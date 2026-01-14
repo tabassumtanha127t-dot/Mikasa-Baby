@@ -1,7 +1,10 @@
 const parseShorthand = (str) => {
   if (!str) return NaN;
-  str = str.toLowerCase();
-  const map = { k:1e3, m:1e6, b:1e9, t:1e12, qd:1e15, qt:1e18, sx:1e21, sp:1e24, oc:1e27, no:1e30, dc:1e33 };
+  str = str.toLowerCase().replace(/\s+/g, "");
+  const map = { 
+    k: 1e3, m: 1e6, b: 1e9, t: 1e12, q: 1e15, qd: 1e18, qi: 1e21, sx: 1e24, 
+    sp: 1e27, oc: 1e30, no: 1e33, dc: 1e36, udc: 1e39, ddc: 1e42, tdc: 1e45, ct: 1e303 
+  };
   let suffix = Object.keys(map).sort((a,b)=>b.length-a.length).find(s=>str.endsWith(s));
   let multiplier = suffix ? map[suffix] : 1;
   if(suffix) str=str.slice(0,-suffix.length);
@@ -9,81 +12,115 @@ const parseShorthand = (str) => {
   return isNaN(number)?NaN:number*multiplier;
 };
 
-const smallBoldNumbers={"0":"𝟎","1":"𝟏","2":"𝟐","3":"𝟑","4":"𝟒","5":"𝟓","6":"𝟔","7":"𝟕","8":"𝟖","9":"𝟗",".":"."};
-function toSmallBoldNumber(num){return num.toString().split("").map(c=>smallBoldNumbers[c]||c).join("");}
-function formatMoney(num){
-  const suffixes=[{value:1e33,symbol:"𝐃𝐂"},{value:1e30,symbol:"𝐍𝐎"},{value:1e27,symbol:"𝐎𝐂"},{value:1e24,symbol:"𝐒𝐏"},{value:1e21,symbol:"𝐒𝐗"},{value:1e18,symbol:"𝐐𝐍"},{value:1e15,symbol:"𝐐𝐃"},{value:1e12,symbol:"𝐓"},{value:1e9,symbol:"𝐁"},{value:1e6,symbol:"𝐌"},{value:1e3,symbol:"𝐊"}];
-  for(const s of suffixes){if(num>=s.value) return toSmallBoldNumber((num/s.value).toFixed(2))+s.symbol;}
-  return toSmallBoldNumber(num);
+function fancy(text) {
+    const map = {
+        'a': '𝒂','b': '𝒃','c': '𝒄','d': '𝒅','e': '𝒆','f': '𝒇','g': '𝒈','h': '𝒉','i': '𝒊','j': '𝒋','k': '𝒌','l': '𝒍','m': '𝒎','n': '𝒏','o': '𝒐','p': '𝒑','q': '𝗊','r': '𝒓','s': '𝒔','t': '𝒕','u': '𝒖','v': '𝒗','w': '𝒘','x': '𝒙','y': '𝒚','z': '𝒛',
+        'A': '𝑨','B': '𝑩','C': '𝑪','D': '𝑫','E': '𝑬','F': '𝑭','G': '𝑮','H': '𝑯','I': '𝑰','J': '𝑱','K': '𝑲','L': '𝑳','M': '𝑴','N': '𝑵','O': '𝑶','P': '𝑷','Q': '𝑸','R': '𝑹','S': '𝑺','T': '𝑻','U': '𝑼','V': '𝑽','W': '𝒘','X': '𝑿','Y': '𝒀','Z': '𝒁',
+        '0': '𝟎','1': '𝟏','2': '𝟐','3': '𝟑','4': '𝟒','5': '𝟓','6': '𝟔','7': '𝟕','8': '𝟖','9': '𝟗', '.': '.'
+    };
+    return text.toString().split('').map(char => map[char] || char).join('');
 }
 
-const cooldowns = new Map(); // 20 sec cooldown
-const dailyUsage = new Map(); // daily limit 20
+function formatMoney(num) {
+  const suffixes = [
+    { value: 1e303, symbol: "𝑪𝑻" }, { value: 1e36, symbol: "𝑫𝑪" }, { value: 1e33, symbol: "𝑵𝑶" }, 
+    { value: 1e30, symbol: "𝑶𝑪" }, { value: 1e27, symbol: "𝑺𝑷" }, { value: 1e24, symbol: "𝑺𝑿" }, 
+    { value: 1e21, symbol: "𝑸𝑰" }, { value: 1e18, symbol: "𝑸𝑻" }, { value: 1e15, symbol: "𝑸𝑫" }, 
+    { value: 1e12, symbol: "𝑻" }, { value: 1e9, symbol: "𝑩" }, { value: 1e6, symbol: "𝑴" }, 
+    { value: 1e3, symbol: "𝑲" }
+  ];
+  for (const s of suffixes) {
+    if (Math.abs(num) >= s.value) return fancy((num / s.value).toFixed(2)) + s.symbol;
+  }
+  return fancy(Math.floor(num).toLocaleString());
+}
 
-module.exports={
-  config:{
-    name:"spin",
-    version:"5.1",
-    author:"SAIF",
-    category:"game",
-    shortDescription:{en:"Stylish bullet spin game"},
-    countDown:10 // 20 second cooldown
+const cooldowns = new Map();
+const dailyUsage = new Map();
+
+module.exports = {
+  config: {
+    name: "spin",
+    version: "6.0",
+    author: "SAIF & ",
+    category: "game",
+    shortDescription: { en: "Stylish bullet spin game with big wins" },
+    countDown: 10
   },
 
-  onStart: async({args,message,event,usersData})=>{
-    const user=event.senderID;
-
-    // Daily reset logic
+  onStart: async ({ args, message, event, usersData }) => {
+    const user = event.senderID;
     const today = new Date().toDateString();
-    if(!dailyUsage.has(user) || dailyUsage.get(user).date !== today){
-      dailyUsage.set(user,{count:0,date:today});
+
+    if (!dailyUsage.has(user) || dailyUsage.get(user).date !== today) {
+      dailyUsage.set(user, { count: 0, date: today });
     }
     const userDaily = dailyUsage.get(user);
-    if(userDaily.count >= 20) return message.reply("⚠️ You have reached your daily limit of 20 spins!");
+    if (userDaily.count >= 20) return message.reply(fancy("⚠️ 𝒀𝒐𝒖 𝒉𝒂𝒗𝒆 𝒓𝒆𝒂𝒄𝒉𝒆𝒅 𝒚𝒐𝒖𝒓 𝒅𝒂𝒊𝒍𝒚 𝒍𝒊𝒎𝒊𝒕 𝒐𝒇 𝟐𝟎 𝒔𝒑𝒊𝒏𝒔 𝒃𝒂𝒃𝒚!"));
 
-    // Cooldown check
     const now = Date.now();
-    if(cooldowns.has(user) && now - cooldowns.get(user) < 20000){
-      const remaining = Math.ceil((20000 - (now - cooldowns.get(user)))/1000);
-      return message.reply(`⏳ Please wait ${remaining} more seconds before spinning again.`);
+    const cooldownTime = 20000; 
+    if (cooldowns.has(user) && now - cooldowns.get(user) < cooldownTime) {
+      const remaining = Math.ceil((cooldownTime - (now - cooldowns.get(user))) / 1000);
+      return message.reply(fancy(`⏳ 𝑷𝒍𝒆𝒂𝒔𝒆 𝒘𝒂𝒊𝒕 ${remaining} 𝒎𝒐𝒓𝒆 𝒔𝒆𝒄𝒐𝒏𝒅𝒔 𝒃𝒂𝒃𝒚.`));
     }
 
-    const userData = await usersData.get(user);
+    let userData = await usersData.get(user);
     const betAmount = parseShorthand(args[0]);
-    if(isNaN(betAmount)||betAmount<=0) return message.reply("⚠️ 𝗘𝗡𝗧𝗘𝗥 𝗔 𝗩𝗔𝗟𝗜𝗗 𝗕𝗘𝗧 𝗔𝗠𝗢𝗨𝗡𝗧.");
-    if(betAmount>userData.money) return message.reply("💰 𝗡𝗢𝗧 𝗘𝗡𝗢𝗨𝗚𝗛 𝗕𝗔𝗟𝗔𝗡𝗖𝗘.");
+    if (isNaN(betAmount) || betAmount <= 0) return message.reply(fancy("⚠️ 𝑬𝑵𝑻𝑬𝑹 𝑨 𝑽𝑨𝑳𝑰𝑫 𝑩𝑬𝑻 𝑨𝑴𝑶𝑼𝑵𝑻 𝑩𝑨𝑩𝒀."));
+    if (betAmount > userData.money) return message.reply(fancy("💰 𝑵𝑶𝑻 𝑬𝑵𝑶𝑼𝑮𝑯 𝑩𝑨𝑳𝑨𝑵𝑪𝑬 𝑩𝑨𝑩𝒀."));
 
-    const slots=["❤️","💛","💙","💚"];
-    const slot1=slots[Math.floor(Math.random()*slots.length)];
-    const slot2=slots[Math.floor(Math.random()*slots.length)];
-    const slot3=slots[Math.floor(Math.random()*slots.length)];
+    const slots = ["❤️", "💛", "💙", "💚", "💎", "👑"];
+    const winChance = Math.random();
+    let slot1, slot2, slot3;
 
-    const winnings=calculateWinnings(slot1,slot2,slot3,betAmount);
-    userData.money+=winnings;
-    await usersData.set(user,{money:userData.money,data:userData.data});
+    // 50% Win/Loss Logic Baby
+    if (winChance < 0.50) {
+      const winType = Math.random();
+      if (winType < 0.02) { slot1 = slot2 = slot3 = "👑"; } // Biggest Won
+      else if (winType < 0.08) { slot1 = slot2 = slot3 = "💎"; } // Ultra Rare
+      else {
+        slot1 = slots[Math.floor(Math.random() * (slots.length - 2))]; 
+        slot2 = slot1;
+        slot3 = Math.random() < 0.4 ? slot1 : slots[Math.floor(Math.random() * slots.length)];
+      }
+    } else {
+      slot1 = slots[Math.floor(Math.random() * slots.length)];
+      slot2 = slots.filter(s => s !== slot1)[Math.floor(Math.random() * (slots.length - 1))];
+      slot3 = slots.filter(s => s !== slot2)[Math.floor(Math.random() * (slots.length - 1))];
+    }
 
-    // Update cooldown and daily count
-    cooldowns.set(user,now);
+    const winnings = calculateWinnings(slot1, slot2, slot3, betAmount);
+    userData.money += winnings;
+    await usersData.set(user, userData);
+
+    cooldowns.set(user, now);
     userDaily.count += 1;
-    dailyUsage.set(user,userDaily);
+    dailyUsage.set(user, userDaily);
 
-    const resultMsg=`🎀
-• 𝐁𝐚𝐛𝐲, 𝐘𝐨𝐮 ${winnings>0?"𝐖𝐨𝐧":"𝐋𝐨𝐬𝐭"} ${formatMoney(Math.abs(winnings))}!
-• 𝐆𝐚𝐦𝐞 𝐑𝐞𝐬𝐮𝐥𝐭𝐬: [ ${slot1} | ${slot2} | ${slot3} ]
-• 𝐁𝐚𝐥𝐚𝐧𝐜𝐞: ${formatMoney(userData.money)}
-• 𝐃𝐚𝐢𝐥𝐲 𝐔𝐬𝐞: ${userDaily.count}/20`;
+    let winStatus = winnings > 0 ? fancy("𝑾𝒐𝒏") : fancy("𝑳𝒐𝒔𝒕");
+    if (slot1 === "👑" && slot2 === "👑" && slot3 === "👑") winStatus = fancy("🔥 𝑩𝑰𝑮𝑮𝑬𝑺𝑻 𝑾𝑶𝑵 🔥");
+    if (slot1 === "💎" && slot2 === "💎" && slot3 === "💎") winStatus = fancy("💎 𝑼𝑳𝑻𝑹𝑨 𝑹𝑨𝑹𝑬 𝑾𝑰𝑵 💎");
+
+    const resultMsg = `🎀
+• ${fancy("𝑩𝒂𝒃𝒚, 𝒀𝒐𝒖")} ${winStatus} ${formatMoney(Math.abs(winnings))}!
+• ${fancy("𝑮𝒂𝒎𝒆 𝑹𝒆𝒔𝒖𝒍𝒕𝒔:")} [ ${slot1} | ${slot2} | ${slot3} ]
+• ${fancy("𝑩𝒂𝒍𝒂𝒏𝒄𝒆:")} ${formatMoney(userData.money)}
+• ${fancy("𝑫𝒂𝒊𝒍𝒚 𝑼𝒔𝒆:")} ${fancy(userDaily.count)}/𝟐𝟎`;
 
     return message.reply(resultMsg);
   }
 };
 
-function calculateWinnings(s1,s2,s3,bet){
-  if(s1===s2&&s2===s3){
-    if(s1==="💙") return bet*15;
-    if(s1==="💚") return bet*10;
-    if(s1==="💛") return bet*5;
-    return bet*3;
+function calculateWinnings(s1, s2, s3, bet) {
+  if (s1 === "👑" && s2 === "👑" && s3 === "👑") return bet * 500;
+  if (s1 === "💎" && s2 === "💎" && s3 === "💎") return bet * 100;
+  if (s1 === s2 && s2 === s3) {
+    if (s1 === "💙") return bet * 15;
+    if (s1 === "💚") return bet * 10;
+    if (s1 === "💛") return bet * 5;
+    return bet * 3; // ❤️
   }
-  if(s1===s2||s1===s3||s2===s3) return bet*2;
+  if (s1 === s2 || s1 === s3 || s2 === s3) return bet * 2;
   return -bet;
 }
