@@ -22,36 +22,40 @@ const toBoldSerifItalic = (text) => {
   return text.split('').map(char => fonts[char] || char).join('');
 };
 
+// --- Updated Suffixes with QD Baby ---
+const suffixes = [
+  { value: 1e303, symbol: "𝑪" },   { value: 1e99,  symbol: "𝑫𝑻𝑮" }, { value: 1e96,  symbol: "𝑼𝑻𝑮" },
+  { value: 1e93,  symbol: "𝑻𝑮" },  { value: 1e90,  symbol: "𝑵𝑶𝑽𝑮" }, { value: 1e87,  symbol: "𝑶𝑪𝑽𝑮" },
+  { value: 1e84,  symbol: "𝑺𝑷𝑽𝑮" }, { value: 1e81,  symbol: "𝑺𝑿𝑽𝑮" }, { value: 1e78,  symbol: "𝑸𝑰𝑽𝑮" },
+  { value: 1e75,  symbol: "𝑸𝑨𝑽𝑮" }, { value: 1e72,  symbol: "𝑻𝑽𝑮" },  { value: 1e69,  symbol: "𝑫𝑽𝑮" },
+  { value: 1e66,  symbol: "𝑼𝑽𝑮" }, { value: 1e63,  symbol: "𝑽𝑮" },   { value: 1e60,  symbol: "𝑵𝑶𝑫" },
+  { value: 1e57,  symbol: "𝑶𝑪𝑫" }, { value: 1e54,  symbol: "𝑺𝑷𝑫" },  { value: 1e51,  symbol: "𝑺𝑿𝑫" },
+  { value: 1e48,  symbol: "𝑸𝑰𝑫" }, { value: 1e45,  symbol: "𝑸𝑫" },   { value: 1e42,  symbol: "𝑻𝑫" },
+  { value: 1e39,  symbol: "𝑫𝑫" },   { value: 1e36,  symbol: "𝑼𝑫" },   { value: 1e33,  symbol: "𝑫𝑪" },
+  { value: 1e30,  symbol: "𝑵𝑶" },   { value: 1e27,  symbol: "𝑶𝑪" },   { value: 1e24,  symbol: "𝑺𝑷" },
+  { value: 1e21,  symbol: "𝑺𝑿" },   { value: 1e18,  symbol: "𝑸𝑰" },   { value: 1e15,  symbol: "𝑸𝑫" },
+  { value: 1e12,  symbol: "𝑻" },    { value: 1e9,   symbol: "𝑩" },    { value: 1e6,   symbol: "𝑴" },
+  { value: 1e3,   symbol: "𝑲" }
+];
+
 const parseAmount = (str) => {
   if (!str) return NaN;
   str = str.toLowerCase().replace(/\s+/g, "");
-  const suffixes = {
-    k: 1e3, m: 1e6, b: 1e9, t: 1e12, qa: 1e15, qi: 1e18, sx: 1e21, sp: 1e24, oc: 1e27, no: 1e30,
-    dc: 1e33, ud: 1e36, dd: 1e39, td: 1e42, qad: 1e45, qid: 1e48, sxd: 1e51, spd: 1e54, ocd: 1e57, nod: 1e60,
-    vg: 1e63, uvg: 1e66, dvg: 1e69, tvg: 1e72, qavg: 1e75, qivg: 1e78, sxvg: 1e81, spvg: 1e84, ocvg: 1e87, novg: 1e90,
-    tg: 1e93, utg: 1e96, dtg: 1e99, c: 1e303 
-  };
-  let matched = Object.keys(suffixes).sort((a, b) => b.length - a.length).find(suf => str.endsWith(suf));
-  let multiplier = matched ? suffixes[matched] : 1;
-  if (matched) str = str.slice(0, -matched.length);
-  let num = parseFloat(str);
+  let matched = suffixes.find(s => str.endsWith(s.symbol.toLowerCase()));
+  let multiplier = matched ? matched.value : 1;
+  let numStr = matched ? str.slice(0, -matched.symbol.length) : str;
+  let num = parseFloat(numStr);
   return isNaN(num) ? NaN : num * multiplier;
 };
 
 function formatMoney(num) {
-  const suffixes = [
-    { value: 1e303, symbol: "𝑪" }, { value: 1e99, symbol: "𝑫𝑻𝑮" }, { value: 1e96, symbol: "𝑼𝑻𝑮" },
-    { value: 1e93, symbol: "𝑻𝑮" }, { value: 1e90, symbol: "𝑵𝑶𝑽𝑮" }, { value: 1e87, symbol: "𝑶𝑪𝑽𝑮" },
-    { value: 1e84, symbol: "𝑺𝑷𝑽𝑮" }, { value: 1e81, symbol: "𝑺𝑿𝑽𝑮" }, { value: 1e78, symbol: "𝑸𝑰𝑽𝑮" },
-    { value: 1e75, symbol: "𝑸𝑨𝑽𝑮" }, { value: 1e72, symbol: "𝑻𝑽𝑮" }, { value: 1e69, symbol: "𝑫𝑽𝑮" },
-    { value: 1e66, symbol: "𝑼𝑽𝑮" }, { value: 1e63, symbol: "𝑽𝑮" }, { value: 1e60, symbol: "𝑵𝑶𝑫" },
-    { value: 1e33, symbol: "𝑫𝑪" }, { value: 1e30, symbol: "𝑵𝑶" }, { value: 1e27, symbol: "𝑶𝑪" },
-    { value: 1e24, symbol: "𝑺𝑷" }, { value: 1e21, symbol: "𝑺𝑿" }, { value: 1e18, symbol: "𝑸𝑰" },
-    { value: 1e15, symbol: "𝑸𝑨" }, { value: 1e12, symbol: "𝑻" }, { value: 1e9, symbol: "𝑩" },
-    { value: 1e6, symbol: "𝑴" }, { value: 1e3, symbol: "𝑲" }
-  ];
+  if (!isFinite(num)) return toBoldSerifItalic("𝑰𝒏𝒇𝒊𝒏𝒊𝒕𝒚");
   for (const s of suffixes) {
-    if (Math.abs(num) >= s.value) return toBoldSerifItalic((num / s.value).toFixed(2)) + s.symbol;
+    if (Math.abs(num) >= s.value) {
+      let val = (num / s.value).toFixed(2);
+      if (val.endsWith(".00")) val = val.slice(0, -3);
+      return toBoldSerifItalic(val) + s.symbol;
+    }
   }
   return toBoldSerifItalic(Math.floor(num).toString());
 }
@@ -68,49 +72,49 @@ const wheelEmojis = [
 module.exports = {
   config: {
     name: "wheel",
-    version: "12.0",
+    version: "15.0",
     author: "Saif",
     category: "game",
     countDown: 10,
-    shortDescription: "🎡 𝑾𝒉𝒆𝒆𝒍 𝒘𝒊𝒕𝒉 𝒑𝒆𝒓𝒎𝒂𝒏𝒆𝒏𝒕 𝒅𝒂𝒕𝒂 & 𝒇𝒊𝒙𝒆𝒅 𝒃𝒂𝒍𝒂𝒏𝒄𝒆",
-    guide: { en: "{p}wheel <amount>" }
+    shortDescription: "🎡 𝑾𝒉𝒆𝒆𝒍 𝒘𝒊𝒕𝒉 𝑸𝑫 𝒔𝒖𝒇𝒇𝒊𝒙 𝒇𝒊𝒙"
   },
 
   onStart: async function ({ api, event, args, usersData }) {
     const { senderID, threadID, messageID } = event;
     const nowTime = Date.now();
-    
     if (cooldowns.has(senderID) && nowTime < cooldowns.get(senderID) + 10000) return;
 
-    const dailyLimit = 20;
     const gameName = "wheel";
+    const dailyLimit = 20;
     let allData = loadData();
     const today = new Date().toISOString().split('T')[0];
 
     if (!allData[senderID]) allData[senderID] = { lastUpdate: today, games: {} };
     if (allData[senderID].lastUpdate !== today) {
-        allData[senderID].lastUpdate = today;
-        allData[senderID].games = {};
+      allData[senderID].lastUpdate = today;
+      allData[senderID].games = {};
     }
     if (!allData[senderID].games[gameName]) allData[senderID].games[gameName] = 0;
 
     if (allData[senderID].games[gameName] >= dailyLimit) {
-      return api.sendMessage(toBoldSerifItalic(`🚫 𝑩𝒂𝒃𝒚, 𝒚𝒐𝒖'𝒗𝒆 𝒖𝒔𝒆𝒅 𝒖𝒑 𝒚𝒐𝒖𝒓 𝒅𝒂𝒊𝒍𝒚 𝒍𝒊𝒎𝒊𝒕 𝒐𝒇 ${dailyLimit} 𝒔𝒑𝒊𝒏𝒔!`), threadID, messageID);
+      return api.sendMessage(toBoldSerifItalic(`🚫 𝑩𝒂𝒃𝒚, 𝒍𝒊𝒎𝒊𝒕 𝒔𝒉𝒆𝒔𝒉!`), threadID, messageID);
     }
 
     let betAmount = parseAmount(args[0]);
-    if (!betAmount || betAmount <= 0) return api.sendMessage(toBoldSerifItalic("❌ 𝑰𝒏𝒗𝒂𝒍𝒊𝒅 𝒃𝒆𝒕 𝒂𝒎𝒐𝒖𝒏𝒕 𝑩𝒂𝒃𝒚!"), threadID, messageID);
+    if (isNaN(betAmount) || betAmount <= 0) return api.sendMessage(toBoldSerifItalic("❌ 𝑰𝒏𝒗𝒂𝒍𝒊𝒅 𝒃𝒆𝒕!"), threadID, messageID);
 
-    // Fetch fresh user data before bet check
     let userData = await usersData.get(senderID);
-    if (userData.money < betAmount) return api.sendMessage(toBoldSerifItalic("💰 𝑰𝒏𝒔𝒖𝒇𝒇𝒊𝒄𝒊𝒆𝒏𝒕 𝒃𝒂𝒍𝒂𝒏𝒄𝒆! 𝒀𝒐𝒖 𝒉𝒂𝒗𝒆: ") + formatMoney(userData.money), threadID, messageID);
+    if (userData.money < betAmount) {
+      return api.sendMessage(toBoldSerifItalic("💰 𝑳𝒐𝒘 𝒃𝒂𝒍𝒂𝒏𝒄𝒆: ") + formatMoney(userData.money), threadID, messageID);
+    }
 
-    // Save count and cooldown Baby
+    const balanceAfterBet = userData.money - betAmount;
+    await usersData.set(senderID, { money: balanceAfterBet });
     allData[senderID].games[gameName] += 1;
     saveData(allData);
     cooldowns.set(senderID, nowTime);
 
-    const loadingMsg = await api.sendMessage(toBoldSerifItalic(`🎰 𝑺𝒑𝒊𝒏𝒏𝒊𝒏𝒈... (${allData[senderID].games[gameName]}/${dailyLimit})\n💵 𝑩𝒆𝒕: `) + formatMoney(betAmount), threadID, messageID);
+    const loadingMsg = await api.sendMessage(toBoldSerifItalic(`🎰 𝑺𝒑𝒊𝒏... (${allData[senderID].games[gameName]}/${dailyLimit})`), threadID, messageID);
     await new Promise(r => setTimeout(r, 2000));
 
     const totalWeight = wheelEmojis.reduce((sum, e) => sum + e.weight, 0);
@@ -118,23 +122,14 @@ module.exports = {
     let cumulative = 0;
     const spinResult = wheelEmojis.find(e => (cumulative += e.weight) >= rand) || wheelEmojis[0];
 
-    const winAmount = Math.floor(betAmount * spinResult.multiplier) - betAmount;
-    
-    // FETCH FRESH DATA AGAIN TO BE SAFE BEFORE UPDATING
-    let currentData = await usersData.get(senderID);
-    const updatedBalance = currentData.money + winAmount;
-    await usersData.set(senderID, { money: updatedBalance });
+    const payout = Math.floor(betAmount * spinResult.multiplier);
+    const finalBalance = balanceAfterBet + payout;
+    await usersData.set(senderID, { money: finalBalance });
 
-    let outcomeText = spinResult.multiplier < 1 ? toBoldSerifItalic("❌ 𝑳𝒐𝒔𝒕: ") + formatMoney(betAmount * 0.5) : 
-                     spinResult.multiplier === 1 ? toBoldSerifItalic("➖ 𝑩𝒓𝒐𝒌𝒆 𝒆𝒗𝒆𝒏") : 
-                     toBoldSerifItalic(`✅ 𝑾𝒐𝒏 ${spinResult.multiplier}𝒙! (+`) + formatMoney(winAmount) + toBoldSerifItalic(")");
+    let outcomeText = spinResult.multiplier < 1 ? toBoldSerifItalic("❌ 𝑳𝒐𝒔𝒕: ") + formatMoney(betAmount - payout) : 
+                     toBoldSerifItalic(`✅ 𝑾𝒐𝒏! +`) + formatMoney(Math.abs(payout - betAmount));
 
-    const finalResult = `
-🎰 ${toBoldSerifItalic("𝑾𝒉𝒆𝒆𝒍 𝒔𝒕𝒐𝒑𝒑𝒆𝒅 𝒐𝒏:")} ${spinResult.emoji}
-${outcomeText}
-💰 ${toBoldSerifItalic("𝑵𝒆𝒘 𝒃𝒂𝒍𝒂𝒏𝒄𝒆:")} ${formatMoney(updatedBalance)}
-✨ ${toBoldSerifItalic("𝑹𝒆𝒎𝒂𝒊𝒏𝒊𝒏𝒈 𝒍𝒊𝒎𝒊𝒕:")} ${dailyLimit - allData[senderID].games[gameName]}`.trim();
-
+    const finalResult = `🎰 ${spinResult.emoji}\n${outcomeText}\n💰 𝑩𝒂𝒍𝒂𝒏𝒄𝒆: ${formatMoney(finalBalance)}\n✨ 𝑳𝒊𝒎𝒊𝒕: ${dailyLimit - allData[senderID].games[gameName]}`;
     return api.editMessage(finalResult, loadingMsg.messageID);
   }
 };
