@@ -1,29 +1,34 @@
-function formatMoney(amount) {
-    if (amount >= 1e33) return (amount / 1e33).toFixed(2) + "𝐃𝐂";
-    if (amount >= 1e30) return (amount / 1e30).toFixed(2) + "𝐍𝐎";
-    if (amount >= 1e27) return (amount / 1e27).toFixed(2) + "𝐎𝐂";
-    if (amount >= 1e24) return (amount / 1e24).toFixed(2) + "𝐒𝐏";
-    if (amount >= 1e21) return (amount / 1e21).toFixed(2) + "𝐒𝐗";
-    if (amount >= 1e18) return (amount / 1e18).toFixed(2) + "𝐐𝐍";
-    if (amount >= 1e15) return (amount / 1e15).toFixed(2) + "𝐐𝐃";
-    if (amount >= 1e12) return (amount / 1e12).toFixed(2) + "𝐓";
-    if (amount >= 1e9)  return (amount / 1e9).toFixed(2)  + "𝐁";
-    if (amount >= 1e6)  return (amount / 1e6).toFixed(2)  + "𝐌";
-    if (amount >= 1e3)  return (amount / 1e3).toFixed(2)  + "𝐊";
-    return amount.toString();
+// Style-4 Fancy Font (Bold Serif Italic) Baby
+function fancy(text) {
+    const map = {
+        'a': '𝒂','b': '𝒃','c': '𝒄','d': '𝒅','e': '𝒆','f': '𝒇','g': '𝒈','h': '𝒉','i': '𝒊','j': '𝒋','k': '𝒌','l': '𝒍','m': '𝒎','n': '𝒏','o': '𝒐','p': '𝒑','q': '𝗊','r': '𝒓','s': '𝒔','t': '𝒕','u': '𝒖','v': '𝒗','w': '𝒘','x': '𝒙','y': '𝒚','z': '𝒛',
+        'A': '𝑨','B': '𝑩','C': '𝑪','D': '𝑫','E': '𝑬','F': '𝑭','G': '𝑮','H': '𝑯','I': '𝑰','J': '𝑱','K': '𝑲','L': '𝑳','M': '𝑴','N': '𝑵','O': '𝑶','P': '𝑷','Q': '𝑸','R': '𝑹','S': '𝑺','T': '𝑻','U': '𝑼','V': '𝑽','W': '𝒘','X': '𝑿','Y': '𝒀','Z': '𝒁',
+        '0': '𝟎','1': '𝟏','2': '𝟐','3': '𝟑','4': '𝟒','5': '𝟓','6': '𝟔','7': '𝟕','8': '𝟖','9': '𝟗', '.': '.'
+    };
+    return text.toString().split('').map(char => map[char] || char).join('');
 }
 
-function stylish(text) {
-    const serifBold = {
-        "a":"𝐚","b":"𝐛","c":"𝐜","d":"𝐝","e":"𝐞","f":"𝐟","g":"𝐠","h":"𝐡","i":"𝐢","j":"𝐣","k":"𝐤","l":"𝐥","m":"𝐦","n":"𝐧","o":"𝐨","p":"𝐩","q":"𝐪","r":"𝐫","s":"𝐬","t":"𝐭","u":"𝐮","v":"𝐯","w":"𝐰","x":"𝐱","y":"𝐲","z":"𝐳",
-        "A":"𝐀","B":"𝐁","C":"𝐂","D":"𝐃","E":"𝐄","F":"𝐅","G":"𝐆","H":"𝐇","I":"𝐈","J":"𝐉","K":"𝐊","L":"𝐋","M":"𝐌","N":"𝐍","O":"𝐎","P":"𝐏","Q":"𝐐","R":"𝐑","S":"𝐒","T":"𝐓","U":"𝐔","V":"𝐕","W":"𝐖","X":"𝐗","Y":"𝐘","Z":"𝐙",
-        "0":"𝟎","1":"𝟏","2":"𝟐","3":"𝟑","4":"𝟒","5":"𝟓","6":"𝟔","7":"𝟕","8":"𝟖","9":"𝟗"
-    };
-    return text.toString().split("").map(c => serifBold[c] || c).join("");
+// Centillion-Ready Shorthand Baby
+function formatMoney(amount) {
+    if (amount === Infinity) return fancy("𝑰𝒏𝒇𝒊𝒏𝒊𝒕𝒚");
+    const units = [
+        { v: 1e303, s: "𝑪𝒕" }, { v: 1e93, s: "𝑵𝒕𝒈" }, { v: 1e66, s: "𝑽𝒈" },
+        { v: 1e63, s: "𝑵𝒐𝒅" }, { v: 1e60, s: "𝑶𝒄𝒅" }, { v: 1e57, s: "𝑺𝒑𝒅" },
+        { v: 1e54, s: "𝑺𝒙𝒅" }, { v: 1e51, s: "𝑸𝒊𝒅" }, { v: 1e48, s: "𝑸𝒅𝒄" },
+        { v: 1e45, s: "𝑻𝒅𝒄" }, { v: 1e42, s: "𝑫𝒅𝒄" }, { v: 1e39, s: "𝑼𝒅𝒄" },
+        { v: 1e36, s: "𝑫𝒄" }, { v: 1e33, s: "𝑵𝒐" }, { v: 1e30, s: "𝑶𝒄" },
+        { v: 1e27, s: "𝑺𝒑" }, { v: 1e24, s: "𝑺𝒙" }, { v: 1e21, s: "𝑸𝒊" },
+        { v: 1e18, s: "𝑸𝒅" }, { v: 1e15, s: "𝑸" }, { v: 1e12, s: "𝑻" },
+        { v: 1e9,  s: "𝑩" }, { v: 1e6,  s: "𝑴" }, { v: 1e3,  s: "𝑲" }
+    ];
+    for (let u of units) {
+        if (Math.abs(amount) >= u.v) return fancy((amount / u.v).toFixed(2)) + u.s;
+    }
+    return fancy(Math.floor(amount).toLocaleString());
 }
 
 function getRankEmoji(rank) {
-    if (rank === 1) return "👑";
+    if (rank === 1) return "🥇";
     if (rank === 2) return "🥈";
     if (rank === 3) return "🥉";
     return "🔹";
@@ -33,12 +38,11 @@ module.exports = {
     config: {
         name: "top",
         aliases: ["richlist", "leaderboard"],
-        version: "4.5",
-        author: "Tꫝᴍɪᴍ & Gemini",
-        shortDescription: "Top Money Leaderboard",
-        longDescription: "Shows the richest users on the global server list.",
+        version: "6.0",
+        author: "Saif & tamim",
+        shortDescription: "🎡 𝑻𝑶𝑷 𝑹𝑰𝑪𝑯𝑬𝑺𝑻 𝑳𝑬𝑨𝑫𝑬𝑹𝑩𝑶𝑨𝑹𝑫",
         category: "Economy",
-        guide: { en: "{p}top [10/50/100]" }
+        guide: { en: "{p}top [count]" }
     },
 
     onStart: async function({ api, event, usersData, args }) {
@@ -51,59 +55,42 @@ module.exports = {
                 .sort((a, b) => b.money - a.money);
 
             const requested = parseInt(args[0]) || 10;
-            const topCount = Math.max(1, Math.min(requested, 500));
+            const topCount = Math.max(1, Math.min(requested, 100)); // Capped at 100 for stability
             const topUsers = sortedUsers.slice(0, topCount);
 
             if (!topUsers.length)
-                return api.sendMessage(
-                    "❌ No data found!",
-                    threadID,
-                    null,
-                    messageID
-                );
+                return api.sendMessage(fancy("❌ 𝑵𝒐 𝒅𝒂𝒕𝒂 𝒇𝒐𝒖𝒏𝒅 𝒃𝒂𝒃𝒚!"), threadID, messageID);
 
-            let msg = `🏆 ${stylish("𝐓𝐎𝐏")} ${stylish(topCount)} ${stylish("𝐑𝐈𝐂𝐇𝐄𝐒𝐓 𝐔𝐒𝐄𝐑𝐒")}\n`;
+            let msg = `🏆 ${fancy("𝑻𝑶𝑷")} ${fancy(topCount)} ${fancy("𝑹𝑰𝑪𝑯𝑬𝑺𝑻 𝑼𝑺𝑬𝑹𝑺 𝑩𝑨𝑩𝒀")}\n`;
             msg += `━━━━━━━━━━━━━━━━━━\n\n`;
 
             let mentions = [];
             topUsers.forEach((user, i) => {
                 const rank = i + 1;
-                const name = user.name || "Unknown";
+                const name = user.name || "𝑼𝒏𝒌𝒏𝒐𝒘𝒏";
                 const balance = formatMoney(user.money || 0);
                 const uid = user.userID || user.id;
 
-                msg += `${getRankEmoji(rank)} ${stylish("𝐑𝐚𝐧𝐤")} ${stylish(rank)}: ${stylish(name)}\n`;
-                msg += `💸 ${stylish("𝐁𝐚𝐥𝐚𝐧𝐜𝐞")}: ${stylish(balance)}\n\n`;
+                msg += `${getRankEmoji(rank)} ${fancy("𝑹𝒂𝒏𝒌")} ${fancy(rank)}: ${fancy(name)}\n`;
+                msg += `💰 ${fancy("𝑩𝒂𝒍𝒂𝒏𝒄𝒆")}: ${balance}\n\n`;
 
                 if (uid) mentions.push({ tag: name, id: uid });
             });
 
-            const userRank =
-                sortedUsers.findIndex(u => (u.userID || u.id) == senderID) + 1;
-            const userMoney =
-                sortedUsers.find(u => (u.userID || u.id) == senderID)?.money || 0;
+            const userRank = sortedUsers.findIndex(u => (u.userID || u.id) == senderID) + 1;
+            const userMoney = sortedUsers.find(u => (u.userID || u.id) == senderID)?.money || 0;
 
             msg += `━━━━━━━━━━━━━━━━━━\n`;
-            msg += `👤 ${stylish("𝐘𝐎𝐔𝐑 𝐑𝐀𝐍𝐊")}: ${userRank > 0 ? stylish(userRank) : "𝐍/𝐀"}\n`;
-            msg += `💰 ${stylish("𝐘𝐎𝐔𝐑 𝐁𝐀𝐋𝐀𝐍𝐂𝐄")}: ${stylish(formatMoney(userMoney))}\n`;
+            msg += `👤 ${fancy("𝒀𝑶𝑼𝑹 𝑹𝑨𝑵𝑲")}: ${userRank > 0 ? fancy(userRank) : fancy("𝑵/𝑨")}\n`;
+            msg += `💳 ${fancy("𝒀𝑶𝑼𝑹 𝑩𝑨𝑳𝑨𝑵𝑪𝑬")}: ${formatMoney(userMoney)}\n`;
             msg += `━━━━━━━━━━━━━━━━━━\n`;
-            msg += `💡 ${stylish("𝐔𝐬𝐞 {𝐩}𝐭𝐨𝐩 𝟓𝟎 | 𝟏𝟎𝟎 | 𝟓𝟎𝟎")}`;
+            msg += `💡 ${fancy("𝑼𝒔𝒆 {𝒑}𝒕𝒐𝒑 𝟓𝟎 | 𝟏𝟎𝟎")}`;
 
-            api.sendMessage(
-                { body: msg, mentions },
-                threadID,
-                null,
-                messageID
-            );
+            return api.sendMessage({ body: msg, mentions }, threadID, messageID);
 
         } catch (err) {
             console.error(err);
-            api.sendMessage(
-                "⚠️ Error loading leaderboard.",
-                event.threadID,
-                null,
-                event.messageID
-            );
+            return api.sendMessage(fancy("⚠️ 𝑬𝒓𝒓𝒐𝒓 𝒍𝒐𝒂𝒅𝒊𝒏𝒈 𝒕𝒉𝒆 𝒘𝒆𝒂𝒍𝒕𝒉 𝒍𝒊𝒔𝒕 𝒃𝒂𝒃𝒚."), event.threadID, event.messageID);
         }
     }
 };
