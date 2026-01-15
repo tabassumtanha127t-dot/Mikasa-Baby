@@ -1,4 +1,4 @@
- const fs = require("fs-extra");
+const fs = require("fs-extra");
 const path = require("path");
 
 // Folder-ei json rakha thakle path hobe erokom Baby
@@ -147,4 +147,6 @@ ${outcomeText}
 🎀 ${toBoldSerifItalic("𝑹𝑬𝑴𝑨𝑰𝑵𝑰𝑵𝑮 𝑳𝑰𝑴𝑰𝑻:")} ${toBoldSerifItalic((20 - userDataFile[senderID].games.wheel).toString())}
     `.trim();
 
-    return api.editMessage(finalResult, loadingMsconst
+    return api.editMessage(finalResult, loadingMsg.messageID);
+  }
+};
