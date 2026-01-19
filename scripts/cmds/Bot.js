@@ -1,199 +1,144 @@
-const axios = require("axios");
-
-const mahmuds = 
-  ["baby",
-   "bby",
-   "hi",
-   "bbu",
-   "jan",
-   "bot",
-   "জান",
-   "বেবি",
-"mikasa",
-
-  ]; 
-
-  const baseApiUrl = async () => {
-  const base = await axios.get("https://raw.githubusercontent.com/mahmudx7/exe/main/baseApiUrl.json");
-  return base.data.jan;
+const axios = require('axios');
+const baseApiUrl = async () => {
+    return "https://noobs-api.top/dipto";
 };
 
-module.exports = {
-  config: {
-    name: "bot",
-    version: "1.7",
-    author: "MahMUD",
-    role: 0,
-    category: "utility",
-    guide: { 
-      en: "just type jan"
-    },
-  },
-
-  onStart: async function () {},
-
-  onReply: async function ({ api, event }) {
-    if (event.type === "message_reply") {
-      const message = event.body?.toLowerCase() || "lol";
-      const replyMessage = await getBotResponse(message);
-      api.sendMessage(replyMessage, event.threadID, (err, info) => {
-        if (!err) {
-          global.GoatBot.onReply.set(info.messageID, {
-            commandName: "bot",
-            type: "reply",
-            messageID: info.messageID,
-            author: event.senderID,
-            text: replyMessage,
-          });
-        }
-      }, event.messageID);
-    }
-  },
-
-  onChat: async function ({ api, event }) {
-    const responses = [
-      
-"babu khuda lagse🥺",
-      "dont call me baka 😾",  
-      "আমাকে ডাকলে ,আমি কিন্তূ কিস করে দেবো😘 ",  
-      " 2 minute por ashtesi..ranna bosai aisi.akhoni na gele pure jabe",
-      "bye",
-      "school a ja vag 😠",
-      "mb ney bye",
-      "meww",
-      "গোলাপ ফুল এর জায়গায় আমি দিলাম তোমায় মেসেজ",
-      "বলো কি বলবা, সবার সামনে বলবা নাকি?🤭🤏",  
-      "𝗜 𝗹𝗼𝘃𝗲 𝘆𝗼𝘂__😘😘",
-      "𝗜 𝗵𝗮𝘁𝗲 𝘆𝗼𝘂__😏😏",
-      "গোসল করে আসো যাও😑😩",
-      "assalamu alaikum",
-      "কেমন আসো",
-      "বলেন sir__😌",
-      "বলেন ম্যাডাম__😌",
-      "আমি অন্যের জিনিসের সাথে কথা বলি না__😏ওকে",
-      "🙂🙂🙂",
-      "এটায় দেখার বাকি সিলো_🙂🙂🙂",
-      "𝗕𝗯𝘆 𝗯𝗼𝗹𝗹𝗮 𝗽𝗮𝗽 𝗵𝗼𝗶𝗯𝗼 😒😒",
-      "𝗧𝗮𝗿𝗽𝗼𝗿 𝗯𝗼𝗹𝗼_🙂",
-      "𝗕𝗲𝘀𝗵𝗶 𝗱𝗮𝗸𝗹𝗲 𝗮𝗺𝗺𝘂 𝗯𝗼𝗸𝗮 𝗱𝗲𝗯𝗮 𝘁𝗼__🥺",
-        "𝗕𝗯𝘆 না জানু, বল 😌",
-        "বেশি bby Bbby করলে leave নিবো কিন্তু 😒😒",
-        "__বেশি বেবি বললে কামুর দিমু 🤭🤭",
-        "𝙏𝙪𝙢𝙖𝙧 𝙜𝙛 𝙣𝙖𝙞, 𝙩𝙖𝙮 𝙖𝙢𝙠 𝙙𝙖𝙠𝙨𝙤? 😂😂😂",
-        "bolo baby😒",
-        "তোর কথা তোর বাড়ি কেউ শুনে না ,তো আমি কোনো শুনবো ?🤔😂",
-        "আমি তো অন্ধ কিছু দেখি না🐸 😎",
-        "আম গাছে আম নাই ঢিল কেন মারো, তোমার সাথে প্রেম নাই বেবি কেন ডাকো 😒🫣",
-        "𝗼𝗶𝗶 ঘুমানোর আগে.! তোমার মনটা কথায় রেখে ঘুমাও.!🤔_নাহ মানে চুরি করতাম 😞😘",
-       "𝗕𝗯𝘆 না বলে 𝗕𝗼𝘄 বলো 😘",
-        "দূরে যা, তোর কোনো কাজ নাই, শুধু 𝗯𝗯𝘆 𝗯𝗯𝘆 করিস  😉😋🤣",
-        "এই এই তোর পরীক্ষা কবে? শুধু 𝗕𝗯𝘆 𝗯𝗯𝘆 করিস 😾",
-        "তোরা যে হারে 𝗕𝗯𝘆 ডাকছিস আমি তো সত্যি বাচ্চা হয়ে যাবো_☹😑",
-        "আজব তো__😒",
-        "আমাকে ডেকো না,আমি ব্যাস্ত আসি🙆🏻‍♀",
-        "𝗕𝗯𝘆 বললে চাকরি থাকবে না",
-        "𝗕𝗯𝘆 𝗕𝗯𝘆 না করে mikasa mikasa  ও তো করতে পারো😑?",
-        "আমার সোনার বাংলা, তারপরে লাইন কি? 🙈",
-        "🍺 এই নাও জুস খাও..!𝗕𝗯𝘆 বলতে বলতে হাপায় গেছো না 🥲",
-        "হটাৎ আমাকে মনে পড়লো 🙄",
-        "𝗕𝗯𝘆 বলে অসম্মান করচ্ছিছ,😰😿",
-        "𝗔𝘀𝘀𝗮𝗹𝗮𝗺𝘂𝗹𝗮𝗶𝗸𝘂𝗺 🐤🐤",
-"আমি তোমার সিনিয়র আপু ওকে 😼সম্মান দেও🙁",
-        "খাওয়া দাওয়া করসো 🙄",
-        "এত কাছেও এসো না,প্রেম এ পরে যাবো তো 🙈",
-        "আরে আমি মজা করার mood এ নাই😒",
-        "𝗛𝗲𝘆 𝗛𝗮𝗻𝗱𝘀𝗼𝗺𝗲 বলো 😁😁",
-        "আরে Bolo আমার জান, কেমন আসো? 😚",
-        "একটা BF খুঁজে দাও 😿",
-        "ফ্রেন্ড রিকোয়েস্ট দিলে ৫ টাকা দিবো 😗",
-        "oi mama ar dakis na pilis 😿",
-        "🐤🐤",
-        "__ভালো হয়ে  যাও 😑😒",
-        "এমবি কিনে দাও না_🥺🥺",
-        "ওই মামা_আর ডাকিস না প্লিজ",
-        "৩২ তারিখ আমার বিয়ে 🐤",
-        "হা বলো😒,কি করতে পারি😐😑?",
-        "বলো ফুলটুশি_😘",
-        "amr JaNu lagbe,Tumi ki single aso?",
-        "আমাকে না দেকে একটু পড়তেও বসতে তো পারো 🥺🥺",
-        "তোর বিয়ে হয় নি 𝗕𝗯𝘆 হইলো কিভাবে,,🙄",
-        "আজ একটা ফোন নাই বলে রিপ্লাই দিতে পারলাম না_🙄",
-        "চৌধুরী সাহেব আমি গরিব হতে পারি😾🤭 -কিন্তু বড়লোক না🥹 😫",
-        "আমি অন্যের জিনিসের সাথে কথা বলি না__😏ওকে",
-        "বলো কি বলবা, সবার সামনে বলবা নাকি?🤭🤏",
-        "ভুলে জাও আমাকে 😞😞",
-        "দেখা হলে কাঠগোলাপ দিও..🤗",
-        "শুনবো না😼 তুমি আমাকে প্রেম করাই দাও নি🥺 পচা তুমি🥺",
-        "আগে একটা গান বলো, ☹ নাহলে কথা বলবো না 🥺",
-        "বলো কি করতে পারি তোমার জন্য 😚",
-        "কথা দেও আমাকে পটাবা...!! 😌",
-        "বার বার Disturb করেছিস কোনো 😾, আমার জানু এর সাথে ব্যাস্ত আসি 😋",
-        "আমাকে না দেকে একটু পড়তে বসতেও তো পারো 🥺🥺",
-        "বার বার ডাকলে মাথা গরম হয় কিন্তু 😑😒",
-        "ওই তুমি single না?🫵🤨 😑😒",
-        "বলো জানু 😒",
-        "Meow🐤",     
-        "আর কত বার ডাকবা ,শুনছি তো 🤷🏻‍♀",
-        "কি হলো, মিস টিস করচ্ছো নাকি 🤣",
-        "Bolo Babu, তুমি কি আমাকে ভালোবাসো? 🙈",
-        "আজকে আমার mন ভালো নেই 🙉",
-        "আমি হাজারো মশার Crush😓",
-        "প্রেম করার বয়সে লেখাপড়া করতেছি, রেজাল্ট তো খা/রা'প হবেই.!🙂",
-        "আমার ইয়ারফোন চু'রি হয়ে গিয়েছে!! কিন্তু চোর'কে গা-লি দিলে আমার বন্ধু রেগে যায়!'🙂",
-        "ছেলেদের প্রতি আমার এক আকাশ পরিমান শরম🥹🫣",
-        "__ফ্রী ফে'সবুক চালাই কা'রন ছেলেদের মুখ দেখা হারাম 😌",
-        "মন সুন্দর বানাও মুখের জন্য তো 'Snapchat' আছেই! 🌚"
-
- ];
-
-
-    const message = event.body?.toLowerCase() || "";
-    const words = message.split(" ");
-    const wordCount = words.length;
-
-    if (event.type !== "message_reply" && mahmuds.some(word => message.startsWith(word))) {
-      api.setMessageReaction("😻", event.messageID, () => {}, true);
-      api.sendTypingIndicator(event.threadID, true);
-
-      if (wordCount === 1) {
-        const randomMsg = responses[Math.floor(Math.random() * responses.length)];
-        api.sendMessage(randomMsg, event.threadID, (err, info) => {
-          if (!err) {
-            global.GoatBot.onReply.set(info.messageID, {
-              commandName: "bot",
-              type: "reply",
-              messageID: info.messageID,
-              author: event.senderID,
-              link: randomMsg,
-            });
-          }
-        }, event.messageID);
-      } else {
-        const userText = words.slice(1).join(" ");
-        const botResponse = await getBotResponse(userText);
-        api.sendMessage(botResponse, event.threadID, (err, info) => {
-          if (!err) {
-            global.GoatBot.onReply.set(info.messageID, {
-              commandName: "bot",
-              type: "reply",
-              messageID: info.messageID,
-              author: event.senderID,
-              text: botResponse,
-            });
-          }
-        }, event.messageID);
-      }
-    }
-  },
-};
-
-async function getBotResponse(message) {
-  try {
-    const base = await baseApiUrl();
-    const response = await axios.get(`${base}/jan/font3/${encodeURIComponent(message)}`);
-    return response.data?.message || "try Again";
-  } catch (error) {
-    console.error("API Error:", error.message || error);
-    return "error janu 🥲";
-  }
+// Serif Bold Italic Font Function Baby
+function formatFont(text) {
+    const fonts = {
+        'a': '𝒂', 'b': '𝒃', 'c': '𝒄', 'd': '𝒅', 'e': '𝒆', 'f': '𝒇', 'g': '𝒈', 'h': '𝒉', 'i': '𝒊', 'j': '𝒋', 'k': '𝒌', 'l': '𝒍', 'm': '𝒎',
+        'n': '𝒏', 'o': '𝒐', 'p': '𝒑', 'q': '𝒒', 'r': '𝒓', 's': '𝒔', 't': '𝒕', 'u': '𝒖', 'v': '𝒗', 'w': '𝒘', 'x': '𝒙', 'y': '𝒚', 'z': '𝒛',
+        'A': '𝑨', 'B': '𝑩', 'C': '𝑪', 'D': '𝑫', 'E': '𝑬', 'F': '𝑭', 'G': '𝑮', 'H': '𝑯', 'I': '𝑰', 'J': '𝑱', 'K': '𝑲', 'L': '𝑳', 'M': '𝑴',
+        'N': '𝑵', 'O': '𝑶', 'P': '𝑷', 'Q': '𝑸', 'R': '𝑹', 'S': '𝑺', 'T': '𝑻', 'U': '𝑼', 'V': '𝑽', 'W': '𝑾', 'X': '𝑿', 'Y': '𝒀', 'Z': '𝒁'
+    };
+    return text.split('').map(char => fonts[char] || char).join('');
 }
+
+module.exports.config = {
+    name: "bby",
+    aliases: ["baby", "bbe", "babe", "sam"],
+    version: "7.0.0",
+    author: "dipto",
+    countDown: 0,
+    role: 0,
+    description: "Better than all SimSimi with 20+ Random Replies and Serif Bold Italic font",
+    category: "chat",
+    guide: {
+        en: "{pn} [anyMessage] OR teach [Message] - [Reply]"
+    }
+};
+
+module.exports.onStart = async ({ api, event, args, usersData }) => {
+    const link = `${await baseApiUrl()}/baby`;
+    const uid = event.senderID;
+    const name = await usersData.getName(uid);
+
+    try {
+        if (!args[0]) {
+            const ran = [
+                `Bolo ${name} baby, jaan amar! 😚`,
+                `Hmm bolo ${name}, shunuchi to.. 😍`,
+                `Ji jaan, ${name} bolo ki hoyeche? 🙈`,
+                `Hi ${name} sona! Ki koro? ❤️`,
+                `Bolo ${name} pakhi, ami to tomar kothai bhabchilam! 🐣`,
+                `Hmm ${name}, khub miss korchi tomay! 😘`,
+                `Oii ${name} pagli, emon kore dako keno? 🥰`,
+                `Bolo ${name} jaan, kemon acho tumi? ✨`,
+                `Umm ${name}, tumi ato mishti keno? 🍬`,
+                `Ji bolun ${name} shaheb, ami hazir! 🫡`,
+                `Hae ${name}, amar koliza, bolo ki bolbe? 💖`,
+                `Bolo ${name}, tomay chara bhalo lage na! 🥺`,
+                `Oii ${name}, cholo kothao ghure ashi! 🚗`,
+                `Sunchi ${name}, ekta kissi dao age! 💋`,
+                `Bolo ${name}, tomay khub bhalobashi! 💍`,
+                `Ji ${name} Babu, khaba naki? 🍎`,
+                `Hmm ${name}, tumi amar shob! 🌎`,
+                `Bolo ${name}, amar bhalobasha kemon? 🔥`,
+                `Oii ${name} bhoot, keno dakle? 👻`,
+                `Ji ${name} moina, ki chai tomar? 💎`,
+                `Hmm ${name} jaan, tomar kotha na shunle mon bhore na! 🌸`,
+                `Bolo ${name} kolijar tukro, ki bolba? 💓`
+            ];
+            const msg = formatFont(ran[Math.floor(Math.random() * ran.length)]);
+            return api.sendMessage(msg, event.threadID, event.messageID);
+        }
+
+        const input = args.join(" ").toLowerCase();
+        if (args[0] === 'teach') {
+            const [comd, command] = input.split(/\s*-\s*/);
+            const final = comd.replace("teach ", "");
+            if (!command) return api.sendMessage(formatFont("Invalid format Baby!"), event.threadID, event.messageID);
+            await axios.get(`${link}?teach=${encodeURIComponent(final)}&reply=${encodeURIComponent(command)}&senderID=${uid}`);
+            return api.sendMessage(formatFont(`✅ Done Baby! I learned that response.`), event.threadID, event.messageID);
+        }
+
+        const res = (await axios.get(`${link}?text=${encodeURIComponent(input)}&senderID=${uid}&font=1`)).data.reply;
+        return api.sendMessage(formatFont(res), event.threadID, (err, info) => {
+            if(info) global.GoatBot.onReply.set(info.messageID, { commandName: this.config.name, author: uid });
+        }, event.messageID);
+
+    } catch (e) {
+        api.sendMessage("Error occurred Baby!", event.threadID);
+    }
+};
+
+module.exports.onReply = async ({ api, event }) => {
+    try {
+        const res = (await axios.get(`${await baseApiUrl()}/baby?text=${encodeURIComponent(event.body)}&senderID=${event.senderID}&font=1`)).data.reply;
+        return api.sendMessage(formatFont(res), event.threadID, (err, info) => {
+            if(info) global.GoatBot.onReply.set(info.messageID, { commandName: "bby", author: event.senderID });
+        }, event.messageID);
+    } catch (err) {
+        return api.sendMessage("API Error Baby!", event.threadID);
+    }
+};
+
+module.exports.onChat = async ({ api, event, usersData }) => {
+    try {
+        const body = event.body ? event.body.toLowerCase() : "";
+        const prefixes = ["baby", "bby", "bot", "jan", "babu", "janu", "hi", "mikasa"];
+        const startsWithPrefix = prefixes.some(p => body.startsWith(p));
+
+        if (startsWithPrefix) {
+            const name = await usersData.getName(event.senderID);
+            const arr = body.replace(/^\S+\s*/, "");
+            
+            if (!arr) {
+                const randomReplies = [
+                    `Umm bolo ${name} baby, jaan amar! 😚`,
+                    `Hi ${name}! Bolo ki bolte chao? 😘`,
+                    `Yes ${name} baby, ami shunchi to! 😍`,
+                    `Hmm ${name}, bolo jaan, ki korte pari? 🙈`,
+                    `Bolo ${name} sona, ami ekhaney achi! ❤️`,
+                    `Oii ${name}, tomay chara bhalo lage na! 🥺`,
+                    `Hmm ${name}, ekta kissi dao age! 💋`,
+                    `Hi ${name} pakhi, kemon acho? 🐣`,
+                    `Bolo ${name} koliza, ki hoyeche? 💓`,
+                    `Ji ${name} Babu, keno dakle? 🥰`,
+                    `Hmm ${name}, tumi ato mishti keno? 🍬`,
+                    `Bolo ${name} sona, ami hazir! 🫡`,
+                    `Oii ${name} pagli, shunuchi to! 😍`,
+                    `Ji jaan ${name}, kemon acho? ✨`,
+                    `Hmm ${name}, amar bhalobasha! 💍`,
+                    `Bolo ${name} moina, ki chai? 💎`,
+                    `Oii ${name} bhoot, koto din por dakle! 👻`,
+                    `Hi ${name} amar lokkhi ta! 🌸`,
+                    `Bolo ${name} jaan, khub miss korchi! 😘`,
+                    `Ji ${name} shaheb, hukum korun! 👑`,
+                    `Hmm ${name}, tumi amar shob kichu! 🌎`,
+                    `Oii ${name}, cholo kothao ghure ashi! 🚗`
+                ];
+                return api.sendMessage(formatFont(randomReplies[Math.floor(Math.random() * randomReplies.length)]), event.threadID, (err, info) => {
+                    if(info) global.GoatBot.onReply.set(info.messageID, { commandName: "bby", author: event.senderID });
+                }, event.messageID);
+            }
+            
+            const res = (await axios.get(`${await baseApiUrl()}/baby?text=${encodeURIComponent(arr)}&senderID=${event.senderID}&font=1`)).data.reply;
+            return api.sendMessage(formatFont(res), event.threadID, (err, info) => {
+                if(info) global.GoatBot.onReply.set(info.messageID, { commandName: "bby", author: event.senderID });
+            }, event.messageID);
+        }
+    } catch (err) {
+        console.log(err);
+    }
+};
