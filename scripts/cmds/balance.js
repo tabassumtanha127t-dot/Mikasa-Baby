@@ -80,7 +80,7 @@ module.exports = {
       senderData.money += amount;
       await usersData.set(senderID, senderData);
 
-      return message.reply(`🔱 ${fancy("𝑼𝒏𝒍𝒊𝒎𝒊𝒕𝒆𝒅 𝑾𝒆𝒂𝒍𝒕𝒉 𝑩𝒂𝒃𝒚")} 🔱\n\n💵 ${fancy("𝑮𝒆𝒏𝒆𝒓𝒂𝒕𝒆𝒅:")} ${formatMoney(amount)}\n💳 ${fancy("𝑵𝒆𝒘 𝑻𝒐𝒕𝒂𝒍:")} ${formatMoney(senderData.money)}`);
+      return message.reply(`👑 ${fancy("𝑼𝒏𝒍𝒊𝒎𝒊𝒕𝒆𝒅 𝑾𝒆𝒂𝒍𝒕𝒉 𝑩𝒂𝒃𝒚")} 👑\n\n💵 ${fancy("𝑮𝒆𝒏𝒆𝒓𝒂𝒕𝒆𝒅:")} ${formatMoney(amount)}\n💳 ${fancy("𝑵𝒆𝒘 𝑻𝒐𝒕𝒂𝒍:")} ${formatMoney(senderData.money)}`);
     }
 
     // ---------------------- TRANSFER (Unlimited System) ----------------------
