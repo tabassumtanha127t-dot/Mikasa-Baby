@@ -1,6 +1,6 @@
 const fs = require("fs");
 
-// Math Bold Italic Font Mapping (যেমন: 𝑻𝒉𝒊𝒔 𝒔𝒕𝒚𝒍𝒆)
+// Math Bold Italic Font Mapping
 const formatText = (text) => {
   const map = {
     'a': '𝒂', 'b': '𝒃', 'c': '𝒄', 'd': '𝒅', 'e': '𝒆', 'f': '𝒇', 'g': '𝒈', 'h': '𝒉', 'i': '𝒊', 'j': '𝒋',
@@ -24,12 +24,12 @@ module.exports = {
     name: "pending",
     aliases: ["pen", "pend", "pe"],
     version: "2.2",
-    author: "♡ 𝑺𝑨𝑰𝑭 ♡",
+    author: formatText("♡ SAIF ♡"),
     countDown: 5,
     role: 1,
     shortDescription: formatText("Handle pending requests"),
     longDescription: formatText("Approve or reject pending users/groups"),
-    category: "utility",
+    category: formatText("utility"),
   },
 
   onReply: async function ({ message, api, event, Reply }) {
@@ -41,19 +41,37 @@ module.exports = {
     if (body.trim().toLowerCase() === "c") {
       try {
         await api.unsendMessage(messageID);
-        return api.sendMessage(formatText("❌ 𝑶𝒑𝒆𝒓𝒂𝒕𝒊𝒐𝒏 𝒄𝒂𝒏𝒄𝒆𝒍𝒆𝒅! 🐇"), threadID);
+        await api.sendMessage(formatText("❌ Operation cancelled! 🐇"), threadID);
       } catch {
         return;
       }
+      return;
     }
 
     const indexes = body.split(/\s+/).map(Number);
 
     if (isNaN(indexes[0])) {
-      return api.sendMessage(formatText("⚠ 𝑰𝒏𝒗𝒂𝒍𝒊𝒅 𝒊𝒏𝒑𝒖𝒕! 𝑻𝒓𝒚 𝒂𝒈𝒂𝒊𝒏 🦋"), threadID);
+      try {
+        await api.editMessage(
+          formatText("⚠ Invalid input! Try again 🦋"),
+          messageID
+        );
+      } catch {
+        await api.sendMessage(formatText("⚠ Invalid input! Try again 🦋"), threadID);
+      }
+      return;
     }
 
     let count = 0;
+    let processingMsg = formatText("⏳ Processing your request... 🐇");
+
+    try {
+      // Edit original message to show processing
+      await api.editMessage(processingMsg, messageID);
+    } catch {
+      // If edit fails, send new message
+      processingMsg = await api.sendMessage(processingMsg, threadID);
+    }
 
     for (const idx of indexes) {
       if (idx <= 0 || idx > pending.length) continue;
@@ -61,12 +79,12 @@ module.exports = {
 
       try {
         await api.sendMessage(
-          formatText("✅ 𝑮𝒓𝒐𝒖𝒑 𝒂𝒑𝒑𝒓𝒐𝒗𝒆𝒅 𝒃𝒚 𝑺𝒆𝒏𝒑𝒂𝒊! 🐇💌\n✨ 𝑬𝒏𝒋𝒐𝒚 𝒚𝒐𝒖𝒓 𝒏𝒆𝒘 𝒂𝒅𝒗𝒆𝒏𝒕𝒖𝒓𝒆! 🦄"),
+          formatText("✅ Group approved by Senpai! 🐇💌\n✨ Enjoy your new adventure! 🦄"),
           group.threadID
         );
 
         await api.changeNickname(
-          formatText(`${global.GoatBot.config.nickNameBot || "🦋𝑺𝑨𝑰𝑭✨"}`),
+          formatText(`${global.GoatBot.config.nickNameBot || "🦋SAIF✨"}`),
           group.threadID,
           api.getCurrentUserID()
         );
@@ -83,10 +101,13 @@ module.exports = {
       }
     }
 
-    return api.sendMessage(
-      formatText(`🎉 𝑺𝒖𝒄𝒄𝒆𝒔𝒔𝒇𝒖𝒍𝒍𝒚 𝒂𝒑𝒑𝒓𝒐𝒗𝒆𝒅 ${count} 𝒈𝒓𝒐𝒖𝒑(𝒔)/𝒖𝒔𝒆𝒓(𝒔)! 🐇💖`),
-      threadID
-    );
+    // Edit the processing message with result
+    const resultMsg = formatText(`🎉 Successfully approved ${count} group(s)/user(s)! 🐇💖`);
+    try {
+      await api.editMessage(resultMsg, messageID);
+    } catch {
+      await api.sendMessage(resultMsg, threadID);
+    }
   },
 
   onStart: async function ({ api, event, args, usersData }) {
@@ -94,7 +115,7 @@ module.exports = {
     const adminBot = global.GoatBot.config.adminBot;
 
     if (!adminBot.includes(event.senderID)) {
-      return api.sendMessage(formatText("⚠ 𝑵𝒐 𝒑𝒆𝒓𝒎𝒊𝒔𝒔𝒊𝒐𝒏 𝒃𝒂𝒌𝒂! 🐇"), threadID);
+      return api.sendMessage(formatText("⚠ No permission baka! 🐇"), threadID, messageID);
     }
 
     try {
@@ -104,28 +125,28 @@ module.exports = {
 
       if (allList.length === 0) {
         return api.sendMessage(
-          formatText("📭 𝑷𝑬𝑵𝑫𝑰𝑵𝑮 𝑳𝑰𝑺𝑻\n\n") +
-          formatText("𝑵𝒐 𝒑𝒆𝒏𝒅𝒊𝒏𝒈 𝒓𝒆𝒒𝒖𝒆𝒔𝒕𝒔 𝒇𝒐𝒖𝒏𝒅! 🥹\n") +
-          formatText("𝑬𝒗𝒆𝒓𝒚𝒕𝒉𝒊𝒏𝒈 𝒊𝒔 𝒄𝒍𝒆𝒂𝒏! 🎀"),
+          formatText("📭 PENDING LIST\n\n") +
+          formatText("No pending requests found! 🥹\n") +
+          formatText("Everything is clean! 🎀"),
           threadID, messageID
         );
       }
 
-      let msg = formatText("📭 𝑷𝑬𝑵𝑫𝑰𝑵𝑮 𝑳𝑰𝑺𝑻\n\n");
+      let msg = formatText("📭 PENDING LIST\n\n");
       let index = 1;
       
       for (const single of allList) {
-        const name = single.name || (await usersData.getName(single.threadID)) || formatText("𝑼𝒏𝒌𝒏𝒐𝒘𝒏");
-        const type = single.isGroup ? formatText("👥 𝑮𝒓𝒐𝒖𝒑") : formatText("👤 𝑼𝒔𝒆𝒓");
+        const name = single.name || (await usersData.getName(single.threadID)) || formatText("Unknown");
+        const type = single.isGroup ? formatText("👥 Group") : formatText("👤 User");
         msg += formatText(`[${index}] ${type} - ${name}\n`);
         index++;
       }
 
-      msg += formatText(`\n🎀 𝑻𝒐𝒕𝒂𝒍: ${allList.length} 𝒑𝒆𝒏𝒅𝒊𝒏𝒈\n`);
-      msg += formatText(`✨ 𝑹𝒆𝒑𝒍𝒚 𝒘𝒊𝒕𝒉 𝒏𝒖𝒎𝒃𝒆𝒓(𝒔) 𝒕𝒐 𝒂𝒑𝒑𝒓𝒐𝒗𝒆 🐇\n`);
-      msg += formatText(`❌ 𝑹𝒆𝒑𝒍𝒚 "𝒄" 𝒕𝒐 𝒄𝒂𝒏𝒄𝒆𝒍, 𝒔𝒆𝒏𝒑𝒂𝒊 💌`);
+      msg += formatText(`\n🎀 Total: ${allList.length} pending\n`);
+      msg += formatText(`✨ Reply with number(s) to approve 🐇\n`);
+      msg += formatText(`❌ Reply "c" to cancel, senpai 💌`);
 
-      return api.sendMessage(
+      const sentMsg = await api.sendMessage(
         msg,
         threadID,
         (error, info) => {
@@ -139,12 +160,24 @@ module.exports = {
         },
         messageID
       );
+
+      // যদি API-তে editMessage সুপোর্ট করে
+      setTimeout(async () => {
+        try {
+          // Update message with some animation or status
+          const updatedMsg = msg + formatText(`\n\n🕐 Last updated: Just now`);
+          await api.editMessage(updatedMsg, sentMsg.messageID);
+        } catch (error) {
+          console.error("Failed to edit message:", error);
+        }
+      }, 1000);
+
     } catch (error) {
       console.error("Pending Error:", error);
       return api.sendMessage(
-        formatText("❌ 𝑬𝑹𝑹𝑶𝑹\n\n") +
-        formatText("𝑭𝒂𝒊𝒍𝒆𝒅 𝒕𝒐 𝒓𝒆𝒕𝒓𝒊𝒆𝒗𝒆 𝒑𝒆𝒏𝒅𝒊𝒏𝒈 𝒍𝒊𝒔𝒕!\n") +
-        formatText("𝑷𝒍𝒆𝒂𝒔𝒆 𝒕𝒓𝒚 𝒂𝒈𝒂𝒊𝒏 𝒍𝒂𝒕𝒆𝒓."), 
+        formatText("❌ ERROR\n\n") +
+        formatText("Failed to retrieve pending list!\n") +
+        formatText("Please try again later."), 
         threadID, 
         messageID
       );
