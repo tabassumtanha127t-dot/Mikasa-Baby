@@ -14,6 +14,32 @@ function formatFont(text) {
     return text.split('').map(char => fonts[char] || char).join('');
 }
 
+// Random replies এক জায়গায় রাখা
+const randomReplies = [
+    `Kire Vuski dakis kn? `,
+    `Hmm bolo, shunuchi to.. 😍`,
+    `Ji jaan, bolo ki hoyeche? 🙈`,
+    `আম গাছে আম নাই, ঢিল কেনো মারো?  তোমার সাথে কথা নাই বেবি কেনো ডাকো`,
+    `Bolo pakhi, ami to tomar kothai bhabchilam! 🐣`,
+    `ভদ্রতার খাতিরেই নারী  দের সাথে চলাফেরা করি, নইলে আমি মিকাসার পুরুষ সজ্ঞি সর্ব্দাই পছন্দনীয়! 🙈 `,
+    `তোর কাজ নাই?  সারাদিন খালি আমারে ডাকস 😾`,
+    `বেশি ডাকলে আম্মু বকা দেবে তো 🥺`,
+    `Ranna kortesi bby!!  ektu por ashtesi`,
+    `Ato bby bby na kore Amar saiful boss re Akta Girlfriend de`,
+    `বলো তোমার বয়ফ্রেন্ড  রে আমার হাতে তুলে দিবা 🥺`,
+    `Over acting er jnno 5tk kata 🐤`,
+    `৩৩ তারিখ আমার বিয়ে 🐤`,
+    `Sunchi, ekta kissi dao age! 💋`,
+    `আতা গাছে তোতা পাখি নারিকেল গাছে ডাব, আমি তোরে বিয়া করমু কি করবে তোর বাপ 🤨?`,
+    `Ji Babu, khaba naki? 🍎`,
+    `আসসালামু আলাইকুম! `,
+    `এই নাও 🥃, বেবি বলতে বলতে হাপিয়ে গেছো! `,
+    `Oii bhoot, keno dakle? 👻`,
+    `আমার বস নি:সন্দেহে এখনো সিংগেল।`,
+    `Kire chapri amare dakte tor lojja lage na? `,
+    `Daisuki da yo`
+];
+
 module.exports.config = {
     name: "bby",
     aliases: ["baby", "bbe", "babe", "sam"],
@@ -35,32 +61,18 @@ module.exports.onStart = async ({ api, event, args, usersData }) => {
 
     try {
         if (!args[0]) {
-            const ran = [
-                `Bolo ${name} baby, jaan amar! 😚`,
-                `Hmm bolo ${name}, shunuchi to.. 😍`,
-                `Ji jaan, ${name} bolo ki hoyeche? 🙈`,
-                `Hi ${name} sona! Ki koro? ❤️`,
-                `Bolo ${name} pakhi, ami to tomar kothai bhabchilam! 🐣`,
-                `Hmm ${name}, khub miss korchi tomay! 😘`,
-                `Oii ${name} pagli, emon kore dako keno? 🥰`,
-                `Bolo ${name} jaan, kemon acho tumi? ✨`,
-                `Umm ${name}, tumi ato mishti keno? 🍬`,
-                `Ji bolun ${name} shaheb, ami hazir! 🫡`,
-                `Hae ${name}, amar koliza, bolo ki bolbe? 💖`,
-                `Bolo ${name}, tomay chara bhalo lage na! 🥺`,
-                `Oii ${name}, cholo kothao ghure ashi! 🚗`,
-                `Sunchi ${name}, ekta kissi dao age! 💋`,
-                `Bolo ${name}, tomay khub bhalobashi! 💍`,
-                `Ji ${name} Babu, khaba naki? 🍎`,
-                `Hmm ${name}, tumi amar shob! 🌎`,
-                `Bolo ${name}, amar bhalobasha kemon? 🔥`,
-                `Oii ${name} bhoot, keno dakle? 👻`,
-                `Ji ${name} moina, ki chai tomar? 💎`,
-                `Hmm ${name} jaan, tomar kotha na shunle mon bhore na! 🌸`,
-                `Bolo ${name} kolijar tukro, ki bolba? 💓`
-            ];
-            const msg = formatFont(ran[Math.floor(Math.random() * ran.length)]);
-            return api.sendMessage(msg, event.threadID, event.messageID);
+            const randomReply = randomReplies[Math.floor(Math.random() * randomReplies.length)];
+            const message = `♡ ${name} ♡\n\n${formatFont(randomReply)}`;
+            
+            return api.sendMessage({
+                body: message,
+                mentions: [{
+                    tag: `♡ ${name} ♡`,
+                    id: uid,
+                    fromIndex: 0,
+                    length: `♡ ${name} ♡`.length
+                }]
+            }, event.threadID, event.messageID);
         }
 
         const input = args.join(" ").toLowerCase();
@@ -104,31 +116,18 @@ module.exports.onChat = async ({ api, event, usersData }) => {
             const arr = body.replace(/^\S+\s*/, "");
             
             if (!arr) {
-                const randomReplies = [
-                    `Umm bolo ${name} baby, jaan amar! 😚`,
-                    `Hi ${name}! Bolo ki bolte chao? 😘`,
-                    `Yes ${name} baby, ami shunchi to! 😍`,
-                    `Hmm ${name}, bolo jaan, ki korte pari? 🙈`,
-                    `Bolo ${name} sona, ami ekhaney achi! ❤️`,
-                    `Oii ${name}, tomay chara bhalo lage na! 🥺`,
-                    `Hmm ${name}, ekta kissi dao age! 💋`,
-                    `Hi ${name} pakhi, kemon acho? 🐣`,
-                    `Bolo ${name} koliza, ki hoyeche? 💓`,
-                    `Ji ${name} Babu, keno dakle? 🥰`,
-                    `Hmm ${name}, tumi ato mishti keno? 🍬`,
-                    `Bolo ${name} sona, ami hazir! 🫡`,
-                    `Oii ${name} pagli, shunuchi to! 😍`,
-                    `Ji jaan ${name}, kemon acho? ✨`,
-                    `Hmm ${name}, amar bhalobasha! 💍`,
-                    `Bolo ${name} moina, ki chai? 💎`,
-                    `Oii ${name} bhoot, koto din por dakle! 👻`,
-                    `Hi ${name} amar lokkhi ta! 🌸`,
-                    `Bolo ${name} jaan, khub miss korchi! 😘`,
-                    `Ji ${name} shaheb, hukum korun! 👑`,
-                    `Hmm ${name}, tumi amar shob kichu! 🌎`,
-                    `Oii ${name}, cholo kothao ghure ashi! 🚗`
-                ];
-                return api.sendMessage(formatFont(randomReplies[Math.floor(Math.random() * randomReplies.length)]), event.threadID, (err, info) => {
+                const randomReply = randomReplies[Math.floor(Math.random() * randomReplies.length)];
+                const message = `♡ ${name} ♡\n\n${formatFont(randomReply)}`;
+                
+                return api.sendMessage({
+                    body: message,
+                    mentions: [{
+                        tag: `♡ ${name} ♡`,
+                        id: event.senderID,
+                        fromIndex: 0,
+                        length: `♡ ${name} ♡`.length
+                    }]
+                }, event.threadID, (err, info) => {
                     if(info) global.GoatBot.onReply.set(info.messageID, { commandName: "bby", author: event.senderID });
                 }, event.messageID);
             }
