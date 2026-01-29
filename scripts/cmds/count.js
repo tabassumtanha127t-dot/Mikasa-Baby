@@ -1,165 +1,171 @@
+const Canvas = require("canvas");
+const fs = require("fs-extra");
+const path = require("path");
+const axios = require("axios");
+
+const FB_APP_TOKEN = "6628568379|c1e620fa708a1d5696fb991c1bde5662";
+const tempDir = path.join(__dirname, "temp");
+fs.ensureDirSync(tempDir);
+
 module.exports = {
-	config: {
-		name: "count",
-		version: "1.3",
-		author: "NTKhang",
-		countDown: 5,
-		role: 1,
-		description: {
-			vi: "Xem số lượng tin nhắn của tất cả thành viên hoặc bản thân (tính từ lúc bot vào nhóm)",
-			en: "View the number of messages of all members or yourself (since the bot joined the group)"
-		},
-		category: "box chat",
-		guide: {
-			vi: "   {pn}: dùng để xem số lượng tin nhắn của bạn"
-				+ "\n   {pn} @tag: dùng để xem số lượng tin nhắn của những người được tag"
-				+ "\n   {pn} all: dùng để xem số lượng tin nhắn của tất cả thành viên",
-			en: "   {pn}: used to view the number of messages of you"
-				+ "\n   {pn} @tag: used to view the number of messages of those tagged"
-				+ "\n   {pn} all: used to view the number of messages of all members"
-		}
-	},
+  config: {
+    name: "count",
+    aliases: ["msgcount", "mc", "c", "h"],
+    version: "9.0",
+    author: "Saif / Gemini Fix",
+    countDown: 5,
+    role: 0,
+    category: "box chat",
+    description: "Premium message count - Fixed PP & Token"
+  },
 
-	langs: {
-		vi: {
-			count: "Số tin nhắn của các thành viên:",
-			endMessage: "Những người không có tên trong danh sách là chưa gửi tin nhắn nào.",
-			page: "Trang [%1/%2]",
-			reply: "Phản hồi tin nhắn này kèm số trang để xem tiếp",
-			result: "%1 hạng %2 với %3 tin nhắn",
-			yourResult: "Bạn đứng hạng %1 và đã gửi %2 tin nhắn trong nhóm này",
-			invalidPage: "Số trang không hợp lệ"
-		},
-		en: {
-			count: "Number of messages of members:",
-			endMessage: "Those who do not have a name in the list have not sent any messages.",
-			page: "Page [%1/%2]",
-			reply: "Reply to this message with the page number to view more",
-			result: "%1 rank %2 with %3 messages",
-			yourResult: "You are ranked %1 and have sent %2 messages in this group",
-			invalidPage: "Invalid page number"
-		}
-	},
+  onStart: async function({ args, threadsData, message, event, api }) {
+    try {
+      const { threadID, senderID, mentions, messageReply, type } = event;
+      const threadData = await threadsData.get(threadID);
+      const members = threadData.members || [];
+      const threadInfo = await api.getThreadInfo(threadID);
+      const usersInGroup = threadInfo.participantIDs;
 
-	onStart: async function ({ args, threadsData, message, event, api, commandName, getLang }) {
-		const { threadID, senderID } = event;
-		const threadData = await threadsData.get(threadID);
-		const { members } = threadData;
-		const usersInGroup = (await api.getThreadInfo(threadID)).participantIDs;
-		let arraySort = [];
-		for (const user of members) {
-			if (!usersInGroup.includes(user.userID))
-				continue;
-			const charac = "️️️️️️️️️️️️️️️️️"; // This character is banned from facebook chat (it is not an empty string)
-			arraySort.push({
-				name: user.name.includes(charac) ? `Uid: ${user.userID}` : user.name,
-				count: user.count,
-				uid: user.userID
-			});
-		}
-		let stt = 1;
-		arraySort.sort((a, b) => b.count - a.count);
-		arraySort.map(item => item.stt = stt++);
+      let arraySort = [];
+      for (const user of members) {
+        if (!usersInGroup.includes(user.userID)) continue;
+        arraySort.push({ 
+          name: user.name || "Facebook User", 
+          count: parseInt(user.count) || 0, 
+          uid: user.userID 
+        });
+      }
 
-		if (args[0]) {
-			if (args[0].toLowerCase() == "all") {
-				let msg = getLang("count");
-				const endMessage = getLang("endMessage");
-				for (const item of arraySort) {
-					if (item.count > 0)
-						msg += `\n${item.stt}/ ${item.name}: ${item.count}`;
-				}
+      arraySort.sort((a, b) => b.count - a.count);
+      arraySort.forEach((item, index) => item.stt = index + 1);
 
-				if ((msg + endMessage).length > 19999) {
-					msg = "";
-					let page = parseInt(args[1]);
-					if (isNaN(page))
-						page = 1;
-					const splitPage = global.utils.splitPage(arraySort, 50);
-					arraySort = splitPage.allPage[page - 1];
-					for (const item of arraySort) {
-						if (item.count > 0)
-							msg += `\n${item.stt}/ ${item.name}: ${item.count}`;
-					}
-					msg += getLang("page", page, splitPage.totalPage)
-						+ `\n${getLang("reply")}`
-						+ `\n\n${endMessage}`;
+      let targetUsers = [];
+      if (args[0]?.toLowerCase() === "all") {
+        targetUsers = arraySort.slice(0, 15); 
+      } else if (type === "message_reply") {
+        const f = arraySort.find(i => i.uid == messageReply.senderID);
+        if (f) targetUsers.push(f);
+      } else if (Object.keys(mentions).length > 0) {
+        for (const id in mentions) {
+          const f = arraySort.find(i => i.uid == id);
+          if (f) targetUsers.push(f);
+        }
+      } else {
+        const selfUser = arraySort.find(i => i.uid == senderID);
+        if (selfUser) targetUsers.push(selfUser);
+      }
 
-					return message.reply(msg, (err, info) => {
-						if (err)
-							return message.err(err);
-						global.GoatBot.onReply.set(info.messageID, {
-							commandName,
-							messageID: info.messageID,
-							splitPage,
-							author: senderID
-						});
-					});
-				}
-				message.reply(msg);
-			}
-			else if (event.mentions) {
-				let msg = "";
-				for (const id in event.mentions) {
-					const findUser = arraySort.find(item => item.uid == id);
-					msg += `\n${getLang("result", findUser.name, findUser.stt, findUser.count)}`;
-				}
-				message.reply(msg);
-			}
-		}
-		else {
-			const findUser = arraySort.find(item => item.uid == senderID);
-			return message.reply(getLang("yourResult", findUser.stt, findUser.count));
-		}
-	},
+      if (targetUsers.length === 0) return message.reply("❌ Baby, I couldn't find anyone!");
 
-	onReply: ({ message, event, Reply, commandName, getLang }) => {
-		const { senderID, body } = event;
-		const { author, splitPage } = Reply;
-		if (author != senderID)
-			return;
-		const page = parseInt(body);
-		if (isNaN(page) || page < 1 || page > splitPage.totalPage)
-			return message.reply(getLang("invalidPage"));
-		let msg = getLang("count");
-		const endMessage = getLang("endMessage");
-		const arraySort = splitPage.allPage[page - 1];
-		for (const item of arraySort) {
-			if (item.count > 0)
-				msg += `\n${item.stt}/ ${item.name}: ${item.count}`;
-		}
-		msg += getLang("page", page, splitPage.totalPage)
-			+ "\n" + getLang("reply")
-			+ "\n\n" + endMessage;
-		message.reply(msg, (err, info) => {
-			if (err)
-				return message.err(err);
-			message.unsend(Reply.messageID);
-			global.GoatBot.onReply.set(info.messageID, {
-				commandName,
-				messageID: info.messageID,
-				splitPage,
-				author: senderID
-			});
-		});
-	},
+      const processingMsg = await message.reply("⏳ Drawing your leaderboard, Baby...");
 
-	onChat: async ({ usersData, threadsData, event }) => {
-		const { senderID, threadID } = event;
-		const members = await threadsData.get(threadID, "members");
-		const findMember = members.find(user => user.userID == senderID);
-		if (!findMember) {
-			members.push({
-				userID: senderID,
-				name: await usersData.getName(senderID),
-				nickname: null,
-				inGroup: true,
-				count: 1
-			});
-		}
-		else
-			findMember.count += 1;
-		await threadsData.set(threadID, members, "members");
-	}
+      const filePath = await drawLeaderboard(targetUsers, arraySort.length);
+      
+      if (processingMsg && processingMsg.messageID) {
+        api.unsendMessage(processingMsg.messageID);
+      }
 
+      await message.reply({
+        body: `📊 ${args[0] === "all" ? "Group Leaderboard" : "User Statistics"}`,
+        attachment: fs.createReadStream(filePath)
+      });
+      
+      setTimeout(() => { if(fs.existsSync(filePath)) fs.unlinkSync(filePath) }, 15000);
+      
+    } catch (err) {
+      console.error(err);
+      return message.reply(`❌ Error: ${err.message}, Baby.`);
+    }
+  },
+
+  onChat: async function({ threadsData, event, usersData }) {
+    const { senderID, threadID } = event;
+    if (!senderID || !threadID || senderID == threadID) return;
+
+    const threadData = await threadsData.get(threadID) || {};
+    let members = threadData.members || [];
+    const index = members.findIndex(u => u.userID == senderID);
+
+    if (index === -1) {
+      const name = await usersData.getName(senderID) || "Facebook User";
+      members.push({ userID: senderID, name: name, count: 1 });
+    } else {
+      members[index].count = (parseInt(members[index].count) || 0) + 1;
+    }
+    await threadsData.set(threadID, members, "members");
+  }
 };
+
+async function drawLeaderboard(users, total) {
+  const itemHeight = 150;
+  const width = 800;
+  const height = (users.length * itemHeight) + 100;
+  const canvas = Canvas.createCanvas(width, height);
+  const ctx = canvas.getContext("2d");
+
+  ctx.fillStyle = "#0f0f1e";
+  ctx.fillRect(0, 0, width, height);
+
+  ctx.fillStyle = "#00ff88";
+  ctx.font = "bold 45px Arial";
+  ctx.textAlign = "center";
+  ctx.fillText("MESSAGE RANKING", width / 2, 65);
+
+  ctx.textAlign = "left";
+  for (let i = 0; i < users.length; i++) {
+    const user = users[i];
+    const y = 100 + (i * itemHeight);
+
+    ctx.fillStyle = "#16213e";
+    const r = 15, x = 20, w = width - 40, h = itemHeight - 20;
+    ctx.beginPath();
+    ctx.moveTo(x+r, y); ctx.lineTo(x+w-r, y); ctx.quadraticCurveTo(x+w, y, x+w, y+r);
+    ctx.lineTo(x+w, y+h-r); ctx.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
+    ctx.lineTo(x+r, y+h); ctx.quadraticCurveTo(x, y+h, x, y+h-r);
+    ctx.lineTo(x, y+r); ctx.quadraticCurveTo(x, y, x+r, y);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.fillStyle = "#00ff88";
+    ctx.font = "bold 40px Arial";
+    ctx.fillText(`#${user.stt}`, 50, y + 80);
+
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "bold 32px Arial";
+    ctx.fillText(user.name.substring(0, 18), 140, y + 65);
+    
+    ctx.fillStyle = "#00d1ff";
+    ctx.font = "28px Arial";
+    ctx.fillText(`Messages: ${user.count.toLocaleString()}`, 140, y + 105);
+
+    try {
+      // Using your token again Baby!
+      const avatarUrl = `https://graph.facebook.com/${user.uid}/picture?width=512&height=512&access_token=${FB_APP_TOKEN}`;
+      const res = await axios.get(avatarUrl, { responseType: "arraybuffer", timeout: 8000 });
+      const img = await Canvas.loadImage(Buffer.from(res.data));
+      
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(700, y + 65, 50, 0, Math.PI * 2);
+      ctx.closePath();
+      ctx.clip();
+      ctx.drawImage(img, 650, y + 15, 100, 100);
+      ctx.restore();
+    } catch (e) {
+      ctx.fillStyle = "#00ff88";
+      ctx.beginPath();
+      ctx.arc(700, y + 65, 50, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = "#000";
+      ctx.font = "bold 45px Arial";
+      ctx.textAlign = "center";
+      ctx.fillText(user.name.charAt(0).toUpperCase(), 700, y + 80);
+      ctx.textAlign = "left";
+    }
+  }
+
+  const filePath = path.join(tempDir, `board_${Date.now()}.png`);
+  fs.writeFileSync(filePath, canvas.toBuffer());
+  return filePath;
+}
