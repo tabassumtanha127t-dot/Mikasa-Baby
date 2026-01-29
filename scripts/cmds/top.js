@@ -41,7 +41,7 @@ module.exports = {
         version: "6.0",
         author: "Saif & tamim",
         shortDescription: "🎡 𝑻𝑶𝑷 𝑹𝑰𝑪𝑯𝑬𝑺𝑻 𝑳𝑬𝑨𝑫𝑬𝑹𝑩𝑶𝑨𝑹𝑫",
-        category: "Economy",
+        category: "bank",
         guide: { en: "{p}top [count]" }
     },
 
