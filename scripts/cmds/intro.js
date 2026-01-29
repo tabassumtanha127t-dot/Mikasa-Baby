@@ -1,45 +1,53 @@
 module.exports = {
   config: {
     name: "intro",
-    version: "1.4",
+    version: "1.8",
     author: "Saif",
-    eventType: ["message"],
-    role: 0
+    role: 0,
+    category: "box chat",
+    description: "Reply to someone's message with 'intro' to make the bot reply to THEM."
   },
 
   onStart: async function({ event, api }) {
-    try {
-      // Catbox JPG link
-      const link = "https://files.catbox.moe/kdkocu.jpg";
-
-      // Fetch user info from senderID of the replied message
-      const replyUserID = event.messageReply.senderID;
-      const userInfo = await api.getUserInfo(replyUserID);
-      const replyUserName = userInfo[replyUserID].name || "Baby";
-
-      // Send message + attachment mentioning their name
-      await api.sendMessage(
-        {
-          body: `✨ Hey ${replyUserName}, YOUR INTRO FORM IS HERE, BABY! 💖`,
-          attachment: await global.utils.getStreamFromURL(link)
-        },
-        event.threadID,
-        event.messageID
-      );
-    } catch (err) {
-      console.log(err);
-      api.sendMessage("_⚠️ SOMETHING WENT WRONG (>_<)_", event.threadID);
-    }
+    return this.handleIntro({ event, api });
   },
 
   onChat: async function({ event, api }) {
-    if (!event.messageReply) return; // must reply
     if (!event.body) return;
-
     const cmd = event.body.trim().toLowerCase();
-    if (!cmd.startsWith("intro")) return;
+    
+    // শুধু intro লিখলে বা intro দিয়ে কিছু লিখলে কাজ করবে বেবি
+    if (cmd === "intro" || cmd.startsWith("intro ")) {
+      if (!event.messageReply) return; // অবশ্যই ১ নম্বর ব্যক্তির মেসেজে রিপ্লাই দিতে হবে
+      this.handleIntro({ event, api });
+    }
+  },
 
-    // Fire intro reply
-    this.onStart({ event, api });
+  handleIntro: async function({ event, api }) {
+    try {
+      const link = "https://files.catbox.moe/kdkocu.jpg";
+      
+      // ১ নম্বর ব্যক্তির আইডি এবং মেসেজ আইডি নেওয়া হচ্ছে বেবি
+      const replyMessageID = event.messageReply.messageID;
+      const targetID = event.messageReply.senderID;
+      
+      const userInfo = await api.getUserInfo(targetID);
+      const name = userInfo[targetID].name || "Baby";
+
+      const msgBody = `✨ 𝑯𝒆𝒚 ${name}, 𝒀𝑶𝑼𝑹 𝑰𝑵𝑻𝑹𝑶 𝑭𝑶𝑹𝑴 𝑰𝑺 𝑯𝑬𝑹𝑬, 𝑩𝑨𝑩𝒀! 💖`;
+
+      // এখানে event.messageID এর বদলে replyMessageID ব্যবহার করা হয়েছে বেবি
+      await api.sendMessage(
+        {
+          body: msgBody,
+          attachment: await global.utils.getStreamFromURL(link)
+        },
+        event.threadID,
+        replyMessageID // এই যে এখানে ফিক্স করলাম, এখন ১ নম্বর ব্যক্তিকেই রিপ্লাই দিবে
+      );
+    } catch (err) {
+      console.error(err);
+      api.sendMessage("⚠️ 𝑺𝑶𝑴𝑬𝑻𝑯𝑰𝑵𝑮 𝑾𝑬𝑵𝑻 𝑾𝑹𝑶𝑵𝑮, 𝑩𝑨𝑩𝒀!", event.threadID);
+    }
   }
 };
