@@ -6,7 +6,7 @@ module.exports = {
     author: "Saif",
     role: 2,
     description: "Show current bot groups and reply to view full group info",
-    category: "Admin",
+    category: "admin",
     usage: "grouplist / gl",
     countDown: 3
   },
