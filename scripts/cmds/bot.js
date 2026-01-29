@@ -48,7 +48,7 @@ module.exports.config = {
     countDown: 0,
     role: 0,
     description: "Better than all SimSimi with 20+ Random Replies and Serif Bold Italic font",
-    category: "chat",
+    category: "box chat",
     guide: {
         en: "{pn} [anyMessage] OR teach [Message] - [Reply]"
     }
