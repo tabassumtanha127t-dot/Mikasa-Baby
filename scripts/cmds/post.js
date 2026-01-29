@@ -14,7 +14,7 @@ module.exports = {
  longDescription: {
  en: "Create a new post on Facebook with text, images, and video."
  },
- category: "Social",
+ category: "admin",
  guide: {
  en: "{pn}: post"
  }
