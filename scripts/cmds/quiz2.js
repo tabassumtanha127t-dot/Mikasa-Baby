@@ -17,12 +17,12 @@ module.exports = {
   config: {
     name: "quiz2",
     aliases: ["qz2"],
-    version: "32.0",
+    version: "33.0",
     author: "Saif",
     countDown: 10,
     role: 0,
     category: "game",
-    description: "𝑷𝒓𝒆𝒎𝒊𝒖𝒎 𝑸𝒖𝒊𝒛 𝑮𝒂𝒎𝒆"
+    description: "𝑷𝒓𝒆𝒎𝒊𝒖𝒎 𝑸𝒖𝒊𝒛 𝑾𝒊𝒕𝒉 𝑷𝒓𝒐𝒕𝒆𝒄𝒕𝒊𝒐𝒏"
   },
 
   onStart: async function ({ api, event, usersData, args }) {
@@ -95,7 +95,12 @@ module.exports = {
   onReply: async function ({ event, api, Reply, usersData }) {
     const { senderID, body, threadID, messageID } = event;
     const session = sessions.get(Reply.sessionId);
-    if (!session || senderID !== Reply.author) return;
+    if (!session) return;
+
+    // Baby, check if the person replying is the actual player
+    if (senderID !== session.author) {
+      return api.sendMessage(`🐸 𝑵𝒐𝒕 𝒚𝒐𝒖𝒓 𝒒𝒖𝒊𝒛 𝑩𝒂𝒃𝒚! 𝑷𝒍𝒆𝒂𝒔𝒆 𝒔𝒕𝒂𝒓𝒕 𝒚𝒐𝒖𝒓 𝒐𝒘𝒏.`, threadID, messageID);
+    }
 
     clearTimeout(session.timeoutId);
     sessions.delete(Reply.sessionId);
