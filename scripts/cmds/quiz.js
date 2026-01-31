@@ -4,7 +4,6 @@ const sessions = new Map();
 const cooldowns = new Map();
 const QUIZ_URL = "https://raw.githubusercontent.com/SAIFUL-404-ST/quiz-api/main/quizzes.json";
 
-// Premium Font Helper Baby
 const fancy = (text) => {
   const map = {
     'a': '𝒂', 'b': '𝒃', 'c': '𝒄', 'd': '𝒅', 'e': '𝒆', 'f': '𝒇', 'g': '𝒈', 'h': '𝒉', 'i': '𝒊', 'j': '𝒋',
@@ -22,33 +21,47 @@ module.exports = {
   config: {
     name: "quiz",
     aliases: ["qz"],
-    version: "18.0",
-    author: "Saif & Gemini",
+    version: "22.0",
+    author: "Saif ",
     countDown: 5,
     role: 0,
     category: "game",
-    description: "📝 𝑷𝑹𝑬𝑴𝑰𝑼𝑴 𝑸𝑼𝑰𝒁 𝑾𝑰𝑻𝑯 𝑴𝑶𝑵𝑬𝒀 𝑭𝑰𝑿 𝑩𝑨𝑩𝒀"
+    description: "𝑺𝑻𝒀𝑳𝑰𝑺𝑯 𝑸𝑼𝑰𝒁 𝑾𝑰𝑻𝑯 𝟐𝟎 𝑫𝑨𝑰𝑳𝑹𝒀 𝑳𝑰𝑴𝑰𝑻 𝑩𝑨𝑩𝒀"
   },
 
   onStart: async function ({ api, event, usersData, args }) {
     const { threadID, messageID, senderID } = event;
     const now = Date.now();
 
-    // Rank List Logic Baby
-    if (args[0] === "rank" || args[0] === "list") {
+    let user = await usersData.get(senderID);
+    if (!user.data) user.data = {};
+    if (!user.data.quizStats) user.data.quizStats = { won: 0, played: 0, dailyUsage: 0, lastDate: "" };
+
+    // Daily Limit Reset Logic Baby
+    const today = new Date().toLocaleDateString();
+    if (user.data.quizStats.lastDate !== today) {
+      user.data.quizStats.dailyUsage = 0;
+      user.data.quizStats.lastDate = today;
+    }
+
+    if (args[0] === "rank") {
       const allUsers = await usersData.getAll();
       const rankList = allUsers
         .filter(u => u.data && u.data.quizStats)
         .sort((a, b) => (b.data.quizStats.won || 0) - (a.data.quizStats.won || 0))
         .slice(0, 10);
 
-      if (rankList.length === 0) return api.sendMessage(fancy("𝑵𝒐 𝒑𝒍𝒂𝒚𝒆𝒓𝒔 𝒊𝒏 𝒓𝒂𝒏𝒌𝒊𝒏𝒈 𝒚𝒆𝒕 𝑩𝒂𝒃𝒚 🥹"), threadID, messageID);
-
-      let rankMsg = `🏆 ${fancy("𝑸𝒖𝒊𝒁 𝑹𝒂𝒏𝒌𝒊𝒏𝒈 𝑩𝒂𝒃𝒚")} 🏆\n━━━━━━━━━━━━━━━━━━\n`;
+      let rankMsg = `╭───━━━━🌟━━━━───╮\n      ${fancy("𝑸𝑼𝑰𝒁 𝑹𝑨𝑵𝑲𝑰𝑵𝑮")}\n━━━━━━━━━━━━━━━━━━\n`;
       rankList.forEach((u, i) => {
-        rankMsg += `${i + 1}. ${fancy(u.name)} — 🏆 ${fancy(u.data.quizStats.won)}\n`;
+        rankMsg += ` ${i + 1}. ${fancy(u.name)} — ${fancy(u.data.quizStats.won)}\n`;
       });
+      rankMsg += `╰───━━━━🌟━━━━───╯`;
       return api.sendMessage(rankMsg, threadID, messageID);
+    }
+
+    // Check Limit Baby
+    if (user.data.quizStats.dailyUsage >= 20) {
+      return api.sendMessage(`⚠️ 𝑳𝒊𝒎𝒊𝒕 𝑹𝒆𝒂𝒄𝒉𝒆𝒅\n━━━━━━━━━━━━━━━━━━\n𝑩𝒂𝒃𝒚, 𝒚𝒐𝒖'𝒗𝒆 𝒖𝒔𝒆𝒅 𝒚𝒐𝒖𝒓 𝟐𝟎 𝒕𝒖𝒓𝒏𝒔 𝒕𝒐𝒅𝒂𝒚. 𝑪𝒐𝒎𝒆 𝒃𝒂𝒄𝒌 𝒕𝒐𝒎𝒐𝒓𝒓𝒐𝒘!`, threadID, messageID);
     }
 
     if (cooldowns.has(senderID) && now - cooldowns.get(senderID) < 5000) return;
@@ -61,88 +74,61 @@ module.exports = {
 
       let optionsMsg = '';
       ['a', 'b', 'c', 'd'].forEach(l => {
-        if (q.options[l]) optionsMsg += `\n${fancy(l.toUpperCase() + '.')} ${fancy(q.options[l])}`;
+        if (q.options[l]) optionsMsg += `  ${fancy(l.toUpperCase())} ❯ ${q.options[l]}\n`;
       });
 
-      const quizContent = `
-📝 ${fancy("𝑸𝒖𝒆𝒔𝒕𝒊𝒐𝒏:")} ${q.text}
-━━━━━━━━━━━━━━━━━━${optionsMsg}
-
-⏰ ${fancy("𝒀𝒐𝒖 𝒉𝒂𝒗𝒆 𝟔𝟎 𝒔𝒆𝒄𝒐𝒏𝒅𝒔!")}
-💡 ${fancy("𝑹𝒆𝒑𝒍𝒚 𝒘𝒊𝒕𝒉: 𝒂, 𝒃, 𝒄 𝒐𝒓 𝒅 𝒃𝒂𝒃𝒚")}`;
+      const quizContent = `╭───━━━━🌟━━━━───╮\n  ${q.text}\n━━━━━━━━━━━━━━━━━━\n${optionsMsg}╰───━━━━🌟━━━━───╯\n𝑩𝒂𝒃𝒚, 𝒓𝒆𝒑𝒍𝒚 𝒘𝒊𝒕𝒉 𝒕𝒉𝒆 𝒐𝒑𝒕𝒊𝒐𝒏!`;
 
       api.sendMessage(quizContent, threadID, (err, info) => {
+        if (err) return;
+        user.data.quizStats.dailyUsage += 1;
+        usersData.set(senderID, { data: user.data });
+
         const timeoutId = setTimeout(() => {
           if (sessions.has(info.messageID)) {
             sessions.delete(info.messageID);
-            api.editMessage(fancy("⏰ 𝑻𝒊𝒎𝒆'𝒔 𝒖𝒑! 𝑸𝒖𝒊𝒛 𝒆𝒙𝒑𝒊𝒓𝒆𝒅 𝑩𝒂𝒃𝒚."), info.messageID);
+            api.editMessage(`⌛ 𝑻𝒊𝒎𝒆'𝒔 𝑼𝒑 𝑩𝒂𝒃𝒚!\n━━━━━━━━━━━━━━━━━━\n𝑻𝒉𝒆 𝒄𝒐𝒓𝒓𝒆𝒄𝒕 𝒐𝒏𝒆 𝒘𝒂𝒔: ${fancy(q.answer.toUpperCase())}`, info.messageID);
           }
         }, 60000);
 
-        sessions.set(info.messageID, { 
-          answer: q.answer.toLowerCase().trim(), 
-          author: senderID, 
-          timeoutId 
-        });
-        global.GoatBot.onReply.set(info.messageID, { 
-          commandName: this.config.name, 
-          author: senderID, 
-          sessionId: info.messageID 
-        });
+        sessions.set(info.messageID, { answer: q.answer.toLowerCase().trim(), author: senderID, timeoutId });
+        global.GoatBot.onReply.set(info.messageID, { commandName: this.config.name, author: senderID, sessionId: info.messageID });
       }, messageID);
-
-    } catch (e) { 
-      return api.sendMessage(fancy("❌ 𝑭𝒂𝒊𝒍𝒆𝒅 𝒕𝒐 𝒍𝒐𝒂𝒅 𝒒𝒖𝒊𝒛 𝒃𝒂𝒃𝒚."), threadID, messageID); 
-    }
+    } catch (e) { return api.sendMessage(fancy("❌ 𝑭𝒂𝒊𝒍𝒆𝒅 𝒕𝒐 𝒍𝒐𝒂𝒅 𝒒𝒖𝒊𝒛 𝒃𝒂𝒃𝒚."), threadID, messageID); }
   },
 
   onReply: async function ({ event, api, Reply, usersData }) {
     const { senderID, body, threadID, messageID } = event;
-    const { author, sessionId } = Reply;
-
-    if (senderID !== author) return api.sendMessage(fancy("🐸 𝑵𝒐𝒕 𝒚𝒐𝒖𝒓 𝒒𝒖𝒊𝒛 𝑩𝒂𝒃𝒚!"), threadID, messageID);
-    const session = sessions.get(sessionId);
-    if (!session) return;
+    const session = sessions.get(Reply.sessionId);
+    if (!session || senderID !== session.author) return;
 
     clearTimeout(session.timeoutId);
-    sessions.delete(sessionId);
+    sessions.delete(Reply.sessionId);
     try { await api.unsendMessage(messageID); } catch(e) {}
 
     const isCorrect = body.trim().toLowerCase() === session.answer;
-    let user = await usersData.get(senderID);
-    
-    // Data Initialization Baby
-    if (!user.data) user.data = {};
-    if (!user.data.quizStats) user.data.quizStats = { won: 0, played: 0 };
-    user.data.quizStats.played += 1;
+    let userData = await usersData.get(senderID);
+    let quizStats = userData.data.quizStats;
+    quizStats.played += 1;
 
-    let rewardMsg = "";
-    let finalMoney = user.money || 0;
+    let status = "";
+    let finalMoney = userData.money || 0;
 
     if (isCorrect) {
-      user.data.quizStats.won += 1;
+      quizStats.won += 1;
       const reward = 500;
       finalMoney += reward;
-      
-      // Saving both money and stats Baby
-      await usersData.set(senderID, { 
-        money: finalMoney, 
-        data: user.data 
-      });
-      rewardMsg = `• ${fancy("𝑩𝒂𝒃𝒚, 𝒀𝒐𝒖 𝑾𝒐𝒏 ")}${fancy(reward)} ${fancy("𝒄𝒐𝒊𝒏𝒔!")}`;
+      status = `✨ 𝒀𝒐𝒖'𝒓𝒆 𝑩𝒓𝒊𝒍𝒍𝒊𝒂𝒏𝒕 𝑩𝒂𝒃𝒚! ✨\n━━━━━━━━━━━━━━━━━━\n💰 𝑪𝒐𝒊𝒏𝒔: +${fancy(reward)}\n🏆 𝑻𝒐𝒕𝒂𝒍 𝑾𝒊𝒏𝒔: ${fancy(quizStats.won)}`;
     } else {
-      await usersData.set(senderID, { data: user.data });
-      rewardMsg = `• ${fancy("𝑩𝒂𝒃𝒚, 𝒀𝒐𝒖 𝑳𝒐𝒔𝒕!")}\n• ${fancy("𝑪𝒐𝒓𝒓𝒆𝒄𝒕:")} ${fancy(session.answer.toUpperCase())}`;
+      status = `💔 𝑶𝒐𝒑𝒔, 𝑾𝒓𝒐𝒏𝒈 𝑩𝒂𝒃𝒚! 💔\n━━━━━━━━━━━━━━━━━━\n✅ 𝑨𝒏𝒔𝒘𝒆𝒓: ${fancy(session.answer.toUpperCase())}\n🏆 𝑾𝒊𝒏𝒔: ${fancy(quizStats.won)}`;
     }
 
-    const resultMsg = `
-🎀
-${rewardMsg}
-• ${fancy("𝑩𝒂𝒍𝒂𝒏𝒄𝒆:")} ${fancy(finalMoney.toLocaleString())}
-• ${fancy("𝑻𝒐𝒕𝒂𝒍 𝑾𝒊𝒏𝒔:")} ${fancy(user.data.quizStats.won)}
-• ${fancy("𝑷𝒍𝒂𝒚𝒆𝒅:")} ${fancy(user.data.quizStats.played)} 𝒃𝒂𝒃𝒚
-    `.trim();
+    await usersData.set(senderID, { 
+      money: finalMoney, 
+      data: { ...userData.data, quizStats: quizStats } 
+    });
 
-    return api.editMessage(resultMsg, sessionId);
+    const resultMsg = `╭───━━━━🌟━━━━───╮\n      𝑸𝑼𝑰𝒁 𝑹𝑬𝑺𝑼𝑳𝑻\n━━━━━━━━━━━━━━━━━━\n${status}\n✨ 𝑩𝒂𝒍𝒂𝒏𝒄𝒆: ${fancy(finalMoney.toLocaleString())}\n╰───━━━━🌟━━━━───╯`;
+    return api.editMessage(resultMsg, Reply.sessionId);
   }
 };
