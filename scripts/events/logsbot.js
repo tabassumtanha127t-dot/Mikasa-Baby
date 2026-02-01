@@ -57,8 +57,40 @@ module.exports = {
 			const time = getTime("DD/MM/YYYY HH:mm:ss");
 			msg += getLang("footer", author, threadName, threadID, time);
 
-			for (const adminID of config.adminBot)
-				api.sendMessage(msg, adminID);
+			// helper: try send with small retry and detailed logging
+			async function trySendWithRetry(api, message, adminID, retries = 1, delayMs = 3000) {
+				for (let attempt = 0; attempt <= retries; attempt++) {
+					try {
+						// api.sendMessage usually supports Promise; await to catch errors
+						const res = await api.sendMessage(message, adminID);
+						// Log success (use console for now; project logging system can be used)
+						console.log(`[logsbot] Sent log to admin ${adminID}`, res || "");
+						return res;
+					} catch (err) {
+						// Normalize error output
+						const errMsg = (err && (err.error || err.message)) || err || "Unknown error";
+						console.error(`[logsbot] Failed to send log to admin ${adminID} (attempt ${attempt + 1}/${retries + 1}):`, errMsg);
+						// On final failure, capture more info if available
+						if (attempt < retries) {
+							await new Promise(r => setTimeout(r, delayMs));
+						} else {
+							// Final failure: consider saving to a persistent queue or notify via alternate webhook
+							try {
+								if (global.utils && typeof global.utils.saveFailedLog === "function") {
+									await global.utils.saveFailedLog?.({ adminID, message, error: errMsg, time: Date.now() });
+								}
+							} catch (e) {
+								console.error("[logsbot] Failed to persist failed log:", e);
+							}
+						}
+					}
+				}
+			}
+
+			// Send sequentially to avoid rate limits; if you prefer parallel, wrap in Promise.all
+			for (const adminID of config.adminBot) {
+				await trySendWithRetry(api, msg, adminID, 1, 3000);
+			}
 		};
 	}
 };
