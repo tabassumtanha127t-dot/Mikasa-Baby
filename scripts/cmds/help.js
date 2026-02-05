@@ -33,18 +33,27 @@ module.exports = {
     const { threadID } = event;
     const prefix = getPrefix(threadID);
 
-    // Admin info for full help only
-    const adminName = "Saif";
-    const adminFacebook = "https://www.facebook.com/61567256940629";
-    const adminWhatsApp = "0182377204* (Important Msg Only)";
+    // Enhanced Admin information
+    const adminInfo = {
+      name: "Saif",
+      facebook: "https://www.facebook.com/61567256940629",
+      github: "https://github.com/saiful-404-st",
+      website: "http://saif-portfilo.onrender.com",
+      email: "saifmorse04@gmail.com",
+      botVersion: "2.5.1",
+      lastUpdate: "February,  2026",
+      supportGroup: "https://m.me/j/Abb2V26Y_VIYh_OM/",
+      donate: "Fokinni vag"
+    };
 
     if (!args || args.length === 0) {
       const categories = {};
       let msg = "";
 
-      // Header
+      // Header (bold)
       msg += `╭───✦ ${boldFont("HELP MENU")} ✦───╮\n`;
       msg += `│ ${boldFont("Current Prefix")}: ${prefix}\n`;
+      msg += `│ ${boldFont("Bot Version")}: ${adminInfo.botVersion}\n`;
       msg += "╰────────────────────╯\n\n";
 
       // Categorize commands
@@ -55,7 +64,7 @@ module.exports = {
         categories[category].push(name);
       }
 
-      // Build category boxes
+      // Build category boxes (bold category names)
       for (const categoryName of Object.keys(categories).sort()) {
         if (categoryName === "info") continue;
         const cmds = categories[categoryName].sort();
@@ -67,21 +76,45 @@ module.exports = {
         msg += "╰────────────────────╯\n\n";
       }
 
-      // Footer / status + admin info
+      // Footer / status (bold titles)
       const totalCommands = commands.size || 0;
-      msg += `╭─────✰[ ${boldFont("ENJOY")} ]\n`;
+      msg += `╭─────✰[ ${boldFont("BOT STATS")} ]\n`;
       msg += `│ ${boldFont("Total Commands")}: [${totalCommands}]\n`;
       msg += `│ ${boldFont("Use")}: ${prefix}help [command]\n`;
+      msg += `│ ${boldFont("Last Update")}: ${adminInfo.lastUpdate}\n`;
       msg += "╰────────────✰\n\n";
 
-      // Admin info at the very end
-      msg += `╭─────✰\n`;
-      msg += `│ ${boldFont("Admin Name")}: ${boldFont(adminName)}\n`;
-      msg += `│ ${boldFont("Facebook")}: ${boldFont(adminFacebook)}\n`;
-      msg += `│ ${boldFont("WhatsApp")}: ${boldFont(adminWhatsApp)}\n`;
+      // Enhanced Admin Section (normal text for info)
+      msg += `╭───✦ ${boldFont("ADMIN INFO")} ✦───╮\n`;
+      msg += `│ ${boldFont("Developer")}: ${adminInfo.name}\n`;
+      msg += `│ ${boldFont("Facebook")}: ${adminInfo.facebook}\n`;
+      msg += `│ ${boldFont("GitHub")}: ${adminInfo.github}\n`;
+      msg += `│ ${boldFont("Website")}: ${adminInfo.website}\n`;
+      msg += `│ ${boldFont("Email")}: ${adminInfo.email}\n`;
+      msg += `│ ${boldFont("Support Group")}: ${adminInfo.supportGroup}\n`;
+      msg += `│ ${boldFont("Donate")}: ${adminInfo.donate}\n`;
+      msg += "╰────────────✰\n\n";
+
+      // Quick Tips Section (bold titles, normal text for tips)
+      msg += `╭───✦ ${boldFont("QUICK TIPS")} ✦───╮\n`;
+      msg += `│ • Use ${prefix}help [cmd] for details\n`;
+      msg += `│ • Report bugs in support group\n`;
+      msg += `│ • Bot auto-updates regularly\n`;
+      msg += `│ • Join group for latest updates\n`;
       msg += "╰────────────✰";
 
-      return message.reply(msg);
+      // Send message and schedule unsend (2 minutes = 120000 ms)
+      const sentMessage = await message.reply(msg);
+      
+      setTimeout(async () => {
+        try {
+          await message.unsend(sentMessage.messageID);
+        } catch (err) {
+          // Silently fail if unsend doesn't work
+        }
+      }, 120000);
+      
+      return;
     }
 
     // ─── Specific command info ───
@@ -94,21 +127,31 @@ module.exports = {
     const guide = c.guide?.en ? c.guide.en.replace(/{pn}/g, `${prefix}${c.name}`) : "No guide provided.";
     const roleText = convertRole(c.role);
 
-    // Command info box (admin info not included)
+    // Command info box with bot version
     const response = [
       `╭───✦ ${boldFont("COMMAND INFO")} ✦───╮`,
       `│ ${boldFont("Name")}: ${boldFont(c.name)}`,
       "├── INFO",
-      `│ ${boldFont("Description")}: ${boldFont(desc)}`,
-      `│ ${boldFont("Author")}: ${boldFont(c.author || "Unknown")}`,
-      `│ ${boldFont("Guide")}: ${boldFont(guide)}`,
+      `│ ${boldFont("Description")}: ${desc}`,
+      `│ ${boldFont("Author")}: ${c.author || "Unknown"}`,
+      `│ ${boldFont("Guide")}: ${guide}`,
       "├── DETAILS",
-      `│ ${boldFont("Version")}: ${boldFont(c.version || "1.0")}`,
-      `│ ${boldFont("Role")}: ${boldFont(roleText)}`,
+      `│ ${boldFont("Version")}: ${c.version || "1.0"}`,
+      `│ ${boldFont("Role")}: ${roleText}`,
+      `│ ${boldFont("Bot Version")}: ${adminInfo.botVersion}`,
       "╰────────────✦"
     ].join("\n");
 
-    return message.reply(response);
+    // Send message and schedule unsend (2 minutes = 120000 ms)
+    const sentMessage = await message.reply(response);
+    
+    setTimeout(async () => {
+      try {
+        await message.unsend(sentMessage.messageID);
+      } catch (err) {
+        // Silently fail if unsend doesn't work
+      }
+    }, 120000);
   },
 };
 
