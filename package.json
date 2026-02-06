@@ -10,8 +10,8 @@
 	"description": "A simple Bot chat messenger using personal account. Made by NTKhang.",
 	"main": "index.js",
 	"engines": {
-		"node": "20.x",
-		"npm": ">=10.0.0"
+		"node": "22.x",
+		"npm": ">=10.8.0"
 	},
 	"dependencies": {
 		"@distube/ytdl-core": "^4.13.3",
