@@ -1,11 +1,5 @@
 {
-	"name": "
-╭━━━┳━━━┳━━┳━━━╮╭━━╮╭━━━┳━━━━╮
-┃╭━╮┃╭━╮┣┫┣┫╭━━╯┃╭╮┃┃╭━╮┃╭╮╭╮┃
-┃╰━━┫┃╱┃┃┃┃┃╰━━╮┃╰╯╰┫┃╱┃┣╯┃┃╰╯
-╰━━╮┃╰━╯┃┃┃┃╭━━╯┃╭━╮┃┃╱┃┃╱┃┃
-┃╰━╯┃╭━╮┣┫┣┫┃╱╱╱┃╰━╯┃╰━╯┃╱┃┃
-╰━━━┻╯╱╰┻━━┻╯╱╱╱╰━━━┻━━━╯╱╰╯",
+	"name": "Mikasa-Baby",
 	"version": "1.5.35",
 	"description": "A simple Bot chat messenger using personal account. Made by NTKhang.",
 	"main": "index.js",
