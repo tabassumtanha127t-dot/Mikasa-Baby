@@ -3,7 +3,7 @@ const axios = require("axios");
 module.exports = {
   config: {
     name: "edit",
-    aliases: ["imgedit", "modify"],
+    aliases: ["imgedit", "e"],
     version: "2.7",
     author: "SiFu ゐ", 
     countDown: 15,
