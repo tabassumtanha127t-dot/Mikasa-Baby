@@ -1,145 +1,67 @@
-const axios = require('axios');
-const fs = require('fs-extra'); 
-const path = require('path');
-
-const API_ENDPOINT = "https://tawsif.is-a.dev/gemini/nano-banana"; 
-const COST = 1000; // Anime edit jutsu cost
-
-function extractImageUrl(message, args, event) {
-    let imageUrl = args.find(arg => arg.startsWith('http'));
-
-    if (!imageUrl && event.messageReply && event.messageReply.attachments && event.messageReply.attachments.length > 0) {
-        const imageAttachment = event.messageReply.attachments.find(att => att.type === 'photo' || att.type === 'image');
-        if (imageAttachment && imageAttachment.url) {
-            imageUrl = imageAttachment.url;
-        }
-    }
-    return imageUrl;
-}
-
-function extractEditPrompt(rawArgs, imageUrl) {
-    let prompt = rawArgs.join(" ");
-    
-    if (imageUrl) {
-        prompt = prompt.replace(imageUrl, '').trim();
-    }
-    
-    if (prompt.includes('|')) {
-        prompt = prompt.split('|')[0].trim();
-    }
-
-    return prompt || "enhance quality";
-}
-
+const axios = require("axios");
 
 module.exports = {
   config: {
     name: "edit",
-    aliases: ["imgedit", "e"],
-    version: "2.4",
-    author: "NeoKEX + modify by saif",
+    aliases: ["imgedit", "modify"],
+    version: "2.7",
+    author: "SiFu ゐ", 
     countDown: 15,
     role: 0,
-    longDescription: "Anime-style nano editing jutsu with coin deduction.",
+    shortDescription: { en: "Edit image with Seedream V4" },
+    longDescription: { en: "Edit or modify an existing image using Seedream V4 Edit AI model" },
     category: "image",
     guide: {
-      en: "{pn} [prompt] or reply with [prompt] ✨ (Cost: 1000 coins)"
+      en: "{pn} <prompt>"
     }
   },
 
-  onStart: async function({ message, args, event, usersData }) {
-    
-    // 🌀 ANIME-STYLE COIN SYSTEM (Same as buttslap)
-    const userID = event.senderID;
-    const userData = await usersData.get(userID);
+  onStart: async function ({ message, event, api, args }) {
+    const hasPhotoReply = event.type === "message_reply" && event.messageReply?.attachments?.[0]?.type === "photo";
 
-    if (!userData.money || userData.money < COST) {
-        return message.reply(
-            `⚠️ *Senpai… your balance is too low to perform this edit command!*\n\n` +
-            `💸 **Required:** ${COST} coins\n` +
-            `💳 **Your Balance:** ${userData.money || 0}\n\n` +
-            `✨ *use daily or others game… earn more… then return.*`
-        );
+    if (!hasPhotoReply) {
+      return message.reply("𝑰𝒇 𝒚𝒐𝒖 𝒘𝒂𝒏𝒕 𝒕𝒐 𝒆𝒅𝒊𝒕 𝒂𝒏 𝒊𝒎𝒂𝒈𝒆, 𝒑𝒍𝒆𝒂𝒔𝒆 𝒓𝒆𝒑𝒍𝒚 𝒕𝒐 𝒂 𝒑𝒉𝒐𝒕𝒐, 𝑩𝒂𝒃𝒚.");
     }
 
-    const imageUrl = extractImageUrl(message, args, event);
-    const editPrompt = extractEditPrompt(args, imageUrl);
-
-    if (!imageUrl) {
-      return message.reply("❌ *No image detected, senpai!* Send or reply to an image.");
-    }
-    if (!editPrompt) {
-        return message.reply("❌ *Describe the transformation you desire, senpai!*");
+    const prompt = args.join(" ").trim();
+    if (!prompt) {
+      return message.reply("𝑷𝒍𝒆𝒂𝒔𝒆 𝒆𝒏𝒕𝒆𝒓 𝒂 𝒑𝒓𝒐𝒎𝒑𝒕 𝒕𝒐 𝒔𝒕𝒂𝒓𝒕 𝒕𝒉𝒆 𝒆𝒅𝒊𝒕𝒊𝒏𝒈, 𝑩𝒂𝒃𝒚.");
     }
 
-    message.reaction("⏳", event.messageID);
-    let tempFilePath; 
+    const model = "seedream v4 edit";
+    const imageUrl = event.messageReply.attachments[0].url;
+    let processingMsg;
 
     try {
+      processingMsg = await message.reply("𝑷𝒓𝒐𝒄𝒆𝒔𝒔𝒊𝒏𝒈 𝒚𝒐𝒖𝒓 𝒊𝒎𝒂𝒈𝒆 𝒘𝒊𝒕𝒉 𝑺𝒆𝒆𝒅𝒓𝒆𝒂𝒎 𝑽𝟒, 𝒑𝒍𝒆𝒂𝒔𝒆 𝒘𝒂𝒊𝒕, 𝑩𝒂𝒃𝒚.");
 
-      // PAY FIRST (like buttslap)
-      userData.money -= COST;
-      await usersData.set(userID, userData);
+      const res = await axios.get("https://fluxcdibai-1.onrender.com/generate", {
+        params: { prompt, model, imageUrl },
+        timeout: 120000
+      });
 
-      const fullApiUrl = `${API_ENDPOINT}?prompt=${encodeURIComponent(editPrompt)}&url=${encodeURIComponent(imageUrl)}`;
-      
-      const apiResponse = await axios.get(fullApiUrl);
-      const data = apiResponse.data;
+      const data = res.data;
+      const resultUrl = data?.data?.imageResponseVo?.url;
 
-      if (!data.success || !data.imageUrl) {
-        throw new Error(data.error || "API returned success: false or missing image URL.");
+      if (!resultUrl) {
+        if (processingMsg) await api.unsendMessage(processingMsg.messageID);
+        return message.reply("𝑻𝒉𝒆 𝒔𝒚𝒔𝒕𝒆𝒎 𝒄𝒐𝒖𝒍𝒅 𝒏𝒐𝒕 𝒓𝒆𝒕𝒖𝒓𝒏 𝒂𝒏 𝒆𝒅𝒊𝒕𝒆𝒅 𝒊𝒎𝒂𝒈𝒆, 𝑩𝒂𝒃𝒚.");
       }
 
-      const finalImageUrl = data.imageUrl;
+      // Unsend the processing message right before sending the final result
+      if (processingMsg) {
+        await api.unsendMessage(processingMsg.messageID);
+      }
 
-      const imageDownloadResponse = await axios.get(finalImageUrl, {
-          responseType: 'stream',
-      });
-      
-      const cacheDir = path.join(__dirname, 'cache');
-      if (!fs.existsSync(cacheDir)) fs.mkdirSync(cacheDir, { recursive: true });
-      
-      tempFilePath = path.join(cacheDir, `edited_nano_${Date.now()}.png`);
-      
-      const writer = fs.createWriteStream(tempFilePath);
-      imageDownloadResponse.data.pipe(writer);
-
-      await new Promise((resolve, reject) => {
-        writer.on("finish", resolve);
-        writer.on("error", (err) => {
-          writer.close();
-          reject(err);
-        });
-      });
-
-      message.reaction("✅", event.messageID);
       await message.reply({
-        body:
-          `✨ **Edit  Complete, Senpai!**\n` +
-          `💸 Coins Used: ${COST}\n` +
-          `💳 Remaining Balance: ${userData.money}\n\n` +
-          `🎨 *Your transformed image is ready!*`,
-        attachment: fs.createReadStream(tempFilePath)
+        body: "𝒀𝒐𝒖𝒓 𝒊𝒎𝒂𝒈𝒆 𝒉𝒂𝒔 𝒃𝒆𝒆𝒏 𝒆𝒅𝒊𝒕𝒆𝒅 𝒔𝒖𝒄𝒄𝒆𝒔𝒇𝒖𝒍𝒍𝒚, 𝑩𝒂𝒃𝒚.",
+        attachment: await global.utils.getStreamFromURL(resultUrl)
       });
 
-    } catch (error) {
-      message.reaction("❌", event.messageID);
-      
-      let errorMessage = "⚠️ *A wild error appeared during the edit command!*";
-      if (error.response && error.response.data && error.response.data.error) {
-         errorMessage += `\nAPI: ${error.response.data.error}`;
-      } else if (error.message) {
-         errorMessage += `\n${error.message}`;
-      } else if (error.code) {
-         errorMessage += `\nNetwork Error: ${error.code}`;
-      }
-
-      console.error("Edit Command Error:", error);
-      message.reply(`❌ ${errorMessage}`);
-    } finally {
-      if (tempFilePath && fs.existsSync(tempFilePath)) {
-          fs.unlinkSync(tempFilePath);
-      }
+    } catch (err) {
+      console.error(err);
+      if (processingMsg) await api.unsendMessage(processingMsg.messageID);
+      return message.reply("𝑨𝒏 𝒆𝒓𝒓𝒐𝒓 𝒐𝒄𝒄𝒖𝒓𝒓𝒆𝒅 𝒘𝒉𝒊𝒍𝒆 𝒆𝒅𝒊𝒕𝒊𝒏𝒈 𝒕𝒉𝒆 𝒊𝒎𝒂𝒈𝒆, 𝑩𝒂𝒃𝒚.");
     }
   }
 };
