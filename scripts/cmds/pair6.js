@@ -4,7 +4,7 @@ const fs = require("fs-extra");
 
 module.exports = {
   config: {
-    name: "pair10",
+    name: "pair6",
     author: "ɪᴍʀᴀɴ",
     role: 0,
     shortDescription: "Love Pair Photo Generator",
