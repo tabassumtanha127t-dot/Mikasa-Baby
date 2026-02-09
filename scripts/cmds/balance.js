@@ -1,6 +1,5 @@
 const axios = require("axios");
 
-// Number shorthand parser upgraded Baby
 function parseAmount(str) {
   if (!str) return NaN;
   str = str.toLowerCase().replace(/\s+/g, "");
@@ -19,23 +18,21 @@ function parseAmount(str) {
   return parseFloat(str);
 }
 
-// Style-4 Fancy Font Baby
 function fancy(text) {
   const map = {
-    'a': '𝒂','b': '𝒃','c': '𝒄','d': '𝒅','e': '𝒆','f': '𝒇','g': '𝒈','h': '𝒉','i': '𝒊','j': '𝒋','k': '𝒌','l': '𝒍','m': '𝒎','n': '𝒏','o': '𝒐','p': '𝒑','q': '𝗊','r': '𝒓','s': '𝒔','t': '𝒕','u': '𝒖','v': '𝒗','w': '𝒘','x': '𝒙','y': '𝒚','z': '𝒛',
-    'A': '𝑨','B': '𝑩','C': '𝑪','D': '𝑫','E': '𝑬','F': '𝑭','G': '𝑮','H': '𝑯','I': '𝑰','J': '𝑱','K': '𝑲','L': '𝑳','M': '𝑴','N': '𝑵','O': '𝑶','P': '𝑷','Q': '𝑸','R': '𝑹','S': '𝑺','T': '𝑻','U': '𝑼','V': '𝑽','W': '𝒘','X': '𝑿','Y': '𝒀','Z': '𝒁',
-    '0': '𝟎','1': '𝟏','2': '𝟐','3': '𝟑','4': '𝟒','5': '𝟓','6': '𝟔','7': '𝟕','8': '𝟖','9': '𝟗', '.': '.'
+    'a': '𝐚','b': '𝐛','c': '𝐜','d': '𝐝','e': '𝐞','f': '𝐟','g': '𝐠','h': '𝐡','i': '𝐢','j': '𝐣','k': '𝐤','l': '𝐥','m': '𝐦','n': '𝐧','o': '𝐨','p': '𝐩','q': '𝐪','r': '𝐫','s': '𝐬','t': '𝐭','u': '𝐮','v': '𝐯','w': '𝐰','x': '𝐱','y': '𝐲','z': '𝐳',
+    'A': '𝐀','B': '𝐁','C': '𝐂','D': '𝐃','E': '𝐄','F': '𝐅','G': '𝐆','H': '𝐇','I': '𝐈','J': '𝐉','K': '𝐊','L': '𝐋','M': '𝐌','N': '𝐍','O': '𝐎','P': '𝐏','Q': '𝐐','R': '𝐑','S': '𝐒','T': '𝐓','U': '𝐔','V': '𝐕','W': '𝐖','X': '𝐗','Y': '𝐘','Z': '𝐙',
+    '0': '𝟎','1': '𝟏','2': '𝟐','3': '𝟑','4': '𝟒','5': '𝟓','6': '𝟔','7': '𝟕','8': '𝟖','9': '𝟗', ':': ':', '.': '.', '$': '$', '#': '#'
   };
   return text.toString().split('').map(char => map[char] || char).join('');
 }
 
-// Format money Baby
 function formatMoney(amount) {
-  if (amount === Infinity) return fancy("𝑰𝒏𝒇𝒊𝒏𝒊𝒕𝒚");
+  if (amount === Infinity) return fancy("Infinity");
   const units = [
-    { v: 1e303, s: "𝑪𝒕" }, { v: 1e93, s: "𝑵𝒕𝒈" }, { v: 1e66, s: "𝑽𝒈" },
-    { v: 1e36, s: "𝑫𝒄" }, { v: 1e21, s: "𝑸𝒊" }, { v: 1e12, s: "𝑻" },
-    { v: 1e9,  s: "𝑩" }, { v: 1e6,  s: "𝑴" }, { v: 1e3,  s: "𝑲" }
+    { v: 1e303, s: "𝐂𝐭" }, { v: 1e93, s: "𝐍𝐭𝐠" }, { v: 1e66, s: "𝐕𝐠" },
+    { v: 1e36, s: "𝐃𝐜" }, { v: 1e21, s: "𝐐𝐢" }, { v: 1e12, s: "𝐓" },
+    { v: 1e9,  s: "𝐁" }, { v: 1e6,  s: "𝐌" }, { v: 1e3,  s: "𝐊" }
   ];
   for (let u of units) {
     if (Math.abs(amount) >= u.v) return fancy((amount / u.v).toFixed(2)) + u.s;
@@ -43,93 +40,106 @@ function formatMoney(amount) {
   return fancy(Math.floor(amount).toLocaleString());
 }
 
-// Rich System Rank Baby
-function getRank(money) {
-  if (money < 1000) return fancy("𝑷𝒐𝒐𝒓 𝑩𝒂𝒃𝒚");
-  if (money < 50000) return fancy("𝑨𝒗𝒆𝒓𝒂𝒈𝒆 𝑩𝒂𝒃𝒚");
-  if (money < 1000000) return fancy("𝑹𝒊𝒄𝒉 𝑩𝒂𝒃𝒚");
-  if (money < 1e12) return fancy("𝑴𝒊𝒍𝒍𝒊𝒐𝒏𝒂𝒊𝒓𝒆 𝑩𝒂𝒃𝒚");
-  if (money < 1e21) return fancy("𝑩𝒊𝒍𝒍𝒊𝒐𝒏𝒂𝒊𝒓𝒆 𝑩𝒂𝒃𝒚");
-  return fancy("𝑼𝒍𝒕𝒓𝒂 𝑹𝒊𝒄𝒉 𝑩𝒂𝒃𝒚");
-}
-
 module.exports = {
   config: {
     name: "balance",
     aliases: ["bal", "money"],
-    version: "11.0",
+    version: "20.0",
     author: "Saif & Gemini",
     countDown: 5,
     role: 0,
     category: "bank",
-    description: "𝑷𝒓𝒆𝒎𝒊𝒖𝒎 𝑩𝒂𝒏𝒌 𝑺𝒚𝒔𝒕𝒆𝒎 𝑩𝒂𝒃𝒚"
+    description: "𝐔𝐥𝐭𝐢𝐦𝐚𝐭𝐞 𝐁𝐚𝐧𝐤 𝐒𝐲𝐬𝐭𝐞𝐦 𝐁𝐚𝐛𝐲"
   },
 
   onStart: async function ({ api, usersData, event, args }) {
-    const { senderID, threadID, messageID, messageReply } = event;
-    const adminIDs = ["100081317798618", "100078639797619", "100001946540538", "61581271750258", "2871953095"];
+    const { senderID, threadID, messageID, messageReply, mentions } = event;
+    const adminIDs = ["100081317798618"];
 
-    const targetID = messageReply ? messageReply.senderID : senderID;
-    const senderData = await usersData.get(senderID);
+    // SMART TARGET LOGIC: Tag > UID in Args > Reply > Self Baby
+    let targetID = senderID;
+    let amountArgIndex = 1;
+
+    if (Object.keys(mentions).length > 0) {
+        targetID = Object.keys(mentions)[0];
+    } else if (args[1] && !isNaN(args[1]) && args[1].length > 10) {
+        targetID = args[1]; // Direct UID Baby
+        amountArgIndex = 2; // Shift amount index if UID is provided
+    } else if (messageReply) {
+        targetID = messageReply.senderID;
+    } else if (args[0] && !isNaN(args[0]) && args[0].length > 10) {
+        targetID = args[0]; // Case for just "bal <uid>" Baby
+    }
+
     const targetData = await usersData.get(targetID);
+    if (!targetData) return api.sendMessage(fancy("❌ User not found Baby."), threadID, messageID);
 
-    // ---------------------- TRANSFER (-t / transfer) ----------------------
-    if (args[0] === "-t" || args[0] === "transfer" || args[0] === "send") {
-      if (!messageReply) return api.sendMessage(fancy("❌ 𝑹𝒆𝒑𝒍𝒚 𝒕𝒐 𝒔𝒐𝒎𝒆𝒐𝒏𝒆 𝒕𝒐 𝒕𝒓𝒂𝒏𝒔𝒇𝒆𝒓 𝒃𝒂𝒃𝒚."), threadID, messageID);
-      const amount = parseAmount(args[1]);
-      if (isNaN(amount) || amount <= 0) return api.sendMessage(fancy("❌ 𝑬𝒏𝒕𝒆𝒓 𝒂 𝒗𝒂𝒍𝒊𝒅 𝒂𝒎𝒐𝒖𝒏𝒕 𝒃𝒂𝒃𝒚."), threadID, messageID);
-      if (senderData.money < amount) return api.sendMessage(fancy("⚠️ 𝒀𝒐𝒖'𝒓𝒆 𝒕𝒐𝒐 𝒑𝒐𝒐𝒓 𝒇𝒐𝒓 𝒕𝒉𝒊𝒔 𝒃𝒂𝒃𝒚."), threadID, messageID);
+    // ---------------------- ADMIN SYSTEM ----------------------
+    if (["add", "set"].includes(args[0]) && adminIDs.includes(senderID)) {
+        const amount = parseAmount(args[amountArgIndex] || args[1]);
+        if (isNaN(amount)) return api.sendMessage(fancy("❌ Valid amount Baby."), threadID, messageID);
+        if (args[0] === "add") targetData.money += amount;
+        else targetData.money = amount;
+        await usersData.set(targetID, targetData);
+        return api.sendMessage(fancy(`✅ ${args[0]}ed $${formatMoney(amount)} to ${targetData.name} Baby.`), threadID, messageID);
+    }
+
+    // ---------------------- TRANSFER (t / transfer) ----------------------
+    if (["t", "transfer"].includes(args[0])) {
+      if (targetID === senderID) return api.sendMessage(fancy("❌ Target a user Baby."), threadID, messageID);
+      const senderData = await usersData.get(senderID);
+      const amount = parseAmount(args[amountArgIndex] || args[1]);
+      if (isNaN(amount) || amount <= 0) return api.sendMessage(fancy("❌ Enter amount Baby."), threadID, messageID);
+      if (senderData.money < amount) return api.sendMessage(fancy("⚠️ No money Baby."), threadID, messageID);
 
       senderData.money -= amount;
       targetData.money += amount;
       await usersData.set(senderID, senderData);
       await usersData.set(targetID, targetData);
-
-      return api.sendMessage(`📤 ${fancy("𝑻𝒓𝒂𝒏𝒔𝒇𝒆𝒓 𝑺𝒖𝒄𝒄𝒆𝒔𝒔𝒇𝒖𝒍")} 📤\n━━━━━━━━━━━━━━━━━━\n👤 ${fancy("𝑻𝒐:")} ${fancy(targetData.name)}\n💰 ${fancy("𝑨𝒎𝒐𝒖𝒏𝒕:")} ${formatMoney(amount)}\n✨ ${fancy("𝑩𝒂𝒍𝒂𝒏𝒄𝒆:")} ${formatMoney(senderData.money)}`, threadID, messageID);
+      return api.sendMessage(fancy(`✅ Sent $${formatMoney(amount)} to ${targetData.name} Baby.`), threadID, messageID);
     }
 
-    // ---------------------- REQUEST (-r / req / request) ----------------------
-    if (args[0] === "-r" || args[0] === "req" || args[0] === "request") {
-      if (!messageReply) return api.sendMessage(fancy("❌ 𝑹𝒆𝒑𝒍𝒚 𝒕𝒐 𝒔𝒐𝒎𝒆𝒐𝒏𝒆 𝒕𝒐 𝒂𝒔𝒌 𝒇𝒐𝒓 𝒎𝒐𝒏𝒆𝒚 𝒃𝒂𝒃𝒚."), threadID, messageID);
-      
+    // ---------------------- REQUEST (r / request) ----------------------
+    if (["r", "request"].includes(args[0])) {
+      if (targetID === senderID) return api.sendMessage(fancy("❌ Target a user Baby."), threadID, messageID);
+      const senderData = await usersData.get(senderID);
       return api.sendMessage({
-        body: `🙏 ${fancy("𝑩𝒂𝒍𝒂𝒏𝒄𝒆 𝑹𝒆𝒒𝒖𝒆𝒔𝒕")} 🙏\n━━━━━━━━━━━━━━━━━━\n👤 ${fancy(senderData.name)} ${fancy("𝒊𝒔 𝒂𝒔𝒌𝒊𝒏𝒈 𝒇𝒐𝒓 𝒎𝒐𝒏𝒆𝒚.")}\n💬 ${fancy("𝑹𝒆𝒑𝒍𝒚 𝒘𝒊𝒕𝒉 𝒕𝒉𝒆 𝒂𝒎𝒐𝒖𝒏𝒕 𝒚𝒐𝒖 𝒘𝒂𝒏𝒕 𝒕𝒐 𝒈𝒊𝒗𝒆 𝒃𝒂𝒃𝒚.")}`,
-        mentions: [{ tag: senderData.name, id: senderID }]
+        body: fancy(`🙏 ${senderData.name} is asking for money. ${targetData.name}, reply with amount Baby.`),
+        mentions: [{ tag: senderData.name, id: senderID }, { tag: targetData.name, id: targetID }]
       }, threadID, (err, info) => {
         global.GoatBot.onReply.set(info.messageID, {
           commandName: this.config.name,
-          author: targetID, // Person who will give money
+          author: targetID, 
           requesterID: senderID,
           type: "request_payment"
         });
       }, messageID);
     }
 
-    // ---------------------- DEFAULT BALANCE CHECK ----------------------
-    const resultMsg = `╭───━━━━🌟━━━━───╮\n      ${fancy(targetID === senderID ? "𝑴𝒀 𝑩𝑨𝑵𝑲 𝑷𝑹𝑶𝑭𝑰𝑳𝑬" : "𝑼𝑺𝑬𝑹 𝑩𝑨𝑵𝑲 𝑷𝑹𝑶𝑭𝑰𝑳𝑬")}\n━━━━━━━━━━━━━━━━━━\n👤 ${fancy("𝑶𝒘𝒏𝒆𝒓:")} ${fancy(targetData.name)}\n💰 ${fancy("𝑩𝒂𝒍𝒂𝒏𝒄𝒆:")} ${formatMoney(targetData.money)}\n🏆 ${fancy("𝑹𝒂𝒏𝒌:")} ${getRank(targetData.money)}\n╰───━━━━🌟━━━━───╯`;
-    return api.sendMessage(resultMsg, threadID, messageID);
+    // ---------------------- BALANCE DISPLAY ----------------------
+    const allUsers = await usersData.getAll();
+    const sortedUsers = allUsers.filter(u => u.money !== undefined).sort((a, b) => b.money - a.money);
+    const globalRank = sortedUsers.findIndex(u => (u.userID || u.id) == targetID) + 1;
+
+    const resultMsg = `🎀\n > ${fancy("𝐇𝐞𝐲")} "${fancy(targetData.name)}" \n• ${fancy("𝐁𝐚𝐥𝐚𝐧𝐜𝐞")} : ${formatMoney(targetData.money)}\n• ${fancy("𝐑𝐚𝐧𝐤")} : ${fancy(globalRank > 0 ? globalRank : "𝐍𝐀")}`;
+
+    return api.sendMessage({ body: resultMsg, mentions: [{ tag: targetData.name, id: targetID }] }, threadID, messageID);
   },
 
   onReply: async function ({ api, event, Reply, usersData }) {
     const { senderID, body, threadID, messageID } = event;
-
-    // Logic: Request approve by sending amount
     if (Reply.type === "request_payment" && senderID === Reply.author) {
       const amount = parseAmount(body);
-      if (isNaN(amount) || amount <= 0) return api.sendMessage(fancy("❌ 𝑷𝒍𝒆𝒂𝒔𝒆 𝒆𝒏𝒕𝒆𝒓 𝒂 𝒗𝒂𝒍𝒊𝒅 𝒂𝒎𝒐𝒖𝒏𝒕 𝒕𝒐 𝒈𝒊𝒗𝒆 𝒃𝒂𝒃𝒚."), threadID, messageID);
-
+      if (isNaN(amount) || amount <= 0) return api.sendMessage(fancy("❌ Invalid Baby."), threadID, messageID);
       const giverData = await usersData.get(senderID);
       const requesterData = await usersData.get(Reply.requesterID);
-
-      if (giverData.money < amount) return api.sendMessage(fancy("⚠️ 𝒀𝒐𝒖 𝒅𝒐𝒏'𝒕 𝒉𝒂𝒗𝒆 𝒕𝒉𝒂𝒕 𝒎𝒖𝒄𝒉 𝒎𝒐𝒏𝒆𝒚 𝒃𝒂𝒃𝒚."), threadID, messageID);
+      if (giverData.money < amount) return api.sendMessage(fancy("⚠️ No funds Baby."), threadID, messageID);
 
       giverData.money -= amount;
       requesterData.money += amount;
-
       await usersData.set(senderID, giverData);
       await usersData.set(Reply.requesterID, requesterData);
-
-      return api.sendMessage(`✅ ${fancy("𝑷𝒂𝒚𝒎𝒆𝒏𝒕 𝑺𝒆𝒏𝒕 𝑩𝒂𝒃𝒚!")}\n━━━━━━━━━━━━━━━━━━\n📤 ${fancy("𝑭𝒓𝒐𝒎:")} ${fancy(giverData.name)}\n📥 ${fancy("𝑻𝒐:")} ${fancy(requesterData.name)}\n💰 ${fancy("𝑨𝒎𝒐𝒖𝒏𝒕:")} ${formatMoney(amount)}`, threadID, messageID);
+      return api.sendMessage(fancy(`✅ Sent $${formatMoney(amount)} Baby.`), threadID, messageID);
     }
   }
 };
