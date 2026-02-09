@@ -21,12 +21,12 @@ module.exports = {
   config: {
     name: "quiz",
     aliases: ["qz"],
-    version: "22.0",
-    author: "Saif ",
+    version: "22.1",
+    author: "Saif & Gemini",
     countDown: 5,
     role: 0,
     category: "game",
-    description: "𝑺𝑻𝒀𝑳𝑰𝑺𝑯 𝑸𝑼𝑰𝒁 𝑾𝑰𝑻𝑯 𝟐𝟎 𝑫𝑨𝑰𝑳𝑹𝒀 𝑳𝑰𝑴𝑰𝑻 𝑩𝑨𝑩𝒀"
+    description: "𝑺𝑻𝒀𝑳𝑰𝑺𝑯 𝑸𝑼𝑰𝒁 𝑾𝑰𝑻𝑯 𝑨𝑳𝑳 𝑷𝑳𝑨𝒀𝑬𝑹 𝑹𝑨𝑵𝑲𝑰𝑵𝑮 𝑩𝑨𝑩𝒀"
   },
 
   onStart: async function ({ api, event, usersData, args }) {
@@ -37,7 +37,6 @@ module.exports = {
     if (!user.data) user.data = {};
     if (!user.data.quizStats) user.data.quizStats = { won: 0, played: 0, dailyUsage: 0, lastDate: "" };
 
-    // Daily Limit Reset Logic Baby
     const today = new Date().toLocaleDateString();
     if (user.data.quizStats.lastDate !== today) {
       user.data.quizStats.dailyUsage = 0;
@@ -46,20 +45,21 @@ module.exports = {
 
     if (args[0] === "rank") {
       const allUsers = await usersData.getAll();
+      // Filter anyone who has played at least once and sort by wins
       const rankList = allUsers
-        .filter(u => u.data && u.data.quizStats)
-        .sort((a, b) => (b.data.quizStats.won || 0) - (a.data.quizStats.won || 0))
-        .slice(0, 10);
+        .filter(u => u.data && u.data.quizStats && u.data.quizStats.played > 0)
+        .sort((a, b) => (b.data.quizStats.won || 0) - (a.data.quizStats.won || 0));
 
-      let rankMsg = `╭───━━━━🌟━━━━───╮\n      ${fancy("𝑸𝑼𝑰𝒁 𝑹𝑨𝑵𝑲𝑰𝑵𝑮")}\n━━━━━━━━━━━━━━━━━━\n`;
+      if (rankList.length === 0) return api.sendMessage(fancy("𝑵𝒐 𝒐𝒏𝒆 𝒉𝒂𝒔 𝒑𝒍𝒂𝒚𝒆𝒅 𝒚𝒆𝒕, 𝑩𝒂𝒃𝒚!"), threadID, messageID);
+
+      let rankMsg = `╭───━━━━🌟━━━━───╮\n      ${fancy("𝑨𝑳𝑳 𝑷𝑳𝑨𝒀𝑬𝑹 𝑹𝑨𝑵𝑲𝑰𝑵𝑮")}\n━━━━━━━━━━━━━━━━━━\n`;
       rankList.forEach((u, i) => {
-        rankMsg += ` ${i + 1}. ${fancy(u.name)} — ${fancy(u.data.quizStats.won)}\n`;
+        rankMsg += ` ${i + 1}. ${fancy(u.name)} — ${fancy(u.data.quizStats.won)} 𝑾𝒊𝒏𝒔\n`;
       });
-      rankMsg += `╰───━━━━🌟━━━━───╯`;
+      rankMsg += `━━━━━━━━━━━━━━━━━━\n   𝑻𝒐𝒕𝒂𝒍 𝑷𝒍𝒂𝒚𝒆𝒓𝒔: ${fancy(rankList.length)}\n╰───━━━━🌟━━━━───╯`;
       return api.sendMessage(rankMsg, threadID, messageID);
     }
 
-    // Check Limit Baby
     if (user.data.quizStats.dailyUsage >= 20) {
       return api.sendMessage(`⚠️ 𝑳𝒊𝒎𝒊𝒕 𝑹𝒆𝒂𝒄𝒉𝒆𝒅\n━━━━━━━━━━━━━━━━━━\n𝑩𝒂𝒃𝒚, 𝒚𝒐𝒖'𝒗𝒆 𝒖𝒔𝒆𝒅 𝒚𝒐𝒖𝒓 𝟐𝟎 𝒕𝒖𝒓𝒏𝒔 𝒕𝒐𝒅𝒂𝒚. 𝑪𝒐𝒎𝒆 𝒃𝒂𝒄𝒌 𝒕𝒐𝒎𝒐𝒓𝒓𝒐𝒘!`, threadID, messageID);
     }
@@ -104,7 +104,7 @@ module.exports = {
 
     clearTimeout(session.timeoutId);
     sessions.delete(Reply.sessionId);
-    try { await api.unsendMessage(messageID); } catch(e) {}
+    try { await api.unsendMessage(event.messageID); } catch(e) {}
 
     const isCorrect = body.trim().toLowerCase() === session.answer;
     let userData = await usersData.get(senderID);
@@ -116,7 +116,7 @@ module.exports = {
 
     if (isCorrect) {
       quizStats.won += 1;
-      const reward = 2000;
+      const reward = 1000;
       finalMoney += reward;
       status = `✨ 𝒀𝒐𝒖'𝒓𝒆 𝑩𝒓𝒊𝒍𝒍𝒊𝒂𝒏𝒕 𝑩𝒂𝒃𝒚! ✨\n━━━━━━━━━━━━━━━━━━\n💰 𝑪𝒐𝒊𝒏𝒔: +${fancy(reward)}\n🏆 𝑻𝒐𝒕𝒂𝒍 𝑾𝒊𝒏𝒔: ${fancy(quizStats.won)}`;
     } else {
