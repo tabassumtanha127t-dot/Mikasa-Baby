@@ -1,95 +1,60 @@
-// Style-4 Fancy Font (Bold Serif Italic) Baby
-function fancy(text) {
-    const map = {
-        'a': '𝒂','b': '𝒃','c': '𝒄','d': '𝒅','e': '𝒆','f': '𝒇','g': '𝒈','h': '𝒉','i': '𝒊','j': '𝒋','k': '𝒌','l': '𝒍','m': '𝒎','n': '𝒏','o': '𝒐','p': '𝒑','q': '𝒒','r': '𝒓','s': '𝒔','t': '𝒕','u': '𝒖','v': '𝒗','w': '𝒘','x': '𝒙','y': '𝒚','z': '𝒛',
-        'A': '𝑨','B': '𝑩','C': '𝑪','D': '𝑫','E': '𝑬','F': '𝑭','G': '𝑮','H': '𝑯','I': '𝑰','J': '𝑱','K': '𝑲','L': '𝑳','M': '𝑴','N': '𝑵','O': '𝑶','P': '𝑷','Q': '𝑸','R': '𝑹','S': '𝑺','T': '𝑻','U': '𝑼','V': '𝑽','W': '𝑾','X': '𝑿','Y': '𝒀','Z': '𝒁',
-        '0': '𝟎','1': '𝟏','2': '𝟐','3': '𝟑','4': '𝟒','5': '𝟏','6': '𝟔','7': '𝟕','8': '𝟖','9': '𝟗', 
-        '.': '.', ',': ',', '!': '!', '?': '?', ' ': ' '
-    };
-    return text.toString().split('').map(char => map[char] || char).join('');
+/*
+  Updated formatMoney to handle up to Centillion (10^303)
+  Shorthand scales included: K, M, B, T, QD, QN, SX, SP, OC, NO, DC, ..., CT
+*/
+
+function formatMoney(amount) {
+    if (amount >= 1e303) return (amount / 1e303).toFixed(2) + "𝐂𝐓"; // Centillion
+    if (amount >= 1e63) return (amount / 1e63).toFixed(2) + "𝐕𝐈";  // Vigintillion
+    if (amount >= 1e60) return (amount / 1e60).toFixed(2) + "𝐍𝐃";  // Novemdecillion
+    if (amount >= 1e57) return (amount / 1e57).toFixed(2) + "𝐎𝐃";  // Octodecillion
+    if (amount >= 1e54) return (amount / 1e54).toFixed(2) + "𝐒𝐃";  // Septendecillion
+    if (amount >= 1e51) return (amount / 1e51).toFixed(2) + "𝐒𝐃";  // Sexdecillion
+    if (amount >= 1e48) return (amount / 1e48).toFixed(2) + "𝐐𝐃";  // Quindecillion
+    if (amount >= 1e45) return (amount / 1e45).toFixed(2) + "𝐐𝐓";  // Quattuordecillion
+    if (amount >= 1e42) return (amount / 1e42).toFixed(2) + "𝐓𝐃";  // Tredecillion
+    if (amount >= 1e39) return (amount / 1e39).toFixed(2) + "𝐃𝐃";  // Duodecillion
+    if (amount >= 1e36) return (amount / 1e36).toFixed(2) + "𝐔𝐃";  // Undecillion
+    if (amount >= 1e33) return (amount / 1e33).toFixed(2) + "𝐃𝐂";  // Decillion
+    if (amount >= 1e30) return (amount / 1e30).toFixed(2) + "𝐍𝐎";  // Nonillion
+    if (amount >= 1e27) return (amount / 1e27).toFixed(2) + "𝐎𝐂";  // Octillion
+    if (amount >= 1e24) return (amount / 1e24).toFixed(2) + "𝐒𝐏";  // Septillion
+    if (amount >= 1e21) return (amount / 1e21).toFixed(2) + "𝐒𝐗";  // Sextillion
+    if (amount >= 1e18) return (amount / 1e18).toFixed(2) + "𝐐𝐍";  // Quintillion
+    if (amount >= 1e15) return (amount / 1e15).toFixed(2) + "𝐐𝐃";  // Quadrillion
+    if (amount >= 1e12) return (amount / 1e12).toFixed(2) + "𝐓";   // Trillion
+    if (amount >= 1e9)  return (amount / 1e9).toFixed(2)  + "𝐁";   // Billion
+    if (amount >= 1e6)  return (amount / 1e6).toFixed(2)  + "𝐌";   // Million
+    if (amount >= 1e3)  return (amount / 1e3).toFixed(2)  + "𝐊";   // Thousand
+    return amount.toString();
 }
 
-// Centillion-Ready Shorthand Baby - FIXED VERSION
-function formatMoney(amount) {
-    if (amount === Infinity || amount === -Infinity) return fancy("𝑰𝒏𝒇𝒊𝒏𝒊𝒕𝒚");
-    if (isNaN(amount) || amount === null || amount === undefined) return fancy("0");
-    
-    const absAmount = Math.abs(amount);
-    const units = [
-        { v: 1e303, s: "𝑪𝒕" },
-        { v: 1e93, s: "𝑵𝒕𝒈" },
-        { v: 1e66, s: "𝑽𝒈" },
-        { v: 1e63, s: "𝑵𝒐𝒅" },
-        { v: 1e60, s: "𝑶𝒄𝒅" },
-        { v: 1e57, s: "𝑺𝒑𝒅" },
-        { v: 1e54, s: "𝑺𝒙𝒅" },
-        { v: 1e51, s: "𝑸𝒊𝒅" },
-        { v: 1e48, s: "𝑸𝒅𝒄" },
-        { v: 1e45, s: "𝑻𝒅𝒄" },
-        { v: 1e42, s: "𝑫𝒅𝒄" },
-        { v: 1e39, s: "𝑼𝒅𝒄" },
-        { v: 1e36, s: "𝑫𝒄" },
-        { v: 1e33, s: "𝑵𝒐" },
-        { v: 1e30, s: "𝑶𝒄" },
-        { v: 1e27, s: "𝑺𝒑" },
-        { v: 1e24, s: "𝑺𝒙" },
-        { v: 1e21, s: "𝑸𝒊" },
-        { v: 1e18, s: "𝑸𝒅" },
-        { v: 1e15, s: "𝑸" },
-        { v: 1e12, s: "𝑻" },
-        { v: 1e9,  s: "𝑩" },
-        { v: 1e6,  s: "𝑴" },
-        { v: 1e3,  s: "𝑲" }
-    ];
-    
-    // Find the appropriate unit
-    for (let u of units) {
-        if (absAmount >= u.v) {
-            const value = amount / u.v;
-            // Format with 2 decimal places, but remove trailing .00 if whole number
-            const formatted = value.toFixed(2).replace(/\.00$/, '');
-            return fancy(formatted) + u.s;
-        }
-    }
-    
-    // For amounts less than 1000
-    if (absAmount >= 1) {
-        return fancy(amount.toFixed(2).replace(/\.00$/, ''));
-    } else {
-        return fancy(amount.toString());
-    }
+function stylish(text) {
+    const serifBold = {
+        "a":"𝐚","b":"𝐛","c":"𝐜","d":"𝐝","e":"𝐞","f":"𝐟","g":"𝐠","h":"𝐡","i":"𝐢","j":"𝐣","k":"𝐤","l":"𝐥","m":"𝐦","n":"𝐧","o":"𝐨","p":"𝐩","q":"𝐪","r":"𝐫","s":"𝐬","t":"𝐭","u":"𝐮","v":"𝐯","w":"𝐰","x":"𝐱","y":"𝐲","z":"𝐳",
+        "A":"𝐀","B":"𝐁","C":"𝐂","D":"𝐃","E":"𝐄","F":"𝐅","G":"𝐆","H":"𝐇","I":"𝐈","J":"𝐉","K":"𝐊","L":"𝐋","M":"𝐌","N":"𝐍","O":"𝐎","P":"𝐏","Q":"𝐐","R":"𝐑","S":"𝐒","T":"𝐓","U":"𝐔","V":"𝐕","W":"𝐖","X":"𝐗","Y":"𝐘","Z":"𝐙",
+        "0":"𝟎","1":"𝟏","2":"𝟐","3":"𝟑","4":"𝟒","5":"𝟓","6":"𝟔","7":"𝟕","8":"𝟖","9":"𝟗"
+    };
+    return text.toString().split("").map(c => serifBold[c] || c).join("");
 }
 
 function getRankEmoji(rank) {
-    switch(rank) {
-        case 1: return "👑";
-        case 2: return "🥈";
-        case 3: return "🥉";
-        case 4: case 5: case 6: case 7: case 8: case 9: case 10: return "🏅";
-        default: return "🔹";
-    }
-}
-
-function getRankTitle(rank) {
-    switch(rank) {
-        case 1: return "𝑲𝑰𝑵𝑮 𝑶𝑭 𝑾𝑬𝑨𝑳𝑻𝑯";
-        case 2: return "𝑬𝑳𝑰𝑻𝑬 𝑩𝑰𝑳𝑳𝑰𝑶𝑵𝑨𝑰𝑹𝑬";
-        case 3: return "𝑮𝑶𝑳𝑫𝑬𝑵 𝑻𝒀𝑪𝑶𝑶𝑵";
-        case 4: case 5: case 6: return "𝑷𝑳𝑨𝑻𝑰𝑵𝑼𝑴 𝑴𝑨𝑮𝑵𝑨𝑻𝑬";
-        case 7: case 8: case 9: case 10: return "𝑫𝑰𝑨𝑴𝑶𝑵𝑫 𝑴𝑶𝑮𝑼𝑳";
-        default: return "𝑨𝑺𝑷𝑰𝑹𝑰𝑵𝑮 𝑻𝒀𝑪𝑶𝑶𝑵";
-    }
+    if (rank === 1) return "👑";
+    if (rank === 2) return "🥈";
+    if (rank === 3) return "🥉";
+    return "✧";
 }
 
 module.exports = {
     config: {
         name: "top",
-        aliases: ["richlist", "leaderboard", "wealth", "richest"],
-        version: "6.9",
-        author: "Saif & tamim",
-        shortDescription: "🎡 𝑻𝑶𝑷 𝑹𝑰𝑪𝑯𝑬𝑺𝑻 𝑳𝑬𝑨𝑫𝑬𝑹𝑩𝑶𝑨𝑹𝑫",
-        category: "bank",
-        guide: { en: "{p}top [count]" }
+        aliases: ["richlist", "leaderboard"],
+        version: "4.6",
+        author: "Tꫝᴍɪᴍ & Gemini",
+        shortDescription: "Top Money Leaderboard",
+        longDescription: "Shows the richest users on the global server list.",
+        category: "Economy",
+        guide: { en: "{p}top [10/50/100]" }
     },
 
     onStart: async function({ api, event, usersData, args }) {
@@ -97,94 +62,63 @@ module.exports = {
             const { threadID, senderID, messageID } = event;
             const allUsers = await usersData.getAll();
 
-            // Filter and sort users by money
             const sortedUsers = allUsers
-                .filter(u => u && u.money !== undefined && u.money !== null)
-                .sort((a, b) => (b.money || 0) - (a.money || 0));
+                .filter(u => u.money !== undefined)
+                .sort((a, b) => b.money - a.money);
 
-            // Determine how many to show (default 10, max 50)
-            let requested = parseInt(args[0]);
-            if (isNaN(requested) || requested < 1) requested = 10;
-            const topCount = Math.min(requested, 50); // Max 50 for better performance
-            
+            const requested = parseInt(args[0]) || 10;
+            const topCount = Math.max(1, Math.min(requested, 500));
             const topUsers = sortedUsers.slice(0, topCount);
 
-            if (topUsers.length === 0) {
-                return api.sendMessage(fancy("❌ 𝑵𝒐 𝒖𝒔𝒆𝒓 𝒅𝒂𝒕𝒂 𝒇𝒐𝒖𝒏𝒅 𝒃𝒂𝒃𝒚!"), threadID, messageID);
-            }
+            if (!topUsers.length)
+                return api.sendMessage(
+                    "❌ No data found, Baby!",
+                    threadID,
+                    null,
+                    messageID
+                );
 
-            // Build message header
-            let msg = `╔══════════════════════════════╗\n`;
-            msg += `       🏆 ${fancy("𝑾𝑬𝑨𝑳𝑻𝑯 𝑳𝑬𝑨𝑫𝑬𝑹𝑩𝑶𝑨𝑹𝑫")} 🏆\n`;
-            msg += `╚══════════════════════════════╝\n\n`;
-            msg += `${fancy(`𝑻𝑶𝑷 ${topCount} 𝑹𝑰𝑪𝑯𝑬𝑺𝑻 𝑷𝑳𝑨𝒀𝑬𝑹𝑺`)}\n`;
-            msg += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
+            let msg = `🏆 ${stylish("𝐓𝐎𝐏")} ${stylish(topCount)} ${stylish("𝐑𝐈𝐂𝐇𝐄𝐒𝐓 𝐔𝐒𝐄𝐑𝐒")}\n`;
+            msg += `━━━━━━━━━━━━━━━━━━\n\n`;
 
             let mentions = [];
-            
-            // Add each top user
-            topUsers.forEach((user, index) => {
-                const rank = index + 1;
-                const name = user.name || "𝑼𝒏𝒌𝒏𝒐𝒘𝒏";
-                const balance = user.money || 0;
+            topUsers.forEach((user, i) => {
+                const rank = i + 1;
+                const name = user.name || "Unknown";
+                const balance = formatMoney(user.money || 0);
                 const uid = user.userID || user.id;
-                
-                const rankDisplay = rank < 10 ? `0${rank}` : `${rank}`;
-                
-                msg += `${getRankEmoji(rank)} ${fancy(`[${rankDisplay}]`)} ${fancy(name)}\n`;
-                msg += `   ${fancy("𝑩𝒂𝒍𝒂𝒏𝒄𝒆")}: ${formatMoney(balance)}\n`;
-                msg += `   ${fancy("𝑻𝒊𝒕𝒍𝒆")}: ${getRankTitle(rank)}\n`;
-                
-                // Add separator between users
-                if (index < topUsers.length - 1) {
-                    msg += `   ────────────────────\n`;
-                } else {
-                    msg += `\n`;
-                }
+
+                msg += `${getRankEmoji(rank)} ${stylish("𝐑𝐚𝐧𝐤")} ${stylish(rank)}: ${stylish(name)}\n`;
+                msg += `💸 ${stylish("𝐁𝐚𝐥𝐚𝐧𝐜𝐞")}: ${stylish(balance)}\n\n`;
 
                 if (uid) mentions.push({ tag: name, id: uid });
             });
 
-            // Find current user's rank and info
-            const userIndex = sortedUsers.findIndex(u => 
-                (u.userID || u.id) == senderID
+            const userRank =
+                sortedUsers.findIndex(u => (u.userID || u.id) == senderID) + 1;
+            const userMoney =
+                sortedUsers.find(u => (u.userID || u.id) == senderID)?.money || 0;
+
+            msg += `━━━━━━━━━━━━━━━━━━\n`;
+            msg += `🎀 ${stylish("𝐘𝐎𝐔𝐑 𝐑𝐀𝐍𝐊")}: ${userRank > 0 ? stylish(userRank) : "𝐍/𝐀"}\n`;
+            msg += `💸 ${stylish("𝐘𝐎𝐔𝐑 𝐁𝐀𝐋𝐀𝐍𝐂𝐄")}: ${stylish(formatMoney(userMoney))}\n`;
+            msg += `━━━━━━━━━━━━━━━━━━\n`;
+            msg += `➳ ${stylish("𝐔𝐬𝐞 {𝐩}𝐭𝐨𝐩 𝟓𝟎 | 𝟏𝟎𝟎 | 𝟓𝟎𝟎")}\n`;
+            msg += `Keep grinding, Baby!`;
+
+            api.sendMessage(
+                { body: msg, mentions },
+                threadID,
+                null,
+                messageID
             );
-            const userRank = userIndex + 1;
-            const userMoney = userIndex >= 0 ? sortedUsers[userIndex].money : 0;
-            const userName = userIndex >= 0 ? sortedUsers[userIndex].name : "𝑼𝒏𝒌𝒏𝒐𝒘𝒏";
-
-            // Add user's own rank info
-            msg += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
-            msg += `${fancy("𝒀𝑶𝑼𝑹 𝑺𝑻𝑨𝑻𝑼𝑺")} 👤\n`;
-            msg += `   ${fancy("𝑵𝒂𝒎𝒆")}: ${fancy(userName)}\n`;
-            msg += `   ${fancy("𝑹𝒂𝒏𝒌")}: ${userRank > 0 ? fancy(`#${userRank}`) : fancy("𝑵/𝑨")}\n`;
-            msg += `   ${fancy("𝑩𝒂𝒍𝒂𝒏𝒄𝒆")}: ${formatMoney(userMoney)}\n`;
-            
-            if (userRank > 0 && userRank > topCount) {
-                const usersAbove = userRank - topCount;
-                msg += `   ${fancy("𝑵𝒆𝒆𝒅")}: ${formatMoney(sortedUsers[topCount - 1].money - userMoney + 1)} ${fancy("𝒕𝒐 𝒆𝒏𝒕𝒆𝒓 𝒕𝒐𝒑")} ${topCount}\n`;
-            }
-            
-            msg += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
-            msg += `${fancy("💡 𝑻𝑰𝑷: 𝑼𝒔𝒆")} {p}top 20 ${fancy("𝒐𝒓")} {p}top 50\n`;
-            msg += `${fancy("📈 𝑻𝒐𝒕𝒂𝒍 𝑷𝒍𝒂𝒚𝒆𝒓𝒔:")} ${fancy(sortedUsers.length)}\n`;
-            
-            // Add timestamp
-            const now = new Date();
-            const timeStr = now.toLocaleTimeString('en-US', { hour12: true, hour: '2-digit', minute: '2-digit' });
-            const dateStr = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-            msg += `${fancy("🕐 𝑼𝒑𝒅𝒂𝒕𝒆𝒅:")} ${dateStr} ${timeStr}`;
-
-            return api.sendMessage({ 
-                body: msg, 
-                mentions 
-            }, threadID, messageID);
 
         } catch (err) {
-            console.error("Top command error:", err);
-            return api.sendMessage(
-                fancy("⚠️ 𝑬𝒓𝒓𝒐𝒓 𝒍𝒐𝒂𝒅𝒊𝒏𝒈 𝒕𝒉𝒆 𝒘𝒆𝒂𝒍𝒕𝒉 𝒍𝒊𝒔𝒕. 𝑷𝒍𝒆𝒂𝒔𝒆 𝒕𝒓𝒚 𝒂𝒈𝒂𝒊𝒏 𝒍𝒂𝒕𝒆𝒓 𝒃𝒂𝒃𝒚."), 
-                event.threadID, 
+            console.error(err);
+            api.sendMessage(
+                "⚠️ Error loading leaderboard, Baby.",
+                event.threadID,
+                null,
                 event.messageID
             );
         }
