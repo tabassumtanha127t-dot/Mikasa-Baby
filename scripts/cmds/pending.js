@@ -29,7 +29,7 @@ module.exports = {
     role: 1,
     shortDescription: formatText("Handle pending requests"),
     longDescription: formatText("Approve or reject pending users/groups"),
-    category: formatText("utility"),
+    category: "utility"
   },
 
   onReply: async function ({ message, api, event, Reply }) {
