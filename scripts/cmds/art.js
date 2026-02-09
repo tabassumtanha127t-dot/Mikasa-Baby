@@ -13,7 +13,7 @@ module.exports = {
     countDown: 15,
     role: 0,
     longDescription: "Generate an image using the ArtV1 model.",
-    category: "ai-image",
+    category: "image",
     guide: {
       en: "{pn} <prompt>"
     }
