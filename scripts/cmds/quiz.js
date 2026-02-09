@@ -116,7 +116,7 @@ module.exports = {
 
     if (isCorrect) {
       quizStats.won += 1;
-      const reward = 500;
+      const reward = 2000;
       finalMoney += reward;
       status = `✨ 𝒀𝒐𝒖'𝒓𝒆 𝑩𝒓𝒊𝒍𝒍𝒊𝒂𝒏𝒕 𝑩𝒂𝒃𝒚! ✨\n━━━━━━━━━━━━━━━━━━\n💰 𝑪𝒐𝒊𝒏𝒔: +${fancy(reward)}\n🏆 𝑻𝒐𝒕𝒂𝒍 𝑾𝒊𝒏𝒔: ${fancy(quizStats.won)}`;
     } else {
