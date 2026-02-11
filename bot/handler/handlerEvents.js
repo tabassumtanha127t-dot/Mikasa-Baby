@@ -233,7 +233,7 @@ module.exports = function (api, threadModel, userModel, dashBoardModel, globalMo
 
                     // 1. Try nickname match
                     let foundID = Object.keys(nicknames).find(id => nicknames[id].toLowerCase().includes(tagName));
-                    
+
                     // 2. Try name/firstName match
                     if (!foundID) {
                         const user = userInfo.find(u => 
