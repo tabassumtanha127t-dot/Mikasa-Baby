@@ -215,37 +215,80 @@ module.exports = function (api, threadModel, userModel, dashBoardModel, globalMo
         async function onStart() {
             let usedPrefix = false;
 
+            // IMPROVED MENTION HANDLER - Fixed by Assistant
             const mentions = event.mentions || {};
             const mentionIDs = Object.keys(mentions);
 
+            // Case 1: Direct mentions already exist
             if (mentionIDs.length > 0) {
                 event.mentions = mentions;
-            } else if (event.messageReply && event.messageReply.senderID) {
-                event.mentions = { [event.messageReply.senderID]: "" };
-            } else {
-                // FALLBACK: Try to resolve the first tag like @Arisa by looking up group members
-                const tagMatch = body.match(/@([^ ]+)/);
-                if (tagMatch) {
-                    const tagName = tagMatch[1].toLowerCase();
-                    const info = await api.getThreadInfo(threadID);
-                    const userInfo = info.userInfo || [];
-                    const nicknames = info.nicknames || {};
+            } 
+            // Case 2: Message reply (prioritize this)
+            else if (event.messageReply && event.messageReply.senderID) {
+                event.mentions = { [event.messageReply.senderID]: event.messageReply.body || "" };
+            } 
+            // Case 3: Manual @tag detection with improved algorithm
+            else {
+                const tagMatches = body.match(/@([^\s@]+)/g);
+                if (tagMatches && tagMatches.length > 0) {
+                    try {
+                        const info = await api.getThreadInfo(threadID);
+                        const userInfo = info.userInfo || [];
+                        const nicknames = info.nicknames || {};
+                        const foundMentions = {};
 
-                    // 1. Try nickname match
-                    let foundID = Object.keys(nicknames).find(id => nicknames[id].toLowerCase().includes(tagName));
+                        for (const tag of tagMatches) {
+                            const tagName = tag.slice(1).toLowerCase().trim();
+                            if (!tagName) continue;
 
-                    // 2. Try name/firstName match
-                    if (!foundID) {
-                        const user = userInfo.find(u => 
-                            (u.name && u.name.toLowerCase().includes(tagName)) || 
-                            (u.firstName && u.firstName.toLowerCase().includes(tagName))
-                        );
-                        if (user) foundID = user.id;
+                            let foundID = null;
+
+                            // Priority 1: Exact nickname match
+                            foundID = Object.keys(nicknames).find(id => 
+                                nicknames[id].toLowerCase() === tagName
+                            );
+
+                            // Priority 2: Partial nickname match
+                            if (!foundID) {
+                                foundID = Object.keys(nicknames).find(id => 
+                                    nicknames[id].toLowerCase().includes(tagName)
+                                );
+                            }
+
+                            // Priority 3: Exact name/firstName match
+                            if (!foundID) {
+                                const user = userInfo.find(u => 
+                                    (u.name && u.name.toLowerCase() === tagName) ||
+                                    (u.firstName && u.firstName.toLowerCase() === tagName)
+                                );
+                                if (user) foundID = user.id;
+                            }
+
+                            // Priority 4: Partial name match
+                            if (!foundID) {
+                                const user = userInfo.find(u => 
+                                    (u.name && u.name.toLowerCase().includes(tagName)) ||
+                                    (u.firstName && u.firstName.toLowerCase().includes(tagName))
+                                );
+                                if (user) foundID = user.id;
+                            }
+
+                            if (foundID && !foundMentions[foundID]) {
+                                foundMentions[foundID] = tag;
+                            }
+                        }
+
+                        if (Object.keys(foundMentions).length > 0) {
+                            event.mentions = foundMentions;
+                        } else {
+                            event.mentions = {};
+                        }
+                    } catch (error) {
+                        console.error("Error fetching thread info for mentions:", error);
+                        event.mentions = {};
                     }
-
-                    if (foundID) {
-                        event.mentions = { [foundID]: "" };
-                    }
+                } else {
+                    event.mentions = {};
                 }
             }
 
