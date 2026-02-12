@@ -15,11 +15,11 @@ const parseShorthand = (str) => {
   return isNaN(number) ? NaN : number * multiplier;
 };
 
-// ✨ Fancy Font Baby
+// ✨ Fancy Font Baby - Bold Sans-Serif Style
 function fancy(text) {
     const map = {
-        'a': '𝒂','b': '𝒃','c': '𝒄','d': '𝒅','e': '𝒆','f': '𝒇','g': '𝒈','h': '𝒉','i': '𝒊','j': '𝒋','k': '𝒌','l': '𝒍','m': '𝒎','n': '𝒏','o': '𝒐','p': '𝒑','q': '𝗊','r': '𝒓','s': '𝒔','t': '𝒕','u': '𝒖','v': '𝒗','w': '𝒘','x': '𝒙','y': '𝒚','z': '𝒛',
-        'A': '𝑨','B': '𝑩','C': '𝑪','D': '𝑫','E': '𝑬','F': '𝑭','G': '𝑮','H': '𝑯','I': '𝑰','J': '𝑱','K': '𝑲','L': '𝑳','M': '𝑴','N': '𝑵','O': '𝑶','P': '𝑷','Q': '𝑸','R': '𝑹','S': '𝑺','T': '𝑻','U': '𝑼','V': '𝑽','W': '𝑾','X': '𝑿','Y': '𝒀','Z': '𝒁',
+        'a': '𝐚','b': '𝐛','c': '𝐜','d': '𝐝','e': '𝐞','f': '𝐟','g': '𝐠','h': '𝐡','i': '𝐢','j': '𝐣','k': '𝐤','l': '𝐥','m': '𝐦','n': '𝐧','o': '𝐨','p': '𝐩','q': '𝐪','r': '𝐫','s': '𝐬','t': '𝐭','u': '𝐮','v': '𝐯','w': '𝐰','x': '𝐱','y': '𝐲','z': '𝐳',
+        'A': '𝐀','B': '𝐁','C': '𝐂','D': '𝐃','E': '𝐄','F': '𝐅','G': '𝐆','H': '𝐇','I': '𝐈','J': '𝐉','K': '𝐊','L': '𝐋','M': '𝐌','N': '𝐍','O': '𝐎','P': '𝐏','Q': '𝐐','R': '𝐑','S': '𝐒','T': '𝐓','U': '𝐔','V': '𝐕','W': '𝐖','X': '𝐗','Y': '𝐘','Z': '𝐙',
         '0': '𝟎','1': '𝟏','2': '𝟐','3': '𝟑','4': '𝟒','5': '𝟓','6': '𝟔','7': '𝟕','8': '𝟖','9': '𝟗', '.': '.'
     };
     return text.toString().split('').map(char => map[char] || char).join('');
@@ -28,10 +28,10 @@ function fancy(text) {
 // 🏦 Standard Shorthand Formatter Baby
 function formatMoney(num) {
   const units = [
-    { v: 1e303, s: "𝑪𝒕" }, { v: 1e45, s: "𝑻𝒅𝒄" }, { v: 1e42, s: "𝑫𝒅𝒄" }, { v: 1e39, s: "𝑼𝒅𝒄" },
-    { v: 1e36, s: "𝑫𝒄" }, { v: 1e33, s: "𝑵𝒐" }, { v: 1e30, s: "𝑶𝒄" }, { v: 1e27, s: "𝑺𝒑" },
-    { v: 1e24, s: "𝑺𝒙" }, { v: 1e21, s: "𝑸𝒊" }, { v: 1e18, s: "𝑸𝒅" }, { v: 1e15, s: "𝑸" },
-    { v: 1e12, s: "𝑻" }, { v: 1e9, s: "𝑩" }, { v: 1e6, s: "𝑴" }, { v: 1e3, s: "𝑲" }
+    { v: 1e303, s: "𝐂𝐭" }, { v: 1e45, s: "𝐓𝐝𝐜" }, { v: 1e42, s: "𝐃𝐝𝐜" }, { v: 1e39, s: "𝐔𝐝𝐜" },
+    { v: 1e36, s: "𝐃𝐜" }, { v: 1e33, s: "𝐍𝐨" }, { v: 1e30, s: "𝐎𝐜" }, { v: 1e27, s: "𝐒𝐩" },
+    { v: 1e24, s: "𝐒𝐱" }, { v: 1e21, s: "𝐐𝐢" }, { v: 1e18, s: "𝐐𝐝" }, { v: 1e15, s: "𝐐" },
+    { v: 1e12, s: "𝐓" }, { v: 1e9, s: "𝐁" }, { v: 1e6, s: "𝐌" }, { v: 1e3, s: "𝐊" }
   ];
   for (const u of units) {
     if (Math.abs(num) >= u.v) return fancy((num / u.v).toFixed(2)) + u.s;
@@ -55,13 +55,13 @@ module.exports = {
     // 🔄 Admin Refresh Logic Baby
     if (args[0] === "refresh" && role >= 2) {
       let targetID = messageReply ? messageReply.senderID : (Object.keys(mentions).length > 0 ? Object.keys(mentions)[0] : args[1]);
-      if (!targetID) return api.sendMessage(fancy("❌ 𝑼𝒔𝒂𝒈𝒆: 𝒔𝒑𝒊𝒏 𝒓𝒆𝒇𝒓𝒆𝒔𝒉 @𝒕𝒂𝒈 𝒐𝒓 𝑼𝑰𝑫 𝒃𝒂𝒃𝒚"), threadID, messageID);
+      if (!targetID) return api.sendMessage(fancy("❌ 𝐔𝐬𝐚𝐠𝐞: 𝐬𝐩𝐢𝐧 𝐫𝐞𝐟𝐫𝐞𝐬𝐡 @𝐭𝐚𝐠 𝐨𝐫 𝐔𝐈𝐃 𝐛𝐚𝐛𝐲"), threadID, messageID);
       
       let tData = await usersData.get(targetID);
       if (!tData.data) tData.data = {};
       tData.data.spinLimit = { lastUpdate: today, count: 0 };
       await usersData.set(targetID, { data: tData.data });
-      return api.sendMessage(fancy("✅ 𝑺𝑷𝑰𝑵 𝑳𝑰𝑴𝑰𝑻 𝑹𝑬𝑭𝑹𝑬𝑺𝑯𝑬𝑫 𝑩𝑨𝑩𝒀! 🎀"), threadID, messageID);
+      return api.sendMessage(fancy("✅ 𝐒𝐏𝐈𝐍 𝐋𝐈𝐌𝐈𝐓 𝐑𝐄𝐅𝐑𝐄𝐒𝐇𝐄𝐃 𝐁𝐀𝐁𝐘! 🎀"), threadID, messageID);
     }
 
     // MongoDB Data Sync Baby
@@ -72,21 +72,23 @@ module.exports = {
     }
 
     if (user.data.spinLimit.count >= 20) {
-      return api.sendMessage(fancy("⚠️ 𝒀𝒐𝒖 𝒉𝒂𝒗𝒆 𝒓𝒆𝒂𝒄𝒉𝒆𝒅 𝒚𝒐𝒖𝒓 𝒅𝒂𝒊𝒍𝒚 𝒍𝒊𝒎𝒊𝒕 𝒐𝒇 𝟐𝟎 𝒔𝒑𝒊𝒏𝒔 𝒃𝒂𝒃𝒚!"), threadID, messageID);
+      return api.sendMessage(fancy("⚠️ 𝐘𝐨𝐮 𝐡𝐚𝐯𝐞 𝐫𝐞𝐚𝐜𝐡𝐞𝐝 𝐲𝐨𝐮𝐫 𝐝𝐚𝐢𝐥𝐲 𝐥𝐢𝐦𝐢𝐭 𝐨𝐟 𝟐𝟎 𝐬𝐩𝐢𝐧𝐬 𝐛𝐚𝐛𝐲!"), threadID, messageID);
     }
 
     const betAmount = parseShorthand(args[0]);
-    if (isNaN(betAmount) || betAmount <= 0) return api.sendMessage(fancy("⚠️ 𝑬𝑵𝑻𝑬𝑹 𝑨 𝑽𝑨𝑳𝑰𝑫 𝑩𝑬𝑻 𝑨𝑴𝑶𝑼𝑵𝑻 𝑩𝑨𝑩𝒀."), threadID, messageID);
-    if (betAmount > user.money) return api.sendMessage(fancy("💰 𝑵𝑶𝑻 𝑬𝑵𝑶𝑼𝑮𝑯 𝑩𝑨𝑳𝑨𝑵𝑪𝑬 𝑩𝑨𝑩𝒀."), threadID, messageID);
+    if (isNaN(betAmount) || betAmount <= 0) return api.sendMessage(fancy("⚠️ 𝐄𝐍𝐓𝐄𝐑 𝐀 𝐕𝐀𝐋𝐈𝐃 𝐁𝐄𝐓 𝐀𝐌𝐎𝐔𝐍𝐓 𝐁𝐀𝐁𝐘."), threadID, messageID);
+    if (betAmount > user.money) return api.sendMessage(fancy("💰 𝐍𝐎𝐓 𝐄𝐍𝐎𝐔𝐆𝐇 𝐁𝐀𝐋𝐀𝐍𝐂𝐄 𝐁𝐀𝐁𝐘."), threadID, messageID);
 
     const slots = ["❤️", "💛", "💙", "💚", "💎", "👑"];
     const winChance = Math.random();
     let s1, s2, s3;
 
-    if (winChance < 0.48) { 
+    // 🎯 50/50 Win Rate - Changed from 0.48 to 0.50
+    if (winChance < 0.50) { 
       const winType = Math.random();
-      if (winType < 0.02) s1 = s2 = s3 = "👑"; 
-      else if (winType < 0.08) s1 = s2 = s3 = "💎";
+      // Reduced jackpot chances to balance payouts
+      if (winType < 0.01) s1 = s2 = s3 = "👑"; // Reduced from 0.02
+      else if (winType < 0.05) s1 = s2 = s3 = "💎"; // Reduced from 0.08
       else {
         s1 = slots[Math.floor(Math.random() * (slots.length - 2))]; 
         s2 = s1;
@@ -99,10 +101,11 @@ module.exports = {
     }
 
     function calculateWinnings(a, b, c, bet) {
-      if (a === "👑" && b === "👑" && c === "👑") return bet * 500;
-      if (a === "💎" && b === "💎" && c === "💎") return bet * 100;
-      if (a === b && b === c) return bet * 15;
-      if (a === b || a === c || b === c) return bet * 2;
+      // 💰 REDUCED WINNINGS - More balanced payouts
+      if (a === "👑" && b === "👑" && c === "👑") return bet * 100; // Reduced from 500x
+      if (a === "💎" && b === "💎" && c === "💎") return bet * 25;  // Reduced from 100x
+      if (a === b && b === c) return bet * 5;  // Reduced from 15x
+      if (a === b || a === c || b === c) return bet * 1.5; // Reduced from 2x
       return -bet;
     }
 
@@ -112,14 +115,14 @@ module.exports = {
 
     await usersData.set(senderID, { money: newBalance, data: user.data });
 
-    let winStatus = winnings > 0 ? fancy("𝑾𝒐𝒏") : fancy("𝑳𝒐𝒔𝒕");
-    if (s1 === "👑" && s2 === "👑" && s3 === "👑") winStatus = fancy("🔥 𝑩𝑰𝑮𝑮𝑬𝑺𝑻 𝑾𝑶𝑵 🔥");
+    let winStatus = winnings > 0 ? fancy("𝐖𝐨𝐧") : fancy("𝐋𝐨𝐬𝐭");
+    if (s1 === "👑" && s2 === "👑" && s3 === "👑") winStatus = fancy("🔥 𝐁𝐈𝐆𝐆𝐄𝐒𝐓 𝐖𝐎𝐍 🔥");
 
     const resultMsg = `🎀
-• ${fancy("𝑩𝒂𝒃𝒚, 𝒀𝒐𝒖")} ${winStatus} ${formatMoney(Math.abs(winnings))}!
-• ${fancy("𝑮𝒂𝒎𝒆 𝑹𝒆𝒔𝒖𝒍𝒕𝒔:")} [ ${s1} | ${s2} | ${s3} ]
-• ${fancy("𝑩𝒂𝒍𝒂𝒏𝒄𝒆:")} ${formatMoney(newBalance)}
-• ${fancy("𝑫𝒂𝒊𝒍𝒚 𝑼𝒔𝒆:")} ${fancy(user.data.spinLimit.count)}/𝟐𝟎 𝒃𝒂𝒃𝒚`;
+• ${fancy("𝐁𝐚𝐛𝐲, 𝐘𝐨𝐮")} ${winStatus} ${formatMoney(Math.abs(winnings))}!
+• ${fancy("𝐆𝐚𝐦𝐞 𝐑𝐞𝐬𝐮𝐥𝐭𝐬:")} [ ${s1} | ${s2} | ${s3} ]
+• ${fancy("𝐁𝐚𝐥𝐚𝐧𝐜𝐞:")} ${formatMoney(newBalance)}
+• ${fancy("𝐃𝐚𝐢𝐥𝐲 𝐔𝐬𝐞:")} ${fancy(user.data.spinLimit.count)}/𝟐𝟎 ${fancy("𝐁𝐚𝐛𝐲")}`;
 
     return api.sendMessage(resultMsg, threadID, messageID);
   }
