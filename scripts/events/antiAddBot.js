@@ -2,14 +2,25 @@ const { getTime } = global.utils;
 
 module.exports = {
     config: {
-        name: "antiAddBot",
+        name: "threadbanned",
         isBot: true,
-        version: "2.6",
+        version: "4.1",
         author: "Gemini",
         envConfig: {
             allow: true
         },
         category: "events"
+    },
+
+    langs: {
+        en: {
+            banMsg: "🎀 𝑻𝒉𝒊𝒔 𝒈𝒓𝒐𝒖𝒑 𝒉𝒂𝒔 𝒃𝒆𝒆𝒏 𝒃𝒂𝒏𝒏𝒆𝒅 𝒇𝒓𝒐𝒎 𝒖𝒔𝒊𝒏𝒈 𝑴𝒊𝒌𝒂𝒔𝒂 𝑩𝒂𝒃𝒚!\n» 𝑹𝒆𝒂𝒔𝒐𝒏: %1\n» 𝑻𝒊𝒎𝒆: %2\n» 𝑻𝒉𝒓𝒆𝒂𝒅 𝑰𝑫: %3!",
+            welcomeAdmin: "𝑯𝒆𝒍𝒍𝒐 𝑩𝒂𝒃𝒚! 𝑰'𝒎 𝒉𝒆𝒓𝒆. 𝑻𝒉𝒂𝒏𝒌 𝒚𝒐𝒖 𝒇𝒐𝒓 𝒂𝒅𝒅𝒊𝒏𝒈 𝒎𝒆! ❤️"
+        },
+        vi: {
+            banMsg: "🎀 𝑻𝒉𝒊𝒔 𝒈𝒓𝒐𝒖𝒑 𝒉𝒂𝒔 𝒃𝒆𝒆𝒏 𝒃𝒂𝒏𝒏𝒆𝒅 𝒇𝒓𝒐𝒎 𝒖𝒔𝒊𝒏𝒈 𝑴𝒊𝒌𝒂𝒔𝒂 𝑩𝒂𝒃𝒚!\n» 𝑹𝒆𝒂𝒔𝒐𝒏: %1\n» 𝑻𝒊𝒎𝒆: %2\n» 𝑻𝒉𝒓𝒆𝒂𝒅 𝑰𝑫: %3!",
+            welcomeAdmin: "𝑯𝒆𝒍𝒍𝒐 𝑩𝒂𝒃𝒚! 𝑰'𝒎 𝒉𝒆𝒓𝒆. 𝑻𝒉𝒂𝒏𝒌 𝒚𝒐𝒖 𝒇𝒐𝒓 𝒂𝒅𝒅𝒊𝒏𝒈 𝒎𝒆! ❤️"
+        }
     },
 
     onStart: async ({ threadsData, event, api, usersData, getLang }) => {
@@ -25,34 +36,28 @@ module.exports = {
                     const time = getTime("DD/MM/YYYY HH:mm:ss");
                     const reason = "𝑼𝒏𝒂𝒖𝒕𝒉𝒐𝒓𝒊𝒛𝒆𝒅 𝒃𝒐𝒕 𝒂𝒅𝒅𝒊𝒕𝒊𝒐𝒏";
 
-                    // 1. Thread ban in database
                     await threadsData.set(threadID, {
                         banned: true,
                         reason: reason,
                         dateBanned: time
                     });
 
-                    // 2. Language file theke official 🎀 message-ta create kora
-                    // %1 = reason, %2 = time, %3 = threadID
-                    const officialBanMsg = getLang("handlerEvents.threadBanned", reason, time, threadID);
+                    const officialBanMsg = getLang("banMsg", reason, time, threadID);
 
-                    // 3. Group-e pathano
                     await api.sendMessage(officialBanMsg, threadID);
 
-                    // 4. Admin Inbox + Admin GC-te pathano (Same language file output)
                     for (const adminID of config.adminBot) {
-                        api.sendMessage(officialBanMsg, adminID).catch(err => console.error(`[antiAddBot] Inbox Error: ${adminID}`, err));
+                        api.sendMessage(officialBanMsg, adminID).catch(() => {});
                     }
-                    api.sendMessage(officialBanMsg, targetGC).catch(err => console.error(`[antiAddBot] GC Error: ${targetGC}`, err));
+                    api.sendMessage(officialBanMsg, targetGC).catch(() => {});
 
-                    // 5. Bot leaves
                     return api.removeUserFromGroup(botID, threadID);
 
                 } catch (err) {
-                    console.error("[antiAddBot] Error:", err);
+                    console.error("[threadbanned] Error:", err);
                 }
             } else {
-                api.sendMessage("𝑴𝒂𝒔𝒕𝒆𝒓! 𝑰'𝒎 𝒉𝒆𝒓𝒆. 𝑻𝒉𝒂𝒏𝒌 𝒚𝒐𝒖 𝒇𝒐𝒓 𝒂𝒅𝒅𝒊𝒏𝒈 𝒎𝒆, 𝑩𝒂𝒃𝒚! ❤️", threadID);
+                api.sendMessage(getLang("welcomeAdmin"), threadID);
             }
         }
     }
