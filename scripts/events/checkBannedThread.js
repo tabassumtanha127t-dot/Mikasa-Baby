@@ -1,8 +1,10 @@
+const cooldowns = new Map(); // message cooldown tracker
+
 module.exports = {
     config: {
         name: "checkBannedThread",
-        version: "1.0",
-        author: "saif",
+        version: "1.2",
+        author: "Your Name",
         envConfig: {
             allow: true
         },
@@ -19,24 +21,37 @@ module.exports = {
     },
 
     onStart: async ({ event, api, threadsData, getLang, message }) => {
-        const { threadID, senderID } = event;
+        const { threadID, senderID, body } = event;
         const { config } = global.GoatBot;
 
-        // Admin হলে command চলবে
+        // শুধু text message এ কাজ করবে
+        if (!body || body.trim() === "") {
+            return;
+        }
+
+        // Admin হলে return
         if (config.adminBot.includes(senderID)) {
             return;
         }
 
+        // Cooldown check - একই thread এ 5 সেকেন্ডে একবার message
+        const now = Date.now();
+        const cooldownKey = `${threadID}`;
+        
+        if (cooldowns.has(cooldownKey)) {
+            const expirationTime = cooldowns.get(cooldownKey) + 5000; // 5 seconds
+            if (now < expirationTime) {
+                return "break"; // message দিবে না, শুধু command block করবে
+            }
+        }
+
         try {
-            // Thread data check করা
             const threadData = await threadsData.get(threadID);
 
-            // যদি thread banned থাকে
             if (threadData && threadData.banned === true) {
                 const reason = threadData.reason || "Unauthorized bot addition";
                 const bannedAt = threadData.bannedAt || "Unknown";
                 
-                // Admin list তৈরি
                 const adminList = config.adminBot.map((id, index) => 
                     `${index + 1}. fb.com/${id}`
                 ).join("\n");
@@ -45,7 +60,12 @@ module.exports = {
                 
                 await message.reply(banMessage);
                 
-                // Command টা block করার জন্য
+                // Cooldown set করা
+                cooldowns.set(cooldownKey, now);
+                
+                // 10 সেকেন্ড পর cooldown clear করা
+                setTimeout(() => cooldowns.delete(cooldownKey), 10000);
+                
                 return "break";
             }
 
