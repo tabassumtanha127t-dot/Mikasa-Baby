@@ -21,7 +21,7 @@ module.exports = {
     author: "Saif",
     countDown: 5,
     role: 0,
-    category: "economy",
+    category: "game",
     description: "🏙️ 𝑼𝒍𝒕𝒊𝒎𝒂𝒕𝒆 𝑳𝒊𝒇𝒆 𝑺𝒊𝒎𝒖𝒍𝒂𝒕𝒊𝒐𝒏 𝑴𝒂𝒓𝒌𝒆𝒕 𝑺𝒚𝒔𝒕𝒆𝒎 🏙️"
   },
 
