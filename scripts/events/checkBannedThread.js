@@ -1,9 +1,9 @@
-const cooldowns = new Map(); // message cooldown tracker
+const cooldowns = new Map();
 
 module.exports = {
     config: {
         name: "checkBannedThread",
-        version: "1.2",
+        version: "2.0",
         author: "Your Name",
         envConfig: {
             allow: true
@@ -13,14 +13,14 @@ module.exports = {
 
     langs: {
         vi: {
-            threadBanned: "⚠️ NHÓM NÀY ĐÃ BỊ CẤM SỬ DỤNG BOT!\n\n📛 Lý do: %1\n⏰ Thời gian ban: %2\n\n📞 Liên hệ admin để được gỡ ban:\n%3"
+            threadBanned: "⚠️ NHÓM NÀY ĐÃ BỊ CẤM!\n━━━━━━━━━━━━━━━━\n\n📛 Lý do: %1\n⏰ Thời gian: %2\n\n📞 Liên hệ admin để gỡ ban:\n%3"
         },
         en: {
-            threadBanned: "⚠️ THIS GROUP IS BANNED FROM USING BOT!\n\n📛 Reason: %1\n⏰ Banned at: %2\n\n📞 Contact admin to unban:\n%3"
+            threadBanned: "⚠️ THIS GROUP IS BANNED!\n━━━━━━━━━━━━━━━━\n\n📛 Reason: %1\n⏰ Banned at: %2\n\n📞 Contact admin to unban:\n%3"
         }
     },
 
-    onStart: async ({ event, api, threadsData, getLang, message }) => {
+    onStart: async ({ event, threadsData, getLang, message }) => {
         const { threadID, senderID, body } = event;
         const { config } = global.GoatBot;
 
@@ -34,14 +34,14 @@ module.exports = {
             return;
         }
 
-        // Cooldown check - একই thread এ 5 সেকেন্ডে একবার message
+        // Cooldown check - 10 সেকেন্ডে একবার message
         const now = Date.now();
-        const cooldownKey = `${threadID}`;
+        const cooldownKey = threadID;
         
         if (cooldowns.has(cooldownKey)) {
-            const expirationTime = cooldowns.get(cooldownKey) + 5000; // 5 seconds
+            const expirationTime = cooldowns.get(cooldownKey) + 10000;
             if (now < expirationTime) {
-                return "break"; // message দিবে না, শুধু command block করবে
+                return "break"; // Silent block, message দিবে না
             }
         }
 
@@ -52,6 +52,7 @@ module.exports = {
                 const reason = threadData.reason || "Unauthorized bot addition";
                 const bannedAt = threadData.bannedAt || "Unknown";
                 
+                // Admin list
                 const adminList = config.adminBot.map((id, index) => 
                     `${index + 1}. fb.com/${id}`
                 ).join("\n");
@@ -60,11 +61,9 @@ module.exports = {
                 
                 await message.reply(banMessage);
                 
-                // Cooldown set করা
+                // Cooldown set
                 cooldowns.set(cooldownKey, now);
-                
-                // 10 সেকেন্ড পর cooldown clear করা
-                setTimeout(() => cooldowns.delete(cooldownKey), 10000);
+                setTimeout(() => cooldowns.delete(cooldownKey), 15000);
                 
                 return "break";
             }
