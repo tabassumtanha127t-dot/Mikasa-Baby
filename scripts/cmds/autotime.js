@@ -7,7 +7,7 @@ module.exports.config = {
   role: 0,
   author: "SAIF",
   description: "Auto send hourly message with optional media attachment",
-  category: "AutoTime",
+  category: "utility",
   countDown: 3
 };
 
