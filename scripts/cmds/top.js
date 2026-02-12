@@ -53,7 +53,7 @@ module.exports = {
         author: "Tꫝᴍɪᴍ & Gemini",
         shortDescription: "Top Money Leaderboard",
         longDescription: "Shows the richest users on the global server list.",
-        category: "Economy",
+        category: "rank",
         guide: { en: "{p}top [10/50/100]" }
     },
 
