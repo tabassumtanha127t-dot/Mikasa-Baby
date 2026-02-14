@@ -125,7 +125,7 @@ module.exports = {
       ctx.textAlign = "left";
       ctx.shadowColor = "black";
       ctx.shadowBlur = 5;
-      ctx.fillText("Kire chdna", 40, 50);
+      ctx.fillText("Kire goru", 40, 50);
 
       const outputPath = path.join(
         cacheDir,
