@@ -140,7 +140,7 @@ module.exports = {
       if (a === "👑" && b === "👑" && c === "👑") return bet * 100;
       if (a === "💎" && b === "💎" && c === "💎") return bet * 25;
       if (a === b && b === c) return bet * 5;
-      if (a === b || a === c || b === c) return bet * 1.5;
+      if (a === b || a === c || b === c) return bet * 2; // Keep at 2x
       return -bet;
     }
 
