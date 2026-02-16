@@ -2,92 +2,90 @@ const axios = require("axios");
 const fs = require("fs-extra");
 const path = require("path");
 
+const formatText = (text) => {
+  const mapping = {
+    'a': '𝐚', 'b': '𝐛', 'c': '𝐜', 'd': '𝐝', 'e': '𝐞', 'f': '𝐟', 'g': '𝐠', 'h': '𝐡', 'i': '𝐢', 'j': '𝐣', 'k': '𝐤', 'l': '𝐥', 'm': '𝐦', 'n': '𝐧', 'o': '𝐨', 'p': '𝐩', 'q': '𝐪', 'r': '𝐫', 's': '𝐬', 't': '𝐭', 'u': '𝐮', 'v': '𝐯', 'w': '𝐰', 'x': '𝐱', 'y': '𝐲', 'z': '𝐳',
+    'A': '𝐀', 'B': '𝐁', 'C': '𝐂', 'D': '𝐃', 'E': '𝐄', 'F': '𝐅', 'G': '𝐆', 'H': '𝐇', 'I': '𝐈', 'J': '𝐉', 'K': '𝐊', '𝐋': '𝐋', 'M': '𝐌', 'N': '𝐍', 'O': '𝐎', 'P': '𝐏', 'Q': '𝐐', 'R': '𝐑', 'S': '𝐒', 'T': '𝐓', 'U': '𝐔', 'V': '𝐕', 'W': '𝐖', 'X': '𝐗', 'Y': '𝐘', 'Z': '𝐙',
+    '0': '𝟎', '1': '𝟏', '2': '𝟐', '3': '𝟑', '4': '𝟒', '5': '𝟓', '6': '𝟔', '7': '𝟕', '8': '𝟖', '9': '𝟗'
+  };
+  return text.split('').map(char => mapping[char] || char).join('');
+};
+
 module.exports = {
   config: {
     name: "clown",
-    version: "1.3",
+    version: "1.4",
     author: "Saif",
     countDown: 5,
     role: 0,
-    shortDescription: "Add clown effect with coins & anime style",
-    longDescription: "Applies clown face effect to your or mentioned avatar with coin deduction, anime flavor, and tagging",
+    shortDescription: "Add clown effect with coins",
     category: "fun",
     guide: {
-      en: "{p}clown [@mention or reply]\nIf no mention or reply, uses your profile picture."
+      en: "{pn} [@mention or reply]"
     }
   },
 
   onStart: async function({ api, event, message, usersData }) {
     const COST = 500;
     const senderID = event.senderID;
-
-    // ---- Check balance ----
-    let user = await usersData.get(senderID);
-    let balance = user.money || 0;
-    if (balance < COST) return message.reply(`🌸 Senpai… you need **${COST} coins**!\n💰 Your balance: ${balance} coins`);
-
-    // Deduct coins
-    await usersData.set(senderID, { ...user, money: balance - COST });
-    const remaining = balance - COST;
-
-    // ---- Determine target ----
-    let uid;
-    if (Object.keys(event.mentions).length > 0) {
-      uid = Object.keys(event.mentions)[0];
-    } else if (event.type === "message_reply" && event.messageReply) {
-      uid = event.messageReply.senderID;
-    } else {
-      uid = senderID;
-    }
-
-    // ---- Fetch target name ----
-    const userInfo = await api.getUserInfo([uid]);
-    const nameTarget = Object.values(userInfo)[0].name;
-
-    // ---- Avatar URL ----
-    const avatarURL = `https://graph.facebook.com/${uid}/picture?width=512&height=512&access_token=350685531728|62f8ce9f74b12f84c123cc23437a4a32`;
-
-    // ---- Countdown ----
-    let countdownMsg = await message.reply(`⏳ Generating clown image for ${nameTarget} in 3 seconds… nyaa~`);
-    for (let i = 2; i > 0; i--) {
-      await new Promise(res => setTimeout(res, 1000));
-      await api.editMessage(`⏳ Generating clown image for ${nameTarget} in ${i} seconds… baka!`, countdownMsg.messageID);
-    }
-    await new Promise(res => setTimeout(res, 1000));
-    await api.editMessage(`🤡 Creating clown image for ${nameTarget} now… senpai noticed! ✨`, countdownMsg.messageID);
+    const senderName = await usersData.getName(senderID);
 
     try {
+      let userData = await usersData.get(senderID);
+      let balance = userData.money || 0;
+
+      // UPDATED BROKE CHECK Baby
+      if (balance < COST) {
+        return message.reply(`‎🎀\n > ${senderName}\n\n` + formatText(`• Baby, You need ${COST} coins to use this command! Use daily /quiz and other games to earn more and come back, Baby!`));
+      }
+
+      // Determine target Baby
+      let uid;
+      if (Object.keys(event.mentions).length > 0) {
+        uid = Object.keys(event.mentions)[0];
+      } else if (event.type === "message_reply") {
+        uid = event.messageReply.senderID;
+      } else {
+        uid = senderID;
+      }
+
+      api.setMessageReaction("⏳", event.messageID, (err) => {}, true);
+
+      const targetName = await usersData.getName(uid);
+      const avatarURL = `https://graph.facebook.com/${uid}/picture?width=512&height=512&access_token=6628568379%7Cc1e620fa708a1d5696fb991c1bde5662`;
+
       const res = await axios.get(`https://api.popcat.xyz/v2/clown?image=${encodeURIComponent(avatarURL)}`, {
         responseType: "arraybuffer"
       });
 
       const cacheDir = path.join(__dirname, "cache");
-      fs.ensureDirSync(cacheDir);
+      await fs.ensureDir(cacheDir);
       const filePath = path.join(cacheDir, `clown_${uid}_${Date.now()}.png`);
-      fs.writeFileSync(filePath, res.data);
+      await fs.writeFile(filePath, Buffer.from(res.data));
 
-      // ---- Anime-style final message with proper tagging ----
-      const animeReplies = [
-        `Nyaa~ clown image ready for ${nameTarget}, senpai! 🤡`,
-        `Baka! Look at ${nameTarget}'s funny clown face 💥`,
-        `Sugoi~ ${nameTarget}'s clown effect is complete ✨`,
-        `Ara ara… senpai made a clown image for ${nameTarget}! 💫`,
-        `Senpai, ${nameTarget}'s avatar is now a clown! ⚡`
-      ];
-      const finalReply = animeReplies[Math.floor(Math.random() * animeReplies.length)];
+      // Deduct coins Baby
+      const remaining = balance - COST;
+      await usersData.set(senderID, { ...userData, money: remaining });
+
+      api.setMessageReaction("✅", event.messageID, (err) => {}, true);
+
+      const styledMsg = `‎🎀\n > ${senderName}\n\n` +
+        `• ` + formatText(`Baby, Look at this clown: @${targetName}!`) + `\n` +
+        `• ` + formatText(`Deducted: ${COST}`) + `\n` +
+        `• ` + formatText(`Balance: ${remaining} Baby`);
 
       await message.reply({
-        body: `${finalReply}\n💸 Deducted: ${COST} coins\n💳 Remaining: ${remaining}`,
-        mentions: [{
-          tag: nameTarget,
-          id: uid
-        }],
+        body: styledMsg,
+        mentions: [{ tag: `@${targetName}`, id: uid }],
         attachment: fs.createReadStream(filePath)
-      }, () => fs.unlinkSync(filePath));
+      }, () => {
+        if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+      });
 
     } catch (err) {
+      api.setMessageReaction("❌", event.messageID, (err) => {}, true);
       console.error(err);
-      return message.reply("❌ | Failed to generate clown image… baka!");
+      message.reply(formatText("• Something went wrong, Baby!"));
     }
   }
 };
