@@ -4,83 +4,78 @@ const fs = require("fs");
 const path = require("path");
 const { performance } = require('perf_hooks');
 
-function getVideoID(url) {
-  const checkurl = /^(?:https?:\/\/)?(?:m\.|www\.)?(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=|shorts\/))((\w|-){11})(?:\S+)?$/;
-  const match = url.match(checkurl);
-  return match ? match[1] : null;
-}
+const formatText = (text) => {
+  const mapping = {
+    'a': '𝐚', 'b': '𝐛', 'c': '𝐜', 'd': '𝐝', 'e': '𝐞', 'f': '𝐟', 'g': '𝐠', 'h': '𝐡', 'i': '𝐢', 'j': '𝐣', 'k': '𝐤', 'l': '𝐥', 'm': '𝐦', 'n': '𝐧', 'o': '𝐨', 'p': '𝐩', 'q': '𝐪', 'r': '𝐫', 's': '𝐬', 't': '𝐭', 'u': '𝐮', 'v': '𝐯', 'w': '𝐰', 'x': '𝐱', 'y': '𝐲', 'z': '𝐳',
+    'A': '𝐀', 'B': '𝐁', 'C': '𝐂', 'D': '𝐃', 'E': '𝐄', 'F': '𝐅', 'G': '𝐆', 'H': '𝐇', 'I': '𝐈', 'J': '𝐉', 'K': '𝐊', 'L': '𝐋', 'M': '𝐌', 'N': '𝐍', 'O': '𝐎', 'P': '𝐏', 'Q': '𝐐', 'R': '𝐑', 'S': '𝐒', 'T': '𝐓', 'U': '𝐔', 'V': '𝐕', 'W': '𝐖', 'X': '𝐗', 'Y': '𝐘', 'Z': '𝐙',
+    '0': '𝟎', '1': '𝟏', '2': '𝟐', '3': '𝟑', '4': '𝟒', '5': '𝟓', '6': '𝟔', '7': '𝟕', '8': '𝟖', '9': '𝟗'
+  };
+  return text.split('').map(char => mapping[char] || char).join('');
+};
 
 module.exports = {
   config: {
     name: "sing",
-    version: "1.0.5",
+    aliases: ["song"],
+    version: "1.1.0",
     author: "bayjid+saif",
     category: "music",
-    shortDescription: "🎧 Download or play YouTube song with coins (reply supported)",
-    longDescription: "Play or download YouTube music by typing the song name or link.",
-    guide: "{pn} <song name or YouTube link>"
+    shortDescription: "Fast Download with React",
+    guide: "{pn} <song name>"
   },
 
   onStart: async function ({ api, event, args, usersData }) {
+    const start = performance.now();
     try {
       const COST = 500;
       const sender = event.senderID;
-      let user = (await usersData.get(sender)) || { money: 0 };
+      const name = await usersData.getName(sender);
+      let user = await usersData.get(sender);
 
-      if (user.money < COST) return api.sendMessage(
-        `🌸 Senpai… you need **${COST} coins** to sing! 💰 Your balance: ${user.money} coins`,
-        event.threadID, event.messageID // reply now
-      );
+      if ((user.money || 0) < COST) {
+        return api.sendMessage(`‎🎀\n > ${name}\n\n` + formatText(`• Baby, You need ${COST} coin to use this command! Use daily /quiz and Other game and come again!`), event.threadID, event.messageID);
+      }
 
-      if (!args[0]) return api.sendMessage("❌ Please type a song name or YouTube link!", event.threadID, event.messageID);
+      if (!args[0]) return api.sendMessage(formatText("• Type a song name, Baby!"), event.threadID, event.messageID);
 
-      let videoID;
-      if (args[0].includes("youtube.com") || args[0].includes("youtu.be")) {
-        videoID = getVideoID(args[0]);
-        if (!videoID) return api.sendMessage("❌ Invalid YouTube link.", event.threadID, event.messageID);
-      } else {
-        const search = await yts(args.join(" "));
-        if (!search.videos.length) return api.sendMessage("❌ Song not found.", event.threadID, event.messageID);
-        videoID = search.videos[0].videoId;
+      api.setMessageReaction("⏳", event.messageID, (err) => {}, true);
+
+      const vID = args[0].match(/(?:v=|\/)([0-9A-Za-z_-]{11})/) ? args[0].match(/(?:v=|\/)([0-9A-Za-z_-]{11})/)[1] : (await yts(args.join(" "))).videos[0]?.videoId;
+      
+      if (!vID) {
+        api.setMessageReaction("❌", event.messageID, (err) => {}, true);
+        return api.sendMessage(formatText("• Not found, Baby!"), event.threadID, event.messageID);
       }
 
       await usersData.set(sender, { ...user, money: user.money - COST });
-      const remaining = user.money - COST;
 
-      const start = performance.now();
-      const tempFilePath = path.join(__dirname, `temp_audio_${sender}_${Date.now()}.mp3`);
+      const { data } = await axios.get(`https://www.noobs-api.top/dipto/ytDl3?link=${vID}&format=mp3`);
+      if (!data.downloadLink) throw new Error();
 
-      const { data } = await axios.get(`https://www.noobs-api.top/dipto/ytDl3?link=${videoID}&format=mp3`).catch(()=>({data:{}}));
-      if (!data.downloadLink) return api.sendMessage("❌ Failed to get download link. Maybe API is down.", event.threadID, event.messageID);
+      const tmp = path.join(__dirname, `cache`, `${Date.now()}.mp3`);
+      if (!fs.existsSync(path.join(__dirname, `cache`))) fs.mkdirSync(path.join(__dirname, `cache`));
 
-      const writer = fs.createWriteStream(tempFilePath);
-      const audioResponse = await axios({ url: data.downloadLink, method: "GET", responseType: "stream" });
-      audioResponse.data.pipe(writer);
-      await new Promise((res, rej) => { writer.on("finish", res); writer.on("error", rej); });
+      const res = await axios({ url: data.downloadLink, method: "GET", responseType: "stream" });
+      const stream = res.data.pipe(fs.createWriteStream(tmp));
 
-      const timeTaken = ((performance.now() - start) / 1000).toFixed(2);
-      const senderName = await usersData.getName(sender);
+      stream.on("finish", () => {
+        api.setMessageReaction("✅", event.messageID, (err) => {}, true);
+        
+        const time = ((performance.now() - start) / 1000).toFixed(2);
+        const msg = `‎🎀\n > ${name}\n\n` +
+          `• ` + formatText(`Baby, Your Song is Ready!`) + `\n` +
+          `• ` + formatText(`Deducted: ${COST}`) + `\n` +
+          `• ` + formatText(`Balance: ${user.money - COST}`) + `\n` +
+          `• ` + formatText(`Time: ${time}s Baby`);
 
-      const animeReplies = [
-        `Nyaa~ ${senderName}-chan is singing "${data.title}"! 🎤✨`,
-        `Sugoiii~ Senpai ${senderName} brings music to everyone! 🎶💖`,
-        `Baka! ${senderName}-kun is performing "${data.title}" 😼`,
-        `Uwuuu~ ${senderName} sang beautifully! 🌸💫`,
-        `${senderName}-san’s song hits the heartstrings! 💕`
-      ];
-      const chosenReply = animeReplies[Math.floor(Math.random() * animeReplies.length)];
-
-      const styledMsg = `${chosenReply}\n\n💸 ${COST} coins deducted!\n💳 Remaining: ${remaining} coins\n⏱ Time taken: ${timeTaken}s`;
-
-      api.sendMessage(
-        { body: styledMsg, attachment: fs.createReadStream(tempFilePath) },
-        event.threadID,
-        () => fs.unlinkSync(tempFilePath),
-        event.messageID // reply now
-      );
+        api.sendMessage({ body: msg, attachment: fs.createReadStream(tmp) }, event.threadID, () => {
+          if (fs.existsSync(tmp)) fs.unlinkSync(tmp);
+        }, event.messageID);
+      });
 
     } catch (e) {
-      api.sendMessage(`Uwuuu~ Something went wrong (>_<)💦\nError: ${e.message}`, event.threadID, event.messageID);
+      api.setMessageReaction("❌", event.messageID, (err) => {}, true);
+      api.sendMessage(formatText("• Error processing, Baby!"), event.threadID, event.messageID);
     }
   }
 };
