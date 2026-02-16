@@ -42,7 +42,7 @@ module.exports = {
       email: "saifmorse04@gmail.com",
       botVersion: "2.5.1",
       lastUpdate: "February,  2026",
-      supportGroup: "https://m.me/j/Abb2V26Y_VIYh_OM/",
+      supportGroup: "https://m.me/j/AbYhrDx5QWRQ54or/",
       donate: "Fokinni vag"
     };
 
