@@ -1,43 +1,38 @@
 const axios = require("axios");
 
-// ===== BASE API =====
+const formatText = (text) => {
+  const mapping = {
+    'a': '𝐚', 'b': '𝐛', 'c': '𝐜', 'd': '𝐝', 'e': '𝐞', 'f': '𝐟', 'g': '𝐠', 'h': '𝐡', 'i': '𝐢', 'j': '𝐣', 'k': '𝐤', 'l': '𝐥', 'm': '𝐦', 'n': '𝐧', 'o': '𝐨', 'p': '𝐩', 'q': '𝐪', 'r': '𝐫', 's': '𝐬', 't': '𝐭', 'u': '𝐮', 'v': '𝐯', 'w': '𝐰', 'x': '𝐱', 'y': '𝐲', 'z': '𝐳',
+    'A': '𝐀', 'B': '𝐁', 'C': '𝐂', 'D': '𝐃', 'E': '𝐄', 'F': '𝐅', 'G': '𝐆', 'H': '𝐇', 'I': '𝐈', 'J': '𝐉', 'K': '𝐊', '𝐋': '𝐋', 'M': '𝐌', 'N': '𝐍', 'O': '𝐎', 'P': '𝐏', 'Q': '𝐐', 'R': '𝐑', 'S': '𝐒', 'T': '𝐓', 'U': '𝐔', 'V': '𝐕', 'W': '𝐖', 'X': '𝐗', 'Y': '𝐘', 'Z': '𝐙',
+    '0': '𝟎', '1': '𝟏', '2': '𝟐', '3': '𝟑', '4': '𝟒', '5': '𝟓', '6': '𝟔', '7': '𝟕', '8': '𝟖', '9': '𝟗'
+  };
+  return text.split('').map(char => mapping[char] || char).join('');
+};
+
 const saif = async () => {
-  const base = await axios.get(
-    "https://raw.githubusercontent.com/mahmudx7/exe/main/baseApiUrl.json"
-  );
+  const base = await axios.get("https://raw.githubusercontent.com/mahmudx7/exe/main/baseApiUrl.json");
   return base.data.mahmud;
 };
 
-// ===== SESSION MAP =====
 const sessions = new Map();
 
 module.exports = {
   config: {
     name: "aniqz",
-    aliases: [" animequiz","animeqz"], // ❌ no 2, no extra alias
-    version: "3.0",
-    author: "Saif",
+    aliases: ["animequiz", "animeqz"],
+    version: "3.2",
+    author: "Saif+mahmud api",
     countDown: 10,
     role: 0,
     category: "game",
-    guide: { en: "{pn} [en/bn] | {pn} rank" }
+    shortDescription: "Anime Quiz Game",
+    guide: "{pn} [en/bn] | {pn} rank"
   },
 
-  // ================= onStart =================
   onStart: async function ({ api, event, usersData, args }) {
     const { threadID, messageID, senderID } = event;
+    const name = await usersData.getName(senderID);
 
-    // ===== AUTHOR PROTECTION =====
-    const obfuscatedAuthor = String.fromCharCode(83, 97, 105, 102); // Saif
-    if (module.exports.config.author !== obfuscatedAuthor) {
-      return api.sendMessage(
-        "You are not authorized to change the author name.",
-        threadID,
-        messageID
-      );
-    }
-
-    // ===== INIT USER DATA =====
     let user = await usersData.get(senderID);
     if (!user.data) user.data = {};
     if (!user.data.aniqzStats) {
@@ -45,132 +40,75 @@ module.exports = {
       await usersData.set(senderID, { data: user.data });
     }
 
-    // ===== RANK SYSTEM =====
     if (args[0] === "rank") {
       const allUsers = await usersData.getAll();
-
       const rankList = allUsers
         .filter(u => u.data?.aniqzStats)
-        .sort(
-          (a, b) =>
-            (b.data.aniqzStats.won || 0) -
-            (a.data.aniqzStats.won || 0)
-        )
+        .sort((a, b) => (b.data.aniqzStats.won || 0) - (a.data.aniqzStats.won || 0))
         .slice(0, 10);
 
-      if (!rankList.length)
-        return api.sendMessage(
-          "😴 No ranking data yet baby.",
-          threadID,
-          messageID
-        );
+      if (!rankList.length) return api.sendMessage(formatText("• No ranking data yet, Baby!"), threadID, messageID);
 
-      let msg = `╭───🏆 𝐀𝐍𝐈𝐐𝐙 𝐑𝐀𝐍𝐊 ───╮\n`;
+      let msg = `‎🎀\n > ${formatText("𝐀𝐍𝐈𝐐𝐙 𝐋𝐄𝐀𝐃𝐄𝐑𝐁𝐎𝐀𝐑𝐃")}\n\n`;
       rankList.forEach((u, i) => {
         msg += ` ${i + 1}. ${u.name} — ${u.data.aniqzStats.won} wins\n`;
       });
-      msg += `╰──────────────────────╯`;
-
       return api.sendMessage(msg, threadID, messageID);
     }
 
     try {
-      // ===== LANGUAGE =====
+      api.setMessageReaction("⏳", messageID, (err) => {}, true);
       const input = args[0]?.toLowerCase() || "bn";
-      const category =
-        input === "en" || input === "english" ? "english" : "bangla";
+      const category = input === "en" || input === "english" ? "english" : "bangla";
 
       const apiUrl = await saif();
-      const res = await axios.get(
-        `${apiUrl}/api/aniqz2?category=${category}`
-      );
+      const res = await axios.get(`${apiUrl}/api/aniqz2?category=${category}`);
       const quiz = res.data?.data || res.data;
 
-      if (!quiz?.question)
-        return api.sendMessage(
-          "❌ No quiz available.",
-          threadID,
-          messageID
-        );
-
       const { question, correctAnswer, options } = quiz;
-      const { a, b, c, d } = options;
 
-      const quizText =
-        `╭──✦ ${question}\n` +
-        `├‣ 𝗔) ${a}\n` +
-        `├‣ 𝗕) ${b}\n` +
-        `├‣ 𝗖) ${c}\n` +
-        `├‣ 𝗗) ${d}\n` +
-        `╰──────────────────‣\n` +
-        `𝐑𝐞𝐩𝐥𝐲 𝐰𝐢𝐭𝐡 𝐲𝐨𝐮𝐫 𝐚𝐧𝐬𝐰𝐞𝐫.`;
+      const quizText = `‎🎀\n > ${name}\n\n` +
+        `• ${formatText(question)}\n\n` +
+        `𝐀) ${options.a}\n𝐁) ${options.b}\n𝐂) ${options.c}\n𝐃) ${options.d}\n\n` +
+        formatText("• Reply with your answer, Baby!");
 
       api.sendMessage(quizText, threadID, (err, info) => {
-        if (err) return;
-
-        // ===== SESSION SAVE =====
         const timeoutId = setTimeout(() => {
           if (sessions.has(info.messageID)) {
             sessions.delete(info.messageID);
-            api.editMessage(
-              `⌛ Time's up baby!\n✅ Correct answer: ${correctAnswer}`,
-              info.messageID
-            );
+            api.editMessage(`‎🎀\n` + formatText(`⌛ Time's up Baby! Correct answer: ${correctAnswer}`), info.messageID);
           }
-        }, 60000); // 1 minute
+        }, 60000);
 
-        sessions.set(info.messageID, {
-          author: senderID,
-          answer: correctAnswer.toLowerCase(),
-          timeoutId
-        });
-
-        global.GoatBot.onReply.set(info.messageID, {
-          commandName: "aniqz",
-          messageID: info.messageID
-        });
+        sessions.set(info.messageID, { author: senderID, answer: correctAnswer.toLowerCase(), timeoutId });
+        global.GoatBot.onReply.set(info.messageID, { commandName: "aniqz", messageID: info.messageID });
       }, messageID);
+
     } catch (e) {
-      console.error(e);
-      api.sendMessage(
-        "🥹 Error",
-        threadID,
-        messageID
-      );
+      api.sendMessage(formatText("• API Error, try again Baby!"), threadID, messageID);
     }
   },
 
-  // ================= onReply =================
   onReply: async function ({ api, event, Reply, usersData }) {
     const { senderID, body } = event;
     const session = sessions.get(Reply.messageID);
-    if (!session) return;
-
-    if (senderID !== session.author)
-      return api.sendMessage(
-        "⚠️ This quiz isn’t yours baby 🐸",
-        event.threadID,
-        event.messageID
-      );
+    if (!session || senderID !== session.author) return;
 
     clearTimeout(session.timeoutId);
     sessions.delete(Reply.messageID);
 
     const userReply = body.trim().toLowerCase();
-    const isCorrect =
-      userReply === session.answer ||
-      userReply === session.answer[0];
+    const isCorrect = userReply === session.answer || userReply === session.answer[0];
 
     const userData = await usersData.get(senderID);
     const stats = userData.data.aniqzStats;
+    const name = await usersData.getName(senderID);
     stats.played += 1;
-
-    let resultText = "";
 
     if (isCorrect) {
       stats.won += 1;
-      const rewardCoins = 500;
-      const rewardExp = 121;
+      const rewardCoins = 1000; // Updated to 1000, Baby!
+      const rewardExp = 150;
 
       await usersData.set(senderID, {
         money: userData.money + rewardCoins,
@@ -178,21 +116,12 @@ module.exports = {
         data: { ...userData.data, aniqzStats: stats }
       });
 
-      resultText =
-        `✅ Correct answer baby 💕\n` +
-        `🏆 Wins: ${stats.won}\n` +
-        `💰 +${rewardCoins} coins | ✨ +${rewardExp} exp`;
+      api.setMessageReaction("✅", event.messageID, (err) => {}, true);
+      return api.editMessage(`‎🎀\n > ${name}\n\n` + formatText(`• Correct Answer Baby!`) + `\n` + formatText(`• Reward: ${rewardCoins} coins`) + `\n` + formatText(`• Total Wins: ${stats.won} Baby`), Reply.messageID);
     } else {
-      await usersData.set(senderID, {
-        data: { ...userData.data, aniqzStats: stats }
-      });
-
-      resultText =
-        `❌ Wrong answer baby\n` +
-        `✅ Correct answer: ${session.answer.toUpperCase()}\n` +
-        `🏆 Wins: ${stats.won}`;
+      await usersData.set(senderID, { data: { ...userData.data, aniqzStats: stats } });
+      api.setMessageReaction("❌", event.messageID, (err) => {}, true);
+      return api.editMessage(`‎🎀\n > ${name}\n\n` + formatText(`• Wrong Answer Baby!`) + `\n` + formatText(`• Correct: ${session.answer.toUpperCase()}`) + `\n` + formatText(`• Total Wins: ${stats.won} Baby`), Reply.messageID);
     }
-
-    return api.editMessage(resultText, Reply.messageID);
   }
 };
