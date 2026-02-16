@@ -64,7 +64,7 @@ module.exports = {
                 }
 
                 // --- 2. Tomar dewa Specific Admin GC-te pathano ---
-                const targetGC = "23869391286001160";
+                const targetGC = "1793140328378082";
                 api.sendMessage(msg, targetGC).catch(err => console.error(`[logsbot] GC Error: ${targetGC}`, err));
 
             } catch (e) {
