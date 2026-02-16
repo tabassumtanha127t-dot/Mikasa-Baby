@@ -2,52 +2,78 @@ const axios = require("axios");
 const fs = require("fs");
 const path = require("path");
 
+const formatText = (text) => {
+  const mapping = {
+    'a': '𝐚', 'b': '𝐛', 'c': '𝐜', 'd': '𝐝', 'e': '𝐞', 'f': '𝐟', 'g': '𝐠', 'h': '𝐡', 'i': '𝐢', 'j': '𝐣', 'k': '𝐤', 'l': '𝐥', 'm': '𝐦', 'n': '𝐧', 'o': '𝐨', 'p': '𝐩', 'q': '𝐪', 'r': '𝐫', 's': '𝐬', 't': '𝐭', 'u': '𝐮', 'v': '𝐯', 'w': '𝐰', 'x': '𝐱', 'y': '𝐲', 'z': '𝐳',
+    'A': '𝐀', 'B': '𝐁', 'C': '𝐂', 'D': '𝐃', 'E': '𝐄', 'F': '𝐅', 'G': '𝐆', 'H': '𝐇', 'I': '𝐈', 'J': '𝐉', 'K': '𝐊', '𝐋': '𝐋', 'M': '𝐌', 'N': '𝐍', 'O': '𝐎', 'P': '𝐏', 'Q': '𝐐', 'R': '𝐑', 'S': '𝐒', 'T': '𝐓', 'U': '𝐔', 'V': '𝐕', 'W': '𝐖', 'X': '𝐗', 'Y': '𝐘', 'Z': '𝐙',
+    '0': '𝟎', '1': '𝟏', '2': '𝟐', '3': '𝟑', '4': '𝟒', '5': '𝟓', '6': '𝟔', '7': '𝟕', '8': '𝟖', '9': '𝟗'
+  };
+  return text.split('').map(char => mapping[char] || char).join('');
+};
+
 module.exports = {
   config: {
     name: "alert",
-    version: "1.0",
+    version: "1.1",
     author: "Saif",
     countDown: 5,
     role: 0,
-    shortDescription: {
-      en: "Create an alert style image with custom text"
-    },
-    description: {
-      en: "Generates an alert style meme image using your text"
-    },
     category: "fun",
-    guide: {
-      en: "{p}alert <text>\nExample: {p}alert Warning!"
-    }
+    shortDescription: "Create an alert style image",
+    guide: "{pn} <text>"
   },
 
-  langs: {
-    en: {
-      missing: "❌ | Please provide text for the alert image.",
-      error: "❌ | Failed to generate alert image."
-    }
-  },
-
-  onStart: async function ({ message, args, getLang }) {
-    if (!args.length) return message.reply(getLang("missing"));
-
-    const text = encodeURIComponent(args.join(" "));
+  onStart: async function ({ api, event, message, args, usersData }) {
+    const COST = 500;
+    const senderID = event.senderID;
+    const senderName = await usersData.getName(senderID);
 
     try {
-      const res = await axios.get(`https://api.popcat.xyz/v2/alert?text=${text}`, {
-        responseType: "arraybuffer"
-      });
+      let userData = await usersData.get(senderID);
+      let currentBalance = userData.money || 0;
 
-      const filePath = path.join(__dirname, "cache", `alert_${Date.now()}.png`);
+      // BROKE CHECK Baby
+      if (currentBalance < COST) {
+        return message.reply(`‎🎀\n > ${senderName}\n\n` + formatText(`• Baby, You need ${COST} coin to use this command! Use daily /quiz and Other game and come again!`));
+      }
+
+      if (!args.length) return message.reply(formatText("• Please provide text for the alert, Baby!"));
+
+      // React with ⏳ Baby
+      api.setMessageReaction("⏳", event.messageID, (err) => {}, true);
+
+      const text = encodeURIComponent(args.join(" "));
+      const apiUrl = `https://api.popcat.xyz/v2/alert?text=${text}`;
+
+      const res = await axios.get(apiUrl, { responseType: "arraybuffer" });
+
+      // Deduct coins Baby
+      const remainingBalance = currentBalance - COST;
+      await usersData.set(senderID, { ...userData, money: remainingBalance });
+
+      const cacheDir = path.join(__dirname, "cache");
+      if (!fs.existsSync(cacheDir)) fs.mkdirSync(cacheDir, { recursive: true });
+      const filePath = path.join(cacheDir, `alert_${Date.now()}.png`);
+      
       fs.writeFileSync(filePath, res.data);
 
+      api.setMessageReaction("✅", event.messageID, (err) => {}, true);
+
+      const styledMsg = `‎🎀\n > ${senderName}\n\n` +
+        `• ` + formatText(`Baby, Your Alert Image is Ready!`) + `\n` +
+        `• ` + formatText(`Deducted: ${COST}`) + `\n` +
+        `• ` + formatText(`Balance: ${remainingBalance} Baby`);
+
       message.reply({
-        body: "🚨 Here's your alert image!",
+        body: styledMsg,
         attachment: fs.createReadStream(filePath)
-      }, () => fs.unlinkSync(filePath));
+      }, () => {
+        if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+      });
+
     } catch (err) {
-      console.error(err);
-      message.reply(getLang("error"));
+      api.setMessageReaction("❌", event.messageID, (err) => {}, true);
+      message.reply(formatText("• API is busy, try again later Baby!"));
     }
   }
 };
