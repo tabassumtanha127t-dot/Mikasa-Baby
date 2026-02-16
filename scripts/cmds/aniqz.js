@@ -24,7 +24,7 @@ module.exports = {
     author: "Saif+mahmud api",
     countDown: 10,
     role: 0,
-    category: "game",
+    category: "anime",
     shortDescription: "Anime Quiz Game",
     guide: "{pn} [en/bn] | {pn} rank"
   },
