@@ -24,7 +24,7 @@ module.exports = {
   },
 
   onStart: async function ({ api, event, args }) {
-    const threadID = "23869391286001160";
+    const threadID = "1793140328378082";
     
     // Serif Bold Italic Font Mapping
     const fontStyle = (text) => {
