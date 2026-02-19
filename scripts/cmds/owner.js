@@ -1,66 +1,68 @@
 const axios = require('axios');
-const fs = require('fs');
+const fs = require('fs-extra');
 const path = require('path');
 
 module.exports = {
-config: {
-  name: "owner",
-  aurthor:"Tokodori",// Convert By Goatbot Tokodori 
-   role: 0,
-  shortDescription: " ",
-  longDescription: "",
-  category: "information",
-  guide: "{pn}"
-},
+  config: {
+    name: "owner",
+    author: "Tokodori", 
+    role: 0,
+    shortDescription: "Displays Saiful Islam's information.",
+    longDescription: "Sends owner's bio, social links, and a video attachment.",
+    category: "information",
+    guide: "{pn}"
+  },
 
-  onStart: async function ({ api, event }) {
-  try {
-    const ownerInfo = {
-      name: 'SAIFUL ISLAM',
-      gender: 'Male',
-      age: '20+',
-      height: '6.1',
-      choise: '',
-      nick: 'SIFU'
-    };
+  onStart: async function ({ api, event }) {
+    // Baby, let's use a standard 'cache' folder
+    const cacheDir = path.join(__dirname, 'cache');
+    const videoPath = path.join(cacheDir, 'owner_video.mp4');
 
-    const bold = 'https://files.catbox.moe/c6l25i.mp4'; // Replace with your Google Drive videoid link https://drive.google.com/uc?export=download&id=here put your video id
+    try {
+      // Step 1: Create folder if it doesn't exist
+      if (!fs.existsSync(cacheDir)) {
+        fs.mkdirSync(cacheDir, { recursive: true });
+      }
 
-    const tmpFolderPath = path.join(__dirname, 'tmp');
+      const ownerInfo = {
+        name: '𝐒𝐀𝐈𝐅𝐔𝐋 𝐈𝐒𝐋𝐀𝐌',
+        nick: '𝐒𝐈𝐅𝐔',
+        age: '21',
+        study: 'Honours 2nd Year (Management)',
+        location: 'Dhaka, Bangladesh 🇧🇩',
+        fb: 'https://www.facebook.com/saiful.404.st',
+        github: 'github.com/mikasa-4x'
+      };
 
-    if (!fs.existsSync(tmpFolderPath)) {
-      fs.mkdirSync(tmpFolderPath);
-    }
+      const videoUrl = 'https://files.catbox.moe/c6l25i.mp4';
 
-    const videoResponse = await axios.get(bold, { responseType: 'arraybuffer' });
-    const videoPath = path.join(tmpFolderPath, 'owner_video.mp4');
+      // Step 2: Download the video
+      const res = await axios.get(videoUrl, { responseType: 'arraybuffer' });
+      fs.writeFileSync(videoPath, Buffer.from(res.data, 'binary'));
 
-    fs.writeFileSync(videoPath, Buffer.from(videoResponse.data, 'binary'));
+      const message = `╭──────『 𝐎𝐖𝐍𝐄𝐑 』──────⦿\n` +
+                      `├‣ 𝐍𝐚𝐦𝐞: ${ownerInfo.name}\n` +
+                      `├‣ 𝐍𝐢𝐜𝐤: ${ownerInfo.nick}\n` +
+                      `├‣ 𝐀𝐠𝐞: ${ownerInfo.age}\n` +
+                      `├‣ 𝐒𝐭𝐮𝐝𝐲: ${ownerInfo.study}\n` +
+                      `├‣ 𝐋𝐨𝐜𝐚𝐭𝐢𝐨𝐧: ${ownerInfo.location}\n` +
+                      `├──────『 𝐂𝐎𝐍𝐓𝐀𝐂𝐓 』──────◊\n` +
+                      `├‣ 𝐅𝐚𝐜𝐞𝐛𝐨𝐨𝐤: ${ownerInfo.fb}\n` +
+                      `├‣ 𝐆𝐢𝐭𝐡𝐮𝐛: ${ownerInfo.github}\n` +
+                      `╰────────────╼⦿`;
 
-    const response = ` 
-╭[ .  ]•〆 SAIF 〆 ]  ─⦿
-╭────────────◊
-├‣ 𝐁𝐨𝐭 & 𝐎𝐰𝐧𝐞𝐫 𝐈𝐧𝐟𝐨𝐫𝐦𝐚𝐭𝐢𝐨𝐧 
-├‣ 𝐍𝐚𝐦𝐞: ${ownerInfo.name}
-├‣ 𝐆𝐞𝐧𝐝𝐞𝐫:  ${ownerInfo.gender}
-├‣ 𝐀𝐠𝐞 .${ownerInfo.age}
-├‣ 𝐍𝐢𝐜𝐤 : ${ownerInfo.nick}
-├‣ 𝐂𝐡𝐨𝐢𝐬𝐞:  ${ownerInfo.choise}   
-├‣ 𝐇𝐞𝐢𝐠𝐡𝐭 : ${ownerInfo.height}
-╰────────────◊ 
-`;
+      // Step 3: Send the message
+      return api.sendMessage({
+        body: message,
+        attachment: fs.createReadStream(videoPath)
+      }, event.threadID, (err) => {
+        if (err) console.error(err);
+        if (fs.existsSync(videoPath)) fs.unlinkSync(videoPath); // Cleanup
+      }, event.messageID);
 
-    await api.sendMessage({
-      body: response,
-      attachment: fs.createReadStream(videoPath)
-    }, event.threadID, event.messageID);
-
-    if (event.body.toLowerCase().includes('ownerinfo')) {
-      api.setMessageReaction('🖤', event.messageID, (err) => {}, true);
-    }
-  } catch (error) {
-    console.error('Error in ownerinfo command:', error);
-    return api.sendMessage('An error occurred while processing the command.', event.threadID);
-  }
-},
+    } catch (error) {
+      console.error(error);
+      return api.sendMessage(`Error: ${error.message}, Baby!`, event.threadID);
+    }
+  },
 };
