@@ -50,7 +50,7 @@ module.exports = {
         { keys: ["ok","yes","hmm","okay"], react: "👍" }
       ];
 
-      let react = "😘"; // default
+      let react = ""; // default
 
       // ==========================
       // check emoji first
@@ -68,7 +68,7 @@ module.exports = {
       // ==========================
       // check text triggers if no emoji matched
       // ==========================
-      if (react === "😘") {
+      if (react === "") {
         outer2:
         for (const t of textTriggers) {
           for (const k of t.keys) {
