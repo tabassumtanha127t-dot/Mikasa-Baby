@@ -4,7 +4,7 @@ module.exports = {
     version: "4.0.0",
     author: "siyuuu",
     role: 0,
-    category: "system",
+    category: "utility",
     shortDescription: "Full mega auto react with all emoji + text",
     longDescription: "Bot reacts automatically based on emojis & common words"
   },
@@ -22,10 +22,10 @@ module.exports = {
       // Category-based emoji reaction
       // ==========================
       const categories = [
-        { emojis: ["😀","😃","😄","😁","😆","😅","🤣","😂","🙂","🙃","🥰","😍","😋","😙","😚","☺️","😗","😛","😜","🤪","😝","🤑","🤗","🤭","😹","😸"], react: "😆" }, // happy/funny
+        { emojis: ["😀","😃","😄","😁","😆","😅","🤣","😂","","","","","","","","","","😛","😜","🤪","😝","🤑","🤗","🤭","😹","😸"], react: "😆" }, // happy/funny
         { emojis: ["😢","😭","🥺","😞","😔","💔","☹️","🙁","😟","😖","😣","😩","😓","😫","🥲","🥹","😩"], react: "😢" }, // sad
         { emojis: ["❤️","💖","💘","💝","💗","💕","💞","💓","💟","❣️","😍","😘","🥰","😇","😛","🫶","❤️‍🩹"], react: "❤️" }, // love
-        { emojis: ["😡","😠","🤬","👿","😈"], react: "😡" }, // angry
+        { emojis: ["😡","😠","🤬","👿","😈"], react: "😾" }, // angry
         { emojis: ["😮","😱","😲","😧","😦","😯","😳","🥵","🥶"], react: "😮" }, // shocked
         { emojis: ["😎","🕶️","🔥","💯","🥵"], react: "😎" }, // cool/fire
         { emojis: ["💀","☠️"], react: "💀" }, // dark
@@ -41,7 +41,7 @@ module.exports = {
       // Common text-based reaction
       // ==========================
       const textTriggers = [
-        { keys: ["haha","lol","funny","xd","moja","bal","bukacuda","dhur","abal","magi","hmm"], react: "😆" },
+        { keys: ["haha","lol","funny","xd","moja","sawa","bukacuda","dhur","abal","magi","hmm"], react: "😆" },
         { keys: ["sad","cry","mon kharap","kharap","depressed"], react: "😢" },
         { keys: ["love","valobasi","miss you","❤️"], react: "❤️" },
         { keys: ["angry","rag","rage"], react: "😡" },
