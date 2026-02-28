@@ -2,39 +2,50 @@ module.exports = {
   config: {
     name: "clear",
     aliases: [],
-    author: "kshitiz",  
-    version: "2.0",
+    author: "Saif",
+    version: "3.0",
     cooldowns: 5,
     role: 2,
     shortDescription: {
-      en: ""
+      en: "Unsend bot messages"
     },
     longDescription: {
-      en: "unsent all messages sent by bot"
+      en: "Unsent all messages sent by bot safely"
     },
     category: "owner",
     guide: {
       en: "{p}{n}"
     }
   },
+
   onStart: async function ({ api, event }) {
 
-    const unsendBotMessages = async () => {
+    try {
       const threadID = event.threadID;
+      const botID = api.getCurrentUserID();
 
+      // 200 পর্যন্ত নিতে পারো চাইলে
+      const messages = await api.getThreadHistory(threadID, 100);
 
-      const botMessages = await api.getThreadHistory(threadID, 100); // Adjust the limit as needed 50 = 50 msg
+      const botMessages = messages.filter(
+        msg => msg.senderID == botID && msg.messageID
+      );
 
+      let count = 0;
 
-      const botSentMessages = botMessages.filter(message => message.senderID === api.getCurrentUserID());
-
-
-      for (const message of botSentMessages) {
-        await api.unsendMessage(message.messageID);
+      for (const msg of botMessages) {
+        try {
+          await api.unsendMessage(msg.messageID);
+          count++;
+        } catch (err) {
+          // Skip unavailable messages
+        }
       }
-    };
 
+      console.log(`Cleared ${count} messages successfully`);
 
-    await unsendBotMessages();
+    } catch (err) {
+      console.log("Clear Command Error:", err);
+    }
   }
 };
