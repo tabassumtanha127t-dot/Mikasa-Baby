@@ -7,7 +7,7 @@ module.exports = {
     version: "7.1",
     author: "—͟͞͞𝐒𝐀𝐈𝐅",
     role: 0,
-    category: "System Info",
+    category: "utility",
     shortDescription: {
       en: "Elite System Diagnostics"
     },
