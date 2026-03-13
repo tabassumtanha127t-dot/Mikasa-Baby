@@ -1,123 +1,87 @@
 const axios = require("axios");
 const fs = require("fs");
 const path = require("path");
-const ytSearch = require("yt-search");
-const https = require("https");
+const yts = require("yt-search");
 
-function deleteAfterTimeout(filePath, timeout = 15000) {
-  setTimeout(() => {
-    if (fs.existsSync(filePath)) {
-      fs.unlink(filePath, (err) => {
-        if (!err) console.log(`✅ Deleted: ${filePath}`);
-        else console.error(`❌ Delete error: ${filePath}`);
-      });
-    }
-  }, timeout);
-}
+const CACHE = path.join(__dirname, "cache");
+if (!fs.existsSync(CACHE)) fs.mkdirSync(CACHE);
 
 module.exports = {
   config: {
     name: "song3",
-    aliases: ["music3"],
-    version: "4.0",
-    prefix: false,
-    author: "‎MR᭄﹅ MAHABUB﹅ メꪜ",
-    countDown: 5,
+    alises:["sing3"],
+    version: "1.1",
+    author: "Aryan Chauhan",
     role: 0,
-    shortDescription: "Download MP3 using YouTube search",
-    longDescription: "Search YouTube then fetch MP3 from Mahabub CDN API",
-    category: "music",
-    guide: "{p}{n} <song name>",
+    category: "media",
+    guide: { en: "{pn} <song name>" }
   },
 
   onStart: async function ({ api, event, args }) {
-    if (!args.length) {
+    if (!args.length)
       return api.sendMessage(
-        "» উফফ কি গান শুনতে চাস তার ২/১ লাইন তো লেখবি নাকি 😾",
+        "❌ Song name missing.",
         event.threadID,
         event.messageID
       );
-    }
 
-    const songName = args.join(" ");
+    api.setMessageReaction("⏳", event.messageID, () => {}, true);
 
     try {
-      // 🔍 Searching message
-      await api.sendMessage(
-        `🔍 Searching for "${songName}"...`,
-        event.threadID
-      );
-
-      // 🔎 YouTube search
-      const result = await ytSearch(songName);
-      if (!result.videos.length) throw new Error("No YouTube results.");
-
-      const top = result.videos[0];
-      const ytUrl = `https://youtu.be/${top.videoId}`;
-
-      // 🌐 Get audio link from API
-      const cdnUrl = `https://mahabub-ytmp3.vercel.app/api/cdn?url=${encodeURIComponent(
-        ytUrl
-      )}`;
-      const { data } = await axios.get(cdnUrl);
-
-      if (!data.status || !data.cdna)
-        throw new Error("Audio link not found in API.");
-
-      const title = data.title || "Unknown Title";
-      const audioLink = data.cdna;
-
-      await api.sendMessage(
-        `✅ FOUND: ${title}\n⬇ Downloading...`,
-        event.threadID
-      );
-
-      // 📂 File path
-      const safeFile = title.replace(/[^a-zA-Z0-9]/g, "_").slice(0, 30);
-      const ext = audioLink.includes(".mp3") ? "mp3" : "m4a";
-      const filePath = path.join(__dirname, "cache", `${safeFile}.${ext}`);
-
-      if (!fs.existsSync(path.dirname(filePath))) {
-        fs.mkdirSync(path.dirname(filePath), { recursive: true });
-      }
-
-      // ⬇ Download audio
-      const file = fs.createWriteStream(filePath);
-      await new Promise((resolve, reject) => {
-        https
-          .get(audioLink, (res) => {
-            if (res.statusCode === 200) {
-              res.pipe(file);
-              file.on("finish", () => file.close(resolve));
-            } else reject(new Error(`Download failed [${res.statusCode}]`));
-          })
-          .on("error", reject);
-      });
-
-      // 🎵 Send audio and then auto delete
-      await api.sendMessage(
-        {
-          body: `🎶 ${title}\n✅ Downloaded successfully!`,
-          attachment: fs.createReadStream(filePath),
-        },
-        event.threadID,
-        (err) => {
-          if (!err) deleteAfterTimeout(filePath, 10000);
-          else console.error("❌ Send message error:", err);
-        },
-        event.messageID
-      );
-
-      await api.sendMessage(`✅ Sent: ${title}`, event.threadID);
-
+      const a = await b(args.join(" "));
+      const c = await d(a.url);
+      await e(api, event, a, c);
     } catch (err) {
-      console.error("❌ Error:", err.message);
-
+      console.error(err);
+      api.setMessageReaction("❌", event.messageID, () => {}, true);
       api.sendMessage(
-        `❌ Failed: ${err.message}`,
+        "❌ Failed to play song.",
         event.threadID,
         event.messageID
       );
     }
-  },
+  }
 };
+
+async function b(q) {
+  const r = await yts(q);
+  if (!r.videos || !r.videos[0]) throw "No result";
+  return r.videos[0];
+}
+
+async function d(url) {
+  const apiUrl =
+    "https://downvid.onrender.com/api/fahh" +
+    `?url=${encodeURIComponent(url)}&format=mp3`;
+
+  const r = await axios.get(apiUrl);
+  if (r.data.status !== "success" || !r.data.downloadUrl)
+    throw "API error";
+
+  return r.data.downloadUrl;
+}
+
+async function e(api, event, video, dl) {
+  const p = path.join(CACHE, `${Date.now()}.mp3`);
+  const s = await axios.get(dl, { responseType: "stream" });
+
+  const w = fs.createWriteStream(p);
+  s.data.pipe(w);
+
+  w.on("finish", async () => {
+    api.setMessageReaction("✅", event.messageID, () => {}, true);
+    await api.sendMessage(
+      {
+        body: `🎶 ${video.title}`,
+        attachment: fs.createReadStream(p)
+      },
+      event.threadID,
+      event.messageID 
+    );
+    fs.unlinkSync(p);
+  });
+
+  w.on("error", () => {
+    api.setMessageReaction("❌", event.messageID, () => {}, true);
+  });
+}
