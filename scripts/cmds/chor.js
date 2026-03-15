@@ -1,4 +1,4 @@
-!cmd install chor.js const fs = require("fs-extra");
+const fs = require("fs-extra");
 const Canvas = require("canvas");
 const axios = require("axios");
 const path = require("path");
