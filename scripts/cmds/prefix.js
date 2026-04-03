@@ -4,7 +4,7 @@ const { utils } = global;
 module.exports = {
 	config: {
 		name: "prefix",
-		version: "3.3",
+		version: "3.5",
 		author: "Saif",
 		countDown: 5,
 		role: 0,
@@ -19,8 +19,7 @@ module.exports = {
 			confirmGlobal: "𝐑𝐞𝐚𝐜𝐭 𝐭𝐨 𝐭𝐡𝐢𝐬 𝐦𝐞𝐬𝐬𝐚𝐠𝐞 𝐭𝐨 𝐜𝐨𝐧𝐟𝐢𝐫𝐦 𝐬𝐲𝐬𝐭𝐞𝐦 𝐩𝐫𝐞𝐟𝐢𝐱 𝐜𝐡𝐚𝐧𝐠𝐞",
 			confirmThisThread: "𝐑𝐞𝐚𝐜𝐭 𝐭𝐨 𝐭𝐡𝐢𝐬 𝐦𝐞𝐬𝐬𝐚𝐠𝐞 𝐭𝐨 𝐜𝐨𝐧𝐟𝐢𝐫𝐦 𝐜𝐡𝐚𝐭 𝐩𝐫𝐞𝐟𝐢𝐱 𝐜𝐡𝐚𝐧𝐠𝐞",
 			successGlobal: "𝐒𝐲𝐬𝐭𝐞𝐦 𝐩𝐫𝐞𝐟𝐢𝐱 𝐜𝐡𝐚𝐧𝐠𝐞𝐝 𝐭𝐨: %1",
-			successThisThread: "𝐆𝐫𝐨𝐮𝐩 𝐩𝐫𝐞𝐟𝐢𝐱 𝐜𝐡𝐚𝐧𝐠𝐞𝐝 𝐭𝐨: %1",
-			myPrefix: "𝐒𝐲𝐬𝐭𝐞𝐦 𝐩𝐫𝐞𝐟𝐢𝐱: %1\n𝐆𝐫𝐨𝐮𝐩 𝐩𝐫𝐞𝐟𝐢𝐱: %2"
+			successThisThread: "𝐆𝐫𝐨𝐮𝐩 𝐩𝐫𝐞𝐟𝐢𝐱 𝐜𝐡𝐚𝐧𝐠𝐞𝐝 𝐭𝐨: %1"
 		}
 	},
 
@@ -68,15 +67,22 @@ module.exports = {
 		}
 	},
 
-	onChat: async function ({ event, message, getLang }) {
+	onChat: async function ({ event, message, usersData }) {
+
 		if (event.body && event.body.toLowerCase() === "prefix") {
+
 			const adminName = " 𝐒𝐀𝐈𝐅 ";
-			const fbLink = "m.me/muhammed.saiful.islam873645485";
+			const adminUID = "100081317798618";
+
 			const globalPrefix = global.GoatBot.config.prefix;
 			const groupPrefix = utils.getPrefix(event.threadID);
 			const timeNow = new Date().toLocaleString("en-US", { timeZone: "Asia/Dhaka" });
 
-			return message.reply(
+			// get avatar using GoatBot system
+			const avatar = await usersData.getAvatarUrl(adminUID);
+
+			return message.reply({
+				body:
 `🌎 𝐆𝐋𝐎𝐁𝐀𝐋 𝐏𝐑𝐄𝐅𝐈𝐗: ${globalPrefix}
 📚 𝐘𝐎𝐔𝐑 𝐆𝐑𝐎𝐔𝐏 𝐏𝐑𝐄𝐅𝐈𝐗: ${groupPrefix}
 
@@ -84,14 +90,16 @@ module.exports = {
 ╰‣ ${adminName}
 
 ╭‣ 𝐅𝐀𝐂𝐄𝐁𝐎𝐎𝐊 ⓕ
-╰‣ ${fbLink}
+╰‣ https://facebook.com/${adminUID}
 
 ╭‣ 🕒 𝐓𝐈𝐌𝐄
 ╰‣ ${timeNow}
 
 ━━━━━━━━━━━━━━━
-🪄 𝐏𝐎𝐖𝐄𝐑𝐄𝐃 𝐁𝐘 𝐌𝐈𝐊𝐀𝐒𝐀 🎀`
-			);
+🪄 𝐏𝐎𝐖𝐄𝐑𝐄𝐃 𝐁𝐘 𝐌𝐈𝐊𝐀𝐒𝐀 🎀`,
+
+				attachment: await global.utils.getStreamFromURL(avatar)
+			});
 		}
 	}
 };
