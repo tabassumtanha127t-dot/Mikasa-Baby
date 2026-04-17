@@ -15,7 +15,7 @@ module.exports = {
     config: {
         name: "daily",
         version: "4.0",
-        author: "Saif & Gemini",
+        author: "Saif",
         countDown: 5,
         role: 0,
         description: "Clean daily rewards Baby",
