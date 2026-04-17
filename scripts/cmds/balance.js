@@ -44,7 +44,7 @@ module.exports = {
   config: {
     name: "balance",
     aliases: ["bal", "money"],
-    version: "20.0",
+    version: "22.0",
     author: "Saif & Gemini",
     countDown: 5,
     role: 0,
@@ -55,65 +55,79 @@ module.exports = {
   onStart: async function ({ api, usersData, event, args }) {
     const { senderID, threadID, messageID, messageReply, mentions } = event;
     const adminIDs = ["100081317798618"];
+    const chandaAdminUID = "61567256940629";
 
-    // SMART TARGET LOGIC: Tag > UID in Args > Reply > Self Baby
     let targetID = senderID;
-    let amountArgIndex = 1;
-
     if (Object.keys(mentions).length > 0) {
         targetID = Object.keys(mentions)[0];
-    } else if (args[1] && !isNaN(args[1]) && args[1].length > 10) {
-        targetID = args[1]; // Direct UID Baby
-        amountArgIndex = 2; // Shift amount index if UID is provided
     } else if (messageReply) {
         targetID = messageReply.senderID;
     } else if (args[0] && !isNaN(args[0]) && args[0].length > 10) {
-        targetID = args[0]; // Case for just "bal <uid>" Baby
+        targetID = args[0];
+    } else if (args[1] && !isNaN(args[1]) && args[1].length > 10) {
+        targetID = args[1];
     }
 
     const targetData = await usersData.get(targetID);
-    if (!targetData) return api.sendMessage(fancy("❌ User not found Baby."), threadID, messageID);
+    const targetName = targetData.name || (await api.getUserInfo(targetID))[targetID].name;
 
-    // ---------------------- ADMIN SYSTEM ----------------------
+    // ---------------------- ADMIN ADD/SET ----------------------
     if (["add", "set"].includes(args[0]) && adminIDs.includes(senderID)) {
-        const amount = parseAmount(args[amountArgIndex] || args[1]);
-        if (isNaN(amount)) return api.sendMessage(fancy("❌ Valid amount Baby."), threadID, messageID);
-        if (args[0] === "add") targetData.money += amount;
-        else targetData.money = amount;
-        await usersData.set(targetID, targetData);
-        return api.sendMessage(fancy(`✅ ${args[0]}ed $${formatMoney(amount)} to ${targetData.name} Baby.`), threadID, messageID);
+        let amountStr = Object.keys(mentions).length > 0 || (args[1] && args[1].length > 10) ? args[2] : args[1];
+        const amount = parseAmount(amountStr);
+        if (isNaN(amount)) return api.sendMessage(fancy("❌ Usage: bal [add/set] [amount] [@tag] Baby."), threadID, messageID);
+        
+        targetData.money = args[0] === "add" ? (targetData.money || 0) + amount : amount;
+        await usersData.set(targetID, { money: targetData.money });
+        return api.sendMessage(fancy(`✅ ${args[0]}ed $${formatMoney(amount)} to ${targetName} Baby.`), threadID, messageID);
     }
 
-    // ---------------------- TRANSFER (t / transfer) ----------------------
+    // ---------------------- TRANSFER SYSTEM ----------------------
     if (["t", "transfer"].includes(args[0])) {
       if (targetID === senderID) return api.sendMessage(fancy("❌ Target a user Baby."), threadID, messageID);
+      
       const senderData = await usersData.get(senderID);
-      const amount = parseAmount(args[amountArgIndex] || args[1]);
-      if (isNaN(amount) || amount <= 0) return api.sendMessage(fancy("❌ Enter amount Baby."), threadID, messageID);
-      if (senderData.money < amount) return api.sendMessage(fancy("⚠️ No money Baby."), threadID, messageID);
+      const amount = parseAmount(Object.keys(mentions).length > 0 ? args[args.length - 1] : args[1]);
 
-      senderData.money -= amount;
-      targetData.money += amount;
+      if (isNaN(amount) || amount <= 0) return api.sendMessage(fancy("❌ Valid amount Baby."), threadID, messageID);
+      if (amount > 10000000) return api.sendMessage(fancy("⚠️ Max $10M limit Baby."), threadID, messageID);
+
+      // Daily Limit Check (Persistent via usersData)
+      const today = new Date().toDateString();
+      if (!senderData.data) senderData.data = {};
+      if (senderData.data.lastTransferDate !== today) {
+          senderData.data.transferCount = 0;
+          senderData.data.lastTransferDate = today;
+      }
+      if (senderData.data.transferCount >= 5) return api.sendMessage(fancy("⚠️ Daily 5 transfer limit Baby."), threadID, messageID);
+
+      // Total 2% Tax (1% Chanda + 1% Charge)
+      const chanda = amount * 0.01;
+      const charge = amount * 0.01;
+      const totalTax = chanda + charge;
+
+      if (senderData.money < (amount + totalTax)) return api.sendMessage(fancy("⚠️ Balance low (2% Tax included) Baby."), threadID, messageID);
+
+      senderData.money -= (amount + totalTax);
+      targetData.money = (targetData.money || 0) + amount;
+      senderData.data.transferCount++;
+
+      // Transfer Chanda to Admin UID
+      const chandaAdmin = await usersData.get(chandaAdminUID);
+      if (chandaAdmin) {
+          chandaAdmin.money = (chandaAdmin.money || 0) + chanda;
+          await usersData.set(chandaAdminUID, { money: chandaAdmin.money });
+      }
+
       await usersData.set(senderID, senderData);
       await usersData.set(targetID, targetData);
-      return api.sendMessage(fancy(`✅ Sent $${formatMoney(amount)} to ${targetData.name} Baby.`), threadID, messageID);
-    }
 
-    // ---------------------- REQUEST (r / request) ----------------------
-    if (["r", "request"].includes(args[0])) {
-      if (targetID === senderID) return api.sendMessage(fancy("❌ Target a user Baby."), threadID, messageID);
-      const senderData = await usersData.get(senderID);
-      return api.sendMessage({
-        body: fancy(`🙏 ${senderData.name} is asking for money. ${targetData.name}, reply with amount Baby.`),
-        mentions: [{ tag: senderData.name, id: senderID }, { tag: targetData.name, id: targetID }]
-      }, threadID, (err, info) => {
-        global.GoatBot.onReply.set(info.messageID, {
-          commandName: this.config.name,
-          author: targetID, 
-          requesterID: senderID,
-          type: "request_payment"
-        });
-      }, messageID);
+      let msg = `✅ Sent $${formatMoney(amount)} to ${targetName} Baby.\n` +
+                `📌 Total 2% Charge Deducted: $${formatMoney(totalTax)}\n` +
+                `💸 1% Chanda + 1% Send Money Charge (Admin: 61567256940629)\n` +
+                `🇧🇩 ২% ট্যাক্স (১% চান্দা এবং ১% সেন্ড মানি চার্জ) কাটা হয়েছে।`;
+                
+      return api.sendMessage(fancy(msg), threadID, messageID);
     }
 
     // ---------------------- BALANCE DISPLAY ----------------------
@@ -121,25 +135,8 @@ module.exports = {
     const sortedUsers = allUsers.filter(u => u.money !== undefined).sort((a, b) => b.money - a.money);
     const globalRank = sortedUsers.findIndex(u => (u.userID || u.id) == targetID) + 1;
 
-    const resultMsg = `🎀\n > ${fancy("𝐇𝐞𝐲")} "${fancy(targetData.name)}" \n• ${fancy("𝐁𝐚𝐥𝐚𝐧𝐜𝐞")} : ${formatMoney(targetData.money)}\n• ${fancy("𝐑𝐚𝐧𝐤")} : ${fancy(globalRank > 0 ? globalRank : "𝐍𝐀")}`;
+    const resultMsg = `🎀\n > ${fancy("𝐇𝐞𝐲")} "${fancy(targetName)}" \n• ${fancy("𝐁𝐚𝐥𝐚𝐧𝐜𝐞")} : ${formatMoney(targetData.money)}\n• ${fancy("𝐑𝐚𝐧𝐤")} : ${fancy(globalRank > 0 ? globalRank : "𝐍𝐀")}`;
 
-    return api.sendMessage({ body: resultMsg, mentions: [{ tag: targetData.name, id: targetID }] }, threadID, messageID);
-  },
-
-  onReply: async function ({ api, event, Reply, usersData }) {
-    const { senderID, body, threadID, messageID } = event;
-    if (Reply.type === "request_payment" && senderID === Reply.author) {
-      const amount = parseAmount(body);
-      if (isNaN(amount) || amount <= 0) return api.sendMessage(fancy("❌ Invalid Baby."), threadID, messageID);
-      const giverData = await usersData.get(senderID);
-      const requesterData = await usersData.get(Reply.requesterID);
-      if (giverData.money < amount) return api.sendMessage(fancy("⚠️ No funds Baby."), threadID, messageID);
-
-      giverData.money -= amount;
-      requesterData.money += amount;
-      await usersData.set(senderID, giverData);
-      await usersData.set(Reply.requesterID, requesterData);
-      return api.sendMessage(fancy(`✅ Sent $${formatMoney(amount)} Baby.`), threadID, messageID);
-    }
+    return api.sendMessage({ body: resultMsg, mentions: [{ tag: targetName, id: targetID }] }, threadID, messageID);
   }
 };
