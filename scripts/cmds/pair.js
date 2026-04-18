@@ -19,12 +19,28 @@ function drawCircle(ctx, img, x, y, size) {
 }
 
 async function fetchBuffer(url) {
-  return (await axios.get(url, { responseType: "arraybuffer" })).data;
+  return (await axios.get(url, { responseType: "arraybuffer", timeout: 30000 })).data;
+}
+
+async function loadImageFromURL(url) {
+  return loadImage(Buffer.from(await fetchBuffer(url)));
+}
+
+function safeUnlink(filePath) {
+  try {
+    if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+  } catch {}
+}
+
+function normalizeUserInfo(userInfo) {
+  if (Array.isArray(userInfo)) return userInfo;
+  if (userInfo && typeof userInfo === "object") return Object.entries(userInfo).map(([id, info]) => ({ id, ...info }));
+  return [];
 }
 
 async function getGenderCandidates(api, event) {
   const threadInfo = await api.getThreadInfo(event.threadID);
-  const all = threadInfo.userInfo;
+  const all = normalizeUserInfo(threadInfo.userInfo);
   const botID = api.getCurrentUserID();
   const senderID = event.senderID;
   const me = all.find(u => u.id === senderID);
@@ -86,13 +102,16 @@ async function style1({ api, event, senderID, name1, id2, name2, remaining }) {
 
   return api.sendMessage(
     { body, mentions: [{ tag: `@${name1}`, id: senderID }, { tag: `@${name2}`, id: id2 }], attachment: fs.createReadStream(pathImg) },
-    event.threadID, () => fs.unlinkSync(pathImg), event.messageID
+    event.threadID, () => safeUnlink(pathImg), event.messageID
   );
 }
 
 // ── Style 2 — Bold unicode, dual avatar, no canvas ──────
 async function style2({ api, event, senderID, name1, id2, name2, remaining }) {
-  const { getStreamFromURL } = global.utils;
+  const getStreamFromURL = global.utils?.getStreamFromURL;
+  const cacheDir = path.join(__dirname, "cache");
+  fs.ensureDirSync(cacheDir);
+  const tempFiles = [];
 
   const toBold = (text) => {
     const map = {"a":"𝐚","b":"𝐛","c":"𝐜","d":"𝐝","e":"𝐞","f":"𝐟","g":"𝐠","h":"𝐡","i":"𝐢","j":"𝐣","k":"𝐤","l":"𝐥","m":"𝐦","n":"𝐧","o":"𝐨","p":"𝐩","q":"𝐪","r":"𝐫","s":"𝐬","t":"𝐭","u":"𝐮","v":"𝐯","w":"𝐰","x":"𝐱","y":"𝐲","z":"𝐳","A":"𝐀","B":"𝐁","C":"𝐂","D":"𝐃","E":"𝐄","F":"𝐅","G":"𝐆","H":"𝐇","I":"𝐈","J":"𝐉","K":"𝐊","L":"𝐋","M":"𝐌","N":"𝐍","O":"𝐎","P":"𝐏","Q":"𝐐","R":"𝐑","S":"𝐒","T":"𝐓","U":"𝐔","V":"𝐕","W":"𝐖","X":"𝐗","Y":"𝐘","Z":"𝐙"," ":" "};
@@ -113,15 +132,24 @@ async function style2({ api, event, senderID, name1, id2, name2, remaining }) {
 
   const attachments = [];
   try {
-    const a1 = await getStreamFromURL(AVT_URL(senderID));
-    const a2 = await getStreamFromURL(AVT_URL(id2));
-    if (a1) attachments.push(a1);
-    if (a2) attachments.push(a2);
+    if (typeof getStreamFromURL === "function") {
+      const a1 = await getStreamFromURL(AVT_URL(senderID));
+      const a2 = await getStreamFromURL(AVT_URL(id2));
+      if (a1) attachments.push(a1);
+      if (a2) attachments.push(a2);
+    } else {
+      const pathAvt1 = path.join(cacheDir, `avt1_2_${senderID}.png`);
+      const pathAvt2 = path.join(cacheDir, `avt2_2_${senderID}.png`);
+      fs.writeFileSync(pathAvt1, Buffer.from(await fetchBuffer(AVT_URL(senderID))));
+      fs.writeFileSync(pathAvt2, Buffer.from(await fetchBuffer(AVT_URL(id2))));
+      tempFiles.push(pathAvt1, pathAvt2);
+      attachments.push(fs.createReadStream(pathAvt1), fs.createReadStream(pathAvt2));
+    }
   } catch {}
 
   return api.sendMessage(
     { body, mentions: [{ tag: `@${bn1}`, id: senderID }, { tag: `@${bn2}`, id: id2 }], ...(attachments.length && { attachment: attachments }) },
-    event.threadID, event.messageID
+    event.threadID, () => tempFiles.forEach(safeUnlink), event.messageID
   );
 }
 
@@ -161,7 +189,7 @@ async function style3({ api, event, senderID, name1, id2, name2, remaining }) {
 
   return api.sendMessage(
     { body, mentions: [{ tag: name1, id: senderID }, { tag: name2, id: id2 }], attachment: fs.createReadStream(finalPath) },
-    event.threadID, () => fs.unlinkSync(finalPath)
+    event.threadID, () => safeUnlink(finalPath), event.messageID
   );
 }
 
@@ -196,7 +224,7 @@ async function style4({ api, event, senderID, name1, id2, name2, remaining }) {
   const msgObj = { body, mentions: [{ tag: `@${name1}`, id: senderID }, { tag: `@${name2}`, id: id2 }] };
   if (fs.existsSync(outputPath)) msgObj.attachment = fs.createReadStream(outputPath);
 
-  return api.sendMessage(msgObj, event.threadID, () => fs.existsSync(outputPath) && fs.unlinkSync(outputPath), event.messageID);
+  return api.sendMessage(msgObj, event.threadID, () => safeUnlink(outputPath), event.messageID);
 }
 
 // ── Style 5 — Random background, square avatars ──────────
@@ -214,9 +242,9 @@ async function style5({ api, event, senderID, name1, id2, name2, remaining }) {
 
   const canvas = createCanvas(800, 400);
   const ctx = canvas.getContext("2d");
-  ctx.drawImage(await loadImage(bgUrl), 0, 0, 800, 400);
-  ctx.drawImage(await loadImage(AVT_URL(senderID)), 385, 40, 170, 170);
-  ctx.drawImage(await loadImage(AVT_URL(id2)), 587, 190, 180, 170);
+  ctx.drawImage(await loadImageFromURL(bgUrl), 0, 0, 800, 400);
+  ctx.drawImage(await loadImageFromURL(AVT_URL(senderID)), 385, 40, 170, 170);
+  ctx.drawImage(await loadImageFromURL(AVT_URL(id2)), 587, 190, 180, 170);
 
   await new Promise((res, rej) => {
     const out = fs.createWriteStream(outputPath);
@@ -235,7 +263,7 @@ async function style5({ api, event, senderID, name1, id2, name2, remaining }) {
 
   return api.sendMessage(
     { body, mentions: [{ tag: `@${name1}`, id: senderID }, { tag: `@${name2}`, id: id2 }], attachment: fs.createReadStream(outputPath) },
-    event.threadID, () => fs.unlinkSync(outputPath), event.messageID
+    event.threadID, () => safeUnlink(outputPath), event.messageID
   );
 }
 
@@ -282,7 +310,7 @@ async function style6({ api, event, senderID, name1, id2, name2, remaining }) {
 
   return api.sendMessage(
     { body, mentions: [{ tag: `@${name1}`, id: senderID }, { tag: `@${name2}`, id: id2 }], attachment: fs.createReadStream(pathImg) },
-    event.threadID, () => fs.unlinkSync(pathImg), event.messageID
+    event.threadID, () => safeUnlink(pathImg), event.messageID
   );
 }
 
@@ -321,7 +349,7 @@ async function style7({ api, event, senderID, name1, id2, name2, remaining }) {
 
   return api.sendMessage(
     { body, mentions: [{ tag: `@${name1}`, id: senderID }, { tag: `@${name2}`, id: id2 }], attachment: fs.createReadStream(pathImg) },
-    event.threadID, () => fs.unlinkSync(pathImg), event.messageID
+    event.threadID, () => safeUnlink(pathImg), event.messageID
   );
 }
 
@@ -359,13 +387,15 @@ async function style8({ api, event, senderID, name1, id2, name2, remaining }) {
 
 // ── Style 9 — Circular avatars, postimg bg, 70~100% ─────
 async function style9({ api, event, senderID, name1, id2, name2, remaining }) {
-  const outputPath = path.join(__dirname, `pair9_${senderID}.png`);
+  const cacheDir = path.join(__dirname, "cache");
+  fs.ensureDirSync(cacheDir);
+  const outputPath = path.join(cacheDir, `pair9_${senderID}.png`);
 
   const canvas = createCanvas(800, 400);
   const ctx = canvas.getContext("2d");
-  ctx.drawImage(await loadImage("https://i.postimg.cc/pdv5dFVX/611905695-855684437229208-8377464727643815456-n.png"), 0, 0, 800, 400);
-  drawCircle(ctx, await loadImage(AVT_URL(senderID)), 385, 40, 170);
-  drawCircle(ctx, await loadImage(AVT_URL(id2)), 587, 190, 170);
+  ctx.drawImage(await loadImageFromURL("https://i.postimg.cc/pdv5dFVX/611905695-855684437229208-8377464727643815456-n.png"), 0, 0, 800, 400);
+  drawCircle(ctx, await loadImageFromURL(AVT_URL(senderID)), 385, 40, 170);
+  drawCircle(ctx, await loadImageFromURL(AVT_URL(id2)), 587, 190, 170);
 
   await new Promise((res, rej) => {
     const out = fs.createWriteStream(outputPath);
@@ -384,7 +414,7 @@ async function style9({ api, event, senderID, name1, id2, name2, remaining }) {
 
   return api.sendMessage(
     { body, mentions: [{ tag: `@${name1}`, id: senderID }, { tag: `@${name2}`, id: id2 }], attachment: fs.createReadStream(outputPath) },
-    event.threadID, () => fs.unlinkSync(outputPath), event.messageID
+    event.threadID, () => safeUnlink(outputPath), event.messageID
   );
 }
 
@@ -393,43 +423,29 @@ module.exports = {
   config: {
     name: "pair",
     version: "9.0",
-    author: "Mikasa Baby",
+    author: "saif",
     countDown: 10,
     role: 0,
     shortDescription: { en: "Find your destined partner 💞" },
-    longDescription: { en: "9 unique love pair styles. Use: pair 1 ~ pair 9. Costs 500 coins." },
+    longDescription: { en: "9 unique love pair styles. Use: pair or pair 2 ~ pair 9. Costs 500 coins." },
     category: "love",
-    guide: { en: "{pn} [1-9]" },
+    guide: { en: "{pn} or {pn} [2-9]" },
   },
 
   onStart: async function ({ api, event, usersData, args, message }) {
     const senderID = event.senderID;
-    const styleNum = parseInt(args[0]);
+    const requestedStyle = parseInt(args[0], 10);
+    const styleNum = requestedStyle >= 1 && requestedStyle <= 9 ? requestedStyle : 1;
 
-    if (!styleNum || styleNum < 1 || styleNum > 9)
-      return message.reply(
-        `💞 𝐏𝐚𝐢𝐫 𝐒𝐭𝐲𝐥𝐞𝐬\n\n` +
-        `pair 1 — Bold serif, crazy %\n` +
-        `pair 2 — Bold unicode, dual avatar\n` +
-        `pair 3 — Anime bg, love notes\n` +
-        `pair 4 — Cursive script font\n` +
-        `pair 5 — Random background\n` +
-        `pair 6 — Circle avatars + names\n` +
-        `pair 7 — Shadow canvas\n` +
-        `pair 8 — 3 attachments + gif heart\n` +
-        `pair 9 — Circular, 70~100% love\n\n` +
-        `💸 Cost: 500 coins each`
-      );
+    let charged = false;
+    let userData;
+    let balance = 0;
 
     try {
-      // Balance check
-      const userData = await usersData.get(senderID);
-      const balance = userData?.money || 0;
+      userData = await usersData.get(senderID);
+      balance = userData?.money || 0;
       if (balance < COST)
         return message.reply(`💸 Need ${COST} coins!\n💰 Your balance: ${balance} coins`);
-
-      await usersData.set(senderID, { ...userData, money: balance - COST });
-      const remaining = balance - COST;
 
       const name1 = userData?.name || "Unknown";
 
@@ -445,14 +461,27 @@ module.exports = {
         id2 = candidates[Math.floor(Math.random() * candidates.length)].id;
       }
 
+      const botID = api.getCurrentUserID();
+      if (!id2 || id2 === senderID || id2 === botID)
+        return message.reply("❌ Please choose a valid partner.");
+
       const partnerData = await usersData.get(id2);
       const name2 = partnerData?.name || "Unknown";
+
+      await usersData.set(senderID, { ...userData, money: balance - COST });
+      charged = true;
+      const remaining = balance - COST;
 
       const ctx = { api, event, usersData, senderID, name1, id2, name2, remaining };
       const styles = [style1, style2, style3, style4, style5, style6, style7, style8, style9];
       await styles[styleNum - 1](ctx);
 
     } catch (err) {
+      if (charged && userData) {
+        try {
+          await usersData.set(senderID, { ...userData, money: balance });
+        } catch {}
+      }
       console.error("[pair]", err);
       return message.reply(`❌ Something went wrong 😿\n${err.message}`);
     }
