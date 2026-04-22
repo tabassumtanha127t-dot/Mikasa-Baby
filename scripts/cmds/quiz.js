@@ -6,12 +6,12 @@ const QUIZ_URL = "https://raw.githubusercontent.com/SAIFUL-404-ST/quiz-api/main/
 
 const fancy = (text) => {
   const map = {
-    'a': '𝒂', 'b': '𝒃', 'c': '𝒄', 'd': '𝒅', 'e': '𝒆', 'f': '𝒇', 'g': '𝒈', 'h': '𝒉', 'i': '𝒊', 'j': '𝒋',
-    'k': '𝒌', 'l': '𝒍', 'm': '𝒎', 'n': '𝒏', 'o': '𝒐', 'p': '𝒑', 'q': '𝒒', 'r': '𝒓', 's': '𝒔', 't': '𝒕',
-    'u': '𝒖', 'v': '𝒗', 'w': '𝒘', 'x': '𝒙', 'y': '𝒚', 'z': '𝒛',
-    'A': '𝑨', 'B': '𝑩', 'C': '𝑪', 'D': '𝑫', 'E': '𝑬', 'F': '𝑭', 'G': '𝑮', 'H': '𝑯', 'I': '𝑰', 'J': '𝑱',
-    'K': '𝑲', 'L': '𝑳', 'M': '𝑴', 'N': '𝑵', 'O': '𝑶', 'P': '𝑷', 'Q': '𝑸', 'R': '𝑹', 'S': '𝑺', 'T': '𝑻',
-    'U': '𝑼', 'V': '𝑽', 'W': '𝑾', 'X': '𝑿', 'Y': '𝒀', 'Z': '𝒁',
+    'a': '𝐚', 'b': '𝐛', 'c': '𝐜', 'd': '𝐝', 'e': '𝐞', 'f': '𝐟', 'g': '𝐠', 'h': '𝐡', 'i': '𝐢', 'j': '𝐣',
+    'k': '𝐤', 'l': '𝐥', 'm': '𝐦', 'n': '𝐧', 'o': '𝐨', 'p': '𝐩', 'q': '𝐪', 'r': '𝐫', 's': '𝐬', 't': '𝐭',
+    'u': '𝐮', 'v': '𝐯', 'w': '𝐰', 'x': '𝐱', 'y': '𝐲', 'z': '𝐳',
+    'A': '𝐀', 'B': '𝐁', 'C': '𝐂', 'D': '𝐃', 'E': '𝐄', 'F': '𝐅', 'G': '𝐆', 'H': '𝐇', 'I': '𝐈', 'J': '𝐉',
+    'K': '𝐊', 'L': '𝐋', 'M': '𝐌', 'N': '𝐍', 'O': '𝐎', 'P': '𝐏', 'Q': '𝐐', 'R': '𝐑', 'S': '𝐒', 'T': '𝐓',
+    'U': '𝐔', 'V': '𝐕', 'W': '𝐖', 'X': '𝐗', 'Y': '𝐘', 'Z': '𝐙',
     '0': '𝟎', '1': '𝟏', '2': '𝟐', '3': '𝟑', '4': '𝟒', '5': '𝟓', '6': '𝟔', '7': '𝟕', '8': '𝟖', '9': '𝟗'
   };
   return text.toString().split('').map(char => map[char] || char).join('');
@@ -21,12 +21,12 @@ module.exports = {
   config: {
     name: "quiz",
     aliases: ["qz"],
-    version: "22.1",
+    version: "22.2",
     author: "Saif & Gemini",
     countDown: 5,
     role: 0,
     category: "game",
-    description: "𝑺𝑻𝒀𝑳𝑰𝑺𝑯 𝑸𝑼𝑰𝒁 𝑾𝑰𝑻𝑯 𝑨𝑳𝑳 𝑷𝑳𝑨𝒀𝑬𝑹 𝑹𝑨𝑵𝑲𝑰𝑵𝑮 𝑩𝑨𝑩𝒀"
+    description: "𝐒𝐓𝐘𝐋𝐈𝐒𝐇 𝐐𝐔𝐈𝐙 𝐖𝐈𝐓𝐇 𝐀𝐋𝐋 𝐏𝐋𝐀𝐘𝐄𝐑 𝐑𝐀𝐍𝐊𝐈𝐍𝐆 𝐁𝐀𝐁𝐘"
   },
 
   onStart: async function ({ api, event, usersData, args }) {
@@ -45,23 +45,26 @@ module.exports = {
 
     if (args[0] === "rank") {
       const allUsers = await usersData.getAll();
-      // Filter anyone who has played at least once and sort by wins
       const rankList = allUsers
         .filter(u => u.data && u.data.quizStats && u.data.quizStats.played > 0)
         .sort((a, b) => (b.data.quizStats.won || 0) - (a.data.quizStats.won || 0));
 
-      if (rankList.length === 0) return api.sendMessage(fancy("𝑵𝒐 𝒐𝒏𝒆 𝒉𝒂𝒔 𝒑𝒍𝒂𝒚𝒆𝒅 𝒚𝒆𝒕, 𝑩𝒂𝒃𝒚!"), threadID, messageID);
+      if (rankList.length === 0)
+        return api.sendMessage("𝐍𝐨 𝐨𝐧𝐞 𝐡𝐚𝐬 𝐩𝐥𝐚𝐲𝐞𝐝 𝐲𝐞𝐭, 𝐁𝐚𝐛𝐲!", threadID, messageID);
 
-      let rankMsg = `╭───━━━━🌟━━━━───╮\n      ${fancy("𝑨𝑳𝑳 𝑷𝑳𝑨𝒀𝑬𝑹 𝑹𝑨𝑵𝑲𝑰𝑵𝑮")}\n━━━━━━━━━━━━━━━━━━\n`;
+      let rankMsg = `╭───━━━━🌟━━━━───╮\n      𝐀𝐋𝐋 𝐏𝐋𝐀𝐘𝐄𝐑 𝐑𝐀𝐍𝐊𝐈𝐍𝐆\n━━━━━━━━━━━━━━━━━━\n`;
       rankList.forEach((u, i) => {
-        rankMsg += ` ${i + 1}. ${fancy(u.name)} — ${fancy(u.data.quizStats.won)} 𝑾𝒊𝒏𝒔\n`;
+        rankMsg += ` ${i + 1}. ${fancy(u.name)} — ${fancy(u.data.quizStats.won)} 𝐖𝐢𝐧𝐬\n`;
       });
-      rankMsg += `━━━━━━━━━━━━━━━━━━\n   𝑻𝒐𝒕𝒂𝒍 𝑷𝒍𝒂𝒚𝒆𝒓𝒔: ${fancy(rankList.length)}\n╰───━━━━🌟━━━━───╯`;
+      rankMsg += `━━━━━━━━━━━━━━━━━━\n   𝐓𝐨𝐭𝐚𝐥 𝐏𝐥𝐚𝐲𝐞𝐫𝐬: ${fancy(rankList.length)}\n╰───━━━━🌟━━━━───╯`;
       return api.sendMessage(rankMsg, threadID, messageID);
     }
 
     if (user.data.quizStats.dailyUsage >= 20) {
-      return api.sendMessage(`⚠️ 𝑳𝒊𝒎𝒊𝒕 𝑹𝒆𝒂𝒄𝒉𝒆𝒅\n━━━━━━━━━━━━━━━━━━\n𝑩𝒂𝒃𝒚, 𝒚𝒐𝒖'𝒗𝒆 𝒖𝒔𝒆𝒅 𝒚𝒐𝒖𝒓 𝟐𝟎 𝒕𝒖𝒓𝒏𝒔 𝒕𝒐𝒅𝒂𝒚. 𝑪𝒐𝒎𝒆 𝒃𝒂𝒄𝒌 𝒕𝒐𝒎𝒐𝒓𝒓𝒐𝒘!`, threadID, messageID);
+      return api.sendMessage(
+        `⚠️ 𝐋𝐢𝐦𝐢𝐭 𝐑𝐞𝐚𝐜𝐡𝐞𝐝\n━━━━━━━━━━━━━━━━━━\n𝐁𝐚𝐛𝐲, 𝐲𝐨𝐮'𝐯𝐞 𝐮𝐬𝐞𝐝 𝐲𝐨𝐮𝐫 𝟐𝟎 𝐭𝐮𝐫𝐧𝐬 𝐭𝐨𝐝𝐚𝐲. 𝐂𝐨𝐦𝐞 𝐛𝐚𝐜𝐤 𝐭𝐨𝐦𝐨𝐫𝐫𝐨𝐰!`,
+        threadID, messageID
+      );
     }
 
     if (cooldowns.has(senderID) && now - cooldowns.get(senderID) < 5000) return;
@@ -69,7 +72,15 @@ module.exports = {
 
     try {
       const res = await axios.get(QUIZ_URL);
-      const questions = res.data[0].questions;
+
+      const questions = Array.isArray(res.data)
+        ? (res.data[0] && res.data[0].questions)
+        : res.data.questions;
+
+      if (!Array.isArray(questions) || questions.length === 0) {
+        return api.sendMessage("❌ 𝐐𝐮𝐢𝐳 𝐝𝐚𝐭𝐚 𝐞𝐦𝐩𝐭𝐲 𝐛𝐚𝐛𝐲.", threadID, messageID);
+      }
+
       const q = questions[Math.floor(Math.random() * questions.length)];
 
       let optionsMsg = '';
@@ -77,7 +88,7 @@ module.exports = {
         if (q.options[l]) optionsMsg += `  ${fancy(l.toUpperCase())} ❯ ${q.options[l]}\n`;
       });
 
-      const quizContent = `╭───━━━━🌟━━━━───╮\n  ${q.text}\n━━━━━━━━━━━━━━━━━━\n${optionsMsg}╰───━━━━🌟━━━━───╯\n𝑩𝒂𝒃𝒚, 𝒓𝒆𝒑𝒍𝒚 𝒘𝒊𝒕𝒉 𝒕𝒉𝒆 𝒐𝒑𝒕𝒊𝒐𝒏!`;
+      const quizContent = `╭───━━━━🌟━━━━───╮\n  ${q.text}\n━━━━━━━━━━━━━━━━━━\n${optionsMsg}╰───━━━━🌟━━━━───╯\n𝐁𝐚𝐛𝐲, 𝐫𝐞𝐩𝐥𝐲 𝐰𝐢𝐭𝐡 𝐭𝐡𝐞 𝐨𝐩𝐭𝐢𝐨𝐧!`;
 
       api.sendMessage(quizContent, threadID, (err, info) => {
         if (err) return;
@@ -87,24 +98,38 @@ module.exports = {
         const timeoutId = setTimeout(() => {
           if (sessions.has(info.messageID)) {
             sessions.delete(info.messageID);
-            api.editMessage(`⌛ 𝑻𝒊𝒎𝒆'𝒔 𝑼𝒑 𝑩𝒂𝒃𝒚!\n━━━━━━━━━━━━━━━━━━\n𝑻𝒉𝒆 𝒄𝒐𝒓𝒓𝒆𝒄𝒕 𝒐𝒏𝒆 𝒘𝒂𝒔: ${fancy(q.answer.toUpperCase())}`, info.messageID);
+            api.editMessage(
+              `⌛ 𝐓𝐢𝐦𝐞'𝐬 𝐔𝐩 𝐁𝐚𝐛𝐲!\n━━━━━━━━━━━━━━━━━━\n𝐓𝐡𝐞 𝐜𝐨𝐫𝐫𝐞𝐜𝐭 𝐨𝐧𝐞 𝐰𝐚𝐬: ${fancy(q.answer.toUpperCase())}`,
+              info.messageID
+            );
           }
         }, 60000);
 
-        sessions.set(info.messageID, { answer: q.answer.toLowerCase().trim(), author: senderID, timeoutId });
-        global.GoatBot.onReply.set(info.messageID, { commandName: this.config.name, author: senderID, sessionId: info.messageID });
+        sessions.set(info.messageID, {
+          answer: q.answer.toLowerCase().trim(),
+          author: senderID,
+          timeoutId
+        });
+        global.GoatBot.onReply.set(info.messageID, {
+          commandName: this.config.name,
+          author: senderID,
+          sessionId: info.messageID
+        });
       }, messageID);
-    } catch (e) { return api.sendMessage(fancy("❌ 𝑭𝒂𝒊𝒍𝒆𝒅 𝒕𝒐 𝒍𝒐𝒂𝒅 𝒒𝒖𝒊𝒛 𝒃𝒂𝒃𝒚."), threadID, messageID); }
+    } catch (e) {
+      console.error("Quiz load error:", e.message);
+      return api.sendMessage("❌ 𝐅𝐚𝐢𝐥𝐞𝐝 𝐭𝐨 𝐥𝐨𝐚𝐝 𝐪𝐮𝐢𝐳 𝐛𝐚𝐛𝐲.", threadID, messageID);
+    }
   },
 
   onReply: async function ({ event, api, Reply, usersData }) {
-    const { senderID, body, threadID, messageID } = event;
+    const { senderID, body } = event;
     const session = sessions.get(Reply.sessionId);
     if (!session || senderID !== session.author) return;
 
     clearTimeout(session.timeoutId);
     sessions.delete(Reply.sessionId);
-    try { await api.unsendMessage(event.messageID); } catch(e) {}
+    try { await api.unsendMessage(event.messageID); } catch (e) {}
 
     const isCorrect = body.trim().toLowerCase() === session.answer;
     let userData = await usersData.get(senderID);
@@ -118,17 +143,17 @@ module.exports = {
       quizStats.won += 1;
       const reward = 1000;
       finalMoney += reward;
-      status = `✨ 𝒀𝒐𝒖'𝒓𝒆 𝑩𝒓𝒊𝒍𝒍𝒊𝒂𝒏𝒕 𝑩𝒂𝒃𝒚! ✨\n━━━━━━━━━━━━━━━━━━\n💰 𝑪𝒐𝒊𝒏𝒔: +${fancy(reward)}\n🏆 𝑻𝒐𝒕𝒂𝒍 𝑾𝒊𝒏𝒔: ${fancy(quizStats.won)}`;
+      status = `✨ 𝐘𝐨𝐮'𝐫𝐞 𝐁𝐫𝐢𝐥𝐥𝐢𝐚𝐧𝐭 𝐁𝐚𝐛𝐲! ✨\n━━━━━━━━━━━━━━━━━━\n💰 𝐂𝐨𝐢𝐧𝐬: +${fancy(reward)}\n🏆 𝐓𝐨𝐭𝐚𝐥 𝐖𝐢𝐧𝐬: ${fancy(quizStats.won)}`;
     } else {
-      status = `💔 𝑶𝒐𝒑𝒔, 𝑾𝒓𝒐𝒏𝒈 𝑩𝒂𝒃𝒚! 💔\n━━━━━━━━━━━━━━━━━━\n✅ 𝑨𝒏𝒔𝒘𝒆𝒓: ${fancy(session.answer.toUpperCase())}\n🏆 𝑾𝒊𝒏𝒔: ${fancy(quizStats.won)}`;
+      status = `💔 𝐎𝐨𝐩𝐬, 𝐖𝐫𝐨𝐧𝐠 𝐁𝐚𝐛𝐲! 💔\n━━━━━━━━━━━━━━━━━━\n✅ 𝐀𝐧𝐬𝐰𝐞𝐫: ${fancy(session.answer.toUpperCase())}\n🏆 𝐖𝐢𝐧𝐬: ${fancy(quizStats.won)}`;
     }
 
-    await usersData.set(senderID, { 
-      money: finalMoney, 
-      data: { ...userData.data, quizStats: quizStats } 
+    await usersData.set(senderID, {
+      money: finalMoney,
+      data: { ...userData.data, quizStats: quizStats }
     });
 
-    const resultMsg = `╭───━━━━🌟━━━━───╮\n      𝑸𝑼𝑰𝒁 𝑹𝑬𝑺𝑼𝑳𝑻\n━━━━━━━━━━━━━━━━━━\n${status}\n✨ 𝑩𝒂𝒍𝒂𝒏𝒄𝒆: ${fancy(finalMoney.toLocaleString())}\n╰───━━━━🌟━━━━───╯`;
+    const resultMsg = `╭───━━━━🌟━━━━───╮\n      𝐐𝐔𝐈𝐙 𝐑𝐄𝐒𝐔𝐋𝐓\n━━━━━━━━━━━━━━━━━━\n${status}\n✨ 𝐁𝐚𝐥𝐚𝐧𝐜𝐞: ${fancy(finalMoney.toLocaleString())}\n╰───━━━━🌟━━━━───╯`;
     return api.editMessage(resultMsg, Reply.sessionId);
   }
 };
