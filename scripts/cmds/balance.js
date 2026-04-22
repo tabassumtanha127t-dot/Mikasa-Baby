@@ -126,7 +126,7 @@ module.exports = {
       await usersData.set(senderID, senderData);
       await usersData.set(targetID, targetData);
 
-      const msg = ` • ✅ Sent $${formatMoney(amount)} to ${targetName} Baby.\n` +
+      const msg = `  • ✅ Sent $${formatMoney(amount)} to ${targetName} Baby.\n` +
                   ` •    Total 2% Charge Deducted: $${formatMoney(totalTax)}\n` +
                   ` • 🇧🇩 1% Chanda + 1% Send Money Charge (chandabaz ‎Śā īfシ : ${chandaAdminUID})\n` +
                   ` • ☑️ 2% টাকা (1% চান্দা এবং 1% সেন্ড মানি চার্জ) কাটা হয়েছে!`;
