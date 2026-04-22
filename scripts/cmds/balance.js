@@ -1,7 +1,3 @@
-const axios = require("axios");
-
-// Pending requests store
-const pendingRequests = new Map();
 
 function parseAmount(str) {
   if (!str) return NaN;
@@ -48,7 +44,7 @@ module.exports = {
   config: {
     name: "balance",
     aliases: ["bal", "money"],
-    version: "23.2",
+    version: "23.3",
     author: "Saif",
     countDown: 5,
     role: 0,
@@ -96,7 +92,7 @@ module.exports = {
       else if (messageReply) targetID = messageReply.senderID;
       else if (args[1] && args[1].length > 10 && !isNaN(args[1])) targetID = args[1];
 
-      if (targetID === senderID) return api.sendMessage(fancy("❌ Target a user Baby."), threadID, messageID);
+      if (targetID === senderID) return api.sendMessage(fancy("❌ Please  Target a user Baby."), threadID, messageID);
 
       let senderData = await usersData.get(senderID);
       let targetData = await usersData.get(targetID);
@@ -130,50 +126,50 @@ module.exports = {
       await usersData.set(senderID, senderData);
       await usersData.set(targetID, targetData);
 
-      const msg = `Sent $${formatMoney(amount)} to ${targetName} Baby.\n` +
-                  `Total 2% Charge Deducted: $${formatMoney(totalTax)}\n` +
-                  `1% Chanda + 1% Send Money Charge (chandabaz : ${chandaAdminUID})\n` +
-                  `2% টাকা (1% চান্দা এবং 1% সেন্ড মানি চার্জ) কাটা হয়েছে!`;
+      const msg = ` • ✅ Sent $${formatMoney(amount)} to ${targetName} Baby.\n` +
+                  ` •    Total 2% Charge Deducted: $${formatMoney(totalTax)}\n` +
+                  ` • 🇧🇩 1% Chanda + 1% Send Money Charge (chandabaz ‎Śā īfシ : ${chandaAdminUID})\n` +
+                  ` • ☑️ 2% টাকা (1% চান্দা এবং 1% সেন্ড মানি চার্জ) কাটা হয়েছে!`;
       return api.sendMessage(fancy(msg), threadID, messageID);
     }
 
     // ---------------------- REQUEST SYSTEM ----------------------
-    if (["req", "request"].includes(args[0])) {
-      let targetID = senderID;
+    if (["req", "request","r"].includes(args[0])) {
+      let targetID = null;
       if (Object.keys(mentions).length > 0) targetID = Object.keys(mentions)[0];
       else if (messageReply) targetID = messageReply.senderID;
       else if (args[1] && args[1].length > 10 && !isNaN(args[1])) targetID = args[1];
 
-      if (targetID === senderID) return api.sendMessage(fancy("❌ Cannot request from yourself Baby."), threadID, messageID);
+      if (!targetID || targetID === senderID)
+        return api.sendMessage(fancy("❌ Cannot request from yourself Baby."), threadID, messageID);
 
       let senderData = await usersData.get(senderID);
       let targetData = await usersData.get(targetID);
-      const senderName = senderData.name || (await api.getUserInfo(senderID))[senderID]?.name || senderID;
-      const targetName = targetData.name || (await api.getUserInfo(targetID))[targetID]?.name || targetID;
+      if (!targetData) targetData = { money: 0, name: targetID };
 
-      const reqMsg = `💰 Money Request\n• ${senderName} is requesting money from you Baby!\n\nIf you want to send, reply with the amount.\nNote: 2% tax will be deducted.`;
+      const senderName = senderData?.name || (await api.getUserInfo(senderID))[senderID]?.name || senderID;
+      const targetName = targetData?.name || (await api.getUserInfo(targetID))[targetID]?.name || targetID;
+
+      // ✅ targetName must appear in body for mention to work in fca-unofficial
+      const reqBody = `💰 ${fancy("Money Request")}\n• ${fancy(senderName)} ${fancy("is requesting money from")} ${targetName}${fancy(" Baby!")}\n\n${fancy("Reply to this message with the amount you want to send.")}\n${fancy("Note: 2% tax will be deducted from your balance.")}`;
 
       api.sendMessage(
-        { body: fancy(reqMsg), mentions: [{ tag: targetName, id: targetID }] },
+        { body: reqBody, mentions: [{ tag: targetName, id: targetID }] },
         threadID,
         (err, info) => {
-          if (!err && info?.messageID) {
-            pendingRequests.set(info.messageID, {
-              requesterID: senderID,
-              requesterName: senderName,
-              targetID,
-              targetName,
-              threadID
-            });
-            global.client.handleReply.push({
-              name: this.config.name,
-              messageID: info.messageID,
-              author: senderID
-            });
-            setTimeout(() => {
-              pendingRequests.delete(info.messageID);
-            }, 5 * 60 * 1000);
-          }
+          if (err || !info?.messageID) return;
+
+          // ✅ Store all data directly in handleReply — no Map needed
+          global.client.handleReply.push({
+            name: "balance",
+            messageID: info.messageID,
+            author: targetID,
+            requesterID: senderID,
+            requesterName: senderName,
+            targetID: targetID,
+            targetName: targetName,
+            threadID: threadID
+          });
         }
       );
       return;
@@ -201,11 +197,11 @@ module.exports = {
     const { senderID, threadID, messageID, body } = event;
     const chandaAdminUID = "61567256940629";
 
-    const req = pendingRequests.get(handleReply.messageID);
-    if (!req) return;
-    if (senderID !== req.targetID) return;
+    // ✅ Data comes directly from handleReply — no Map lookup needed
+    const { requesterID, requesterName, targetID, targetName } = handleReply;
+    if (!requesterID || !targetID) return;
+    if (senderID !== targetID) return;
 
-    const { requesterID, requesterName, targetID, targetName } = req;
     const replyAmount = parseAmount(body?.trim());
 
     if (isNaN(replyAmount) || replyAmount <= 0) {
@@ -220,7 +216,6 @@ module.exports = {
     let adminData = await usersData.get(chandaAdminUID);
 
     if ((payerData.money || 0) < replyAmount) {
-      pendingRequests.delete(handleReply.messageID);
       return api.sendMessage(fancy(`❌ ${targetName} has insufficient balance Baby.`), threadID, messageID);
     }
 
@@ -231,8 +226,6 @@ module.exports = {
     await usersData.set(targetID, payerData);
     await usersData.set(requesterID, receiverData);
     await usersData.set(chandaAdminUID, adminData);
-
-    pendingRequests.delete(handleReply.messageID);
 
     const msg = `✅ Request Completed Baby!\n• ${targetName} sent: $${formatMoney(replyAmount)}\n• 2% Tax: $${formatMoney(totalTax)} → Admin\n• ${requesterName} received: $${formatMoney(senderReceives)}`;
     return api.sendMessage(fancy(msg), threadID, messageID);
