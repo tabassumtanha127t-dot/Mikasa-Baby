@@ -1,19 +1,18 @@
 const fs = require("fs");
 
-// Math Bold Italic Font Mapping
+/**
+ * @description Unicode Math Bold Converter
+ * Maps standard alphanumeric characters to Mathematical Bold Serif equivalents.
+ */
 const formatText = (text) => {
   const map = {
-    'a': '𝒂', 'b': '𝒃', 'c': '𝒄', 'd': '𝒅', 'e': '𝒆', 'f': '𝒇', 'g': '𝒈', 'h': '𝒉', 'i': '𝒊', 'j': '𝒋',
-    'k': '𝒌', 'l': '𝒍', 'm': '𝒎', 'n': '𝒏', 'o': '𝒐', 'p': '𝒑', 'q': '𝒒', 'r': '𝒓', 's': '𝒔', 't': '𝒕',
-    'u': '𝒖', 'v': '𝒗', 'w': '𝒘', 'x': '𝒙', 'y': '𝒚', 'z': '𝒛',
-    'A': '𝑨', 'B': '𝑩', 'C': '𝑪', 'D': '𝑫', 'E': '𝑬', 'F': '𝑭', 'G': '𝑮', 'H': '𝑯', 'I': '𝑰', 'J': '𝑱',
-    'K': '𝑲', 'L': '𝑳', 'M': '𝑴', 'N': '𝑵', 'O': '𝑶', 'P': '𝑷', 'Q': '𝑸', 'R': '𝑹', 'S': '𝑺', 'T': '𝑻',
-    'U': '𝑼', 'V': '𝑽', 'W': '𝑾', 'X': '𝑿', 'Y': '𝒀', 'Z': '𝒁',
-    '0': '𝟎', '1': '𝟏', '2': '𝟐', '3': '𝟑', '4': '𝟒', '5': '𝟓', '6': '𝟔', '7': '𝟕', '8': '𝟖', '9': '𝟗',
-    '!': '!', '?': '?', '.': '.', ',': ',', ':': ':', ';': ';', '-': '-', '_': '_', '(': '(', ')': ')',
-    '[': '[', ']': ']', '{': '{', '}': '}', '<': '<', '>': '>', '/': '/', '\\': '\\', '|': '|', '@': '@',
-    '#': '#', '$': '$', '%': '%', '^': '^', '&': '&', '*': '*', '+': '+', '=': '=', '~': '~', '`': '`',
-    '"': '"', "'": "'", ' ': ' '
+    'a': '𝐚', 'b': '𝐛', 'c': '𝐜', 'd': '𝐝', 'e': '𝐞', 'f': '𝐟', 'g': '𝐠', 'h': '𝐡', 'i': '𝐢', 'j': '𝐣',
+    'k': '𝐤', 'l': '𝐥', 'm': '𝐦', 'n': '𝐧', 'o': '𝐨', 'p': '𝐩', 'q': '𝐪', 'r': '𝐫', 's': '𝐬', 't': '𝐭',
+    'u': '𝐮', 'v': '𝐯', 'w': '𝐰', 'x': '𝐱', 'y': '𝐲', 'z': '𝐳',
+    'A': '𝐀', 'B': '𝐁', 'C': '𝐂', 'D': '𝐃', 'E': '𝐄', 'F': '𝐅', 'G': '𝐆', 'H': '𝐇', 'I': '𝐈', 'J': '𝐉',
+    'K': '𝐊', 'L': '𝐋', 'M': '𝐌', 'N': '𝐍', 'O': '𝐎', 'P': '𝐏', 'Q': '𝐐', 'R': '𝐑', 'S': '𝐒', 'T': '𝐓',
+    'U': '𝐔', 'V': '𝐕', 'W': '𝐖', 'X': '𝐗', 'Y': '𝐘', 'Z': '𝒁',
+    '0': '𝟎', '1': '𝟏', '2': '𝟐', '3': '𝟑', '4': '𝟒', '5': '𝟓', '6': '𝟔', '7': '𝟕', '8': '𝟖', '9': '𝟗'
   };
   
   return text.split('').map(char => map[char] || char).join('');
@@ -22,14 +21,14 @@ const formatText = (text) => {
 module.exports = {
   config: {
     name: "pending",
-    aliases: ["pen", "pend", "pe"],
-    version: "2.2",
-    author: formatText("♡ SAIF ♡"),
+    aliases: ["pen", "pend", "approve"],
+    version: "2.5",
+    author: "♡ SAIF ♡",
     countDown: 5,
-    role: 1,
-    shortDescription: formatText("Handle pending requests"),
-    longDescription: formatText("Approve or reject pending users/groups"),
-    category: "utility"
+    role: 2, // Admin only
+    shortDescription: formatText("Manage pending requests Baby"),
+    longDescription: formatText("System to approve or decline group/user join requests Baby"),
+    category: "admin"
   },
 
   onReply: async function ({ message, api, event, Reply }) {
@@ -41,81 +40,57 @@ module.exports = {
     if (body.trim().toLowerCase() === "c") {
       try {
         await api.unsendMessage(messageID);
-        await api.sendMessage(formatText("❌ Operation cancelled! 🐇"), threadID);
-      } catch {
-        return;
-      }
-      return;
+        return api.sendMessage(formatText("❌ Cleanup successful! Operation has been cancelled Baby 🐇"), threadID);
+      } catch (err) { return; }
     }
 
-    const indexes = body.split(/\s+/).map(Number);
+    const indexes = body.split(/\s+/).map(Number).filter(n => !isNaN(n));
 
-    if (isNaN(indexes[0])) {
-      try {
-        await api.editMessage(
-          formatText("⚠ Invalid input! Try again 🦋"),
-          messageID
-        );
-      } catch {
-        await api.sendMessage(formatText("⚠ Invalid input! Try again 🦋"), threadID);
-      }
-      return;
+    if (indexes.length === 0) {
+      return api.sendMessage(formatText("⚠ Invalid selection! Please provide a valid number from the list Baby 🦋"), threadID);
     }
 
-    let count = 0;
-    let processingMsg = formatText("⏳ Processing your request... 🐇");
+    let successCount = 0;
+    let failCount = 0;
 
-    try {
-      // Edit original message to show processing
-      await api.editMessage(processingMsg, messageID);
-    } catch {
-      // If edit fails, send new message
-      processingMsg = await api.sendMessage(processingMsg, threadID);
-    }
+    await api.sendMessage(formatText("⏳ Processing approvals... Please wait a moment Baby 🐇"), threadID);
 
     for (const idx of indexes) {
       if (idx <= 0 || idx > pending.length) continue;
-      const group = pending[idx - 1];
+      const target = pending[idx - 1];
 
       try {
         await api.sendMessage(
-          formatText("✅ Group approved by Senpai! 🐇💌\n✨ Enjoy your new adventure! 🦄"),
-          group.threadID
+          formatText("✅ Request Approved! You can now use the bot services Baby 🐇💌\n✨ Type /help to see commands! 🦄"),
+          target.threadID
         );
 
         await api.changeNickname(
-          formatText(`${global.GoatBot.config.nickNameBot || "🦋SAIF✨"}`),
-          group.threadID,
+          formatText(`${global.GoatBot.config.nickNameBot || "BOT SYSTEM"}`),
+          target.threadID,
           api.getCurrentUserID()
         );
 
-        count++;
-      } catch {
-        count++;
+        successCount++;
+      } catch (e) {
+        failCount++;
       }
     }
 
-    for (const idx of indexes.sort((a, b) => b - a)) {
-      if (idx > 0 && idx <= pending.length) {
-        pending.splice(idx - 1, 1);
-      }
-    }
+    // Removing approved items from local list
+    const remaining = pending.filter((_, i) => !indexes.includes(i + 1));
 
-    // Edit the processing message with result
-    const resultMsg = formatText(`🎉 Successfully approved ${count} group(s)/user(s)! 🐇💖`);
-    try {
-      await api.editMessage(resultMsg, messageID);
-    } catch {
-      await api.sendMessage(resultMsg, threadID);
-    }
+    const resultMsg = formatText(`🎉 Task Completed Baby!\n\n✅ Approved: ${successCount}\n❌ Failed: ${failCount}\n📂 Remaining in queue: ${remaining.length} Baby 💖`);
+    
+    return api.sendMessage(resultMsg, threadID);
   },
 
   onStart: async function ({ api, event, args, usersData }) {
-    const { threadID, messageID } = event;
-    const adminBot = global.GoatBot.config.adminBot;
+    const { threadID, messageID, senderID } = event;
+    const adminBot = global.GoatBot.config.adminBot || [];
 
-    if (!adminBot.includes(event.senderID)) {
-      return api.sendMessage(formatText("⚠ No permission baka! 🐇"), threadID, messageID);
+    if (!adminBot.includes(senderID)) {
+      return api.sendMessage(formatText("⚠ Access Denied! This command is reserved for Bot Administrators only Baby 🐇"), threadID, messageID);
     }
 
     try {
@@ -125,62 +100,39 @@ module.exports = {
 
       if (allList.length === 0) {
         return api.sendMessage(
-          formatText("📭 PENDING LIST\n\n") +
-          formatText("No pending requests found! 🥹\n") +
-          formatText("Everything is clean! 🎀"),
+          formatText("📭 PENDING QUEUE EMPTY\n\n") +
+          formatText("There are no pending requests to review right now Baby! 🥹\n") +
+          formatText("Your system is running clean! 🎀"),
           threadID, messageID
         );
       }
 
-      let msg = formatText("📭 PENDING LIST\n\n");
-      let index = 1;
+      let msg = formatText("📑 PENDING REQUEST LIST Baby\n") + "━━━━━━━━━━━━━━━━━━\n\n";
       
-      for (const single of allList) {
-        const name = single.name || (await usersData.getName(single.threadID)) || formatText("Unknown");
-        const type = single.isGroup ? formatText("👥 Group") : formatText("👤 User");
-        msg += formatText(`[${index}] ${type} - ${name}\n`);
-        index++;
+      for (let i = 0; i < allList.length; i++) {
+        const item = allList[i];
+        const name = item.name || (await usersData.getName(item.threadID)) || "Unknown Entity";
+        const type = item.isGroup ? "👥 [Group]" : "👤 [Private]";
+        msg += `${i + 1}. ${type} » ${name}\n🆔 ${item.threadID}\n\n`;
       }
 
-      msg += formatText(`\n🎀 Total: ${allList.length} pending\n`);
-      msg += formatText(`✨ Reply with number(s) to approve 🐇\n`);
-      msg += formatText(`❌ Reply "c" to cancel, senpai 💌`);
+      msg += "━━━━━━━━━━━━━━━━━━\n";
+      msg += formatText(`🎀 Total Requests: ${allList.length}\n`);
+      msg += formatText(`✨ Reply with the index number to approve Baby 🐇\n`);
+      msg += formatText(`❌ Reply 'c' to cancel this session Baby 💌`);
 
-      const sentMsg = await api.sendMessage(
-        msg,
-        threadID,
-        (error, info) => {
-          if (error) return;
-          global.GoatBot.onReply.set(info.messageID, {
-            commandName: this.config.name,
-            messageID: info.messageID,
-            author: event.senderID,
-            pending: allList,
-          });
-        },
-        messageID
-      );
-
-      // যদি API-তে editMessage সুপোর্ট করে
-      setTimeout(async () => {
-        try {
-          // Update message with some animation or status
-          const updatedMsg = msg + formatText(`\n\n🕐 Last updated: Just now`);
-          await api.editMessage(updatedMsg, sentMsg.messageID);
-        } catch (error) {
-          console.error("Failed to edit message:", error);
-        }
-      }, 1000);
+      return api.sendMessage(msg, threadID, (error, info) => {
+        if (error) return;
+        global.GoatBot.onReply.set(info.messageID, {
+          commandName: this.config.name,
+          messageID: info.messageID,
+          author: senderID,
+          pending: allList,
+        });
+      }, messageID);
 
     } catch (error) {
-      console.error("Pending Error:", error);
-      return api.sendMessage(
-        formatText("❌ ERROR\n\n") +
-        formatText("Failed to retrieve pending list!\n") +
-        formatText("Please try again later."), 
-        threadID, 
-        messageID
-      );
+      return api.sendMessage(formatText("❌ Critical system error while fetching pending list Baby!"), threadID, messageID);
     }
   },
 };
