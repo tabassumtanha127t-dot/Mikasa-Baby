@@ -15,7 +15,7 @@ const API_ENDPOINT = "https://dev.oculux.xyz/api/artv1";
 
 module.exports = {
   config: {
-    name: "art",
+    name: "art2",
     aliases: ["draw"],
     version: "1.1", 
     author: "NeoKEX + modified by saif",
