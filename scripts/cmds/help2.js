@@ -13,7 +13,7 @@ module.exports = {
   config: {
     name: "help2",
     version: "3.0",
-    author: "Saif / Gemini Fix",
+    author: "Saif ",
     role: 0,
     category: "system",
     description: "💖 Interactive category help with love font Baby"
