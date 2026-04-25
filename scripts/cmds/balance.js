@@ -287,20 +287,12 @@ module.exports = {
     let targetData  = await usersData.get(targetID) || { money: 0 };
     const targetName = targetData.name ||
                        (await api.getUserInfo(targetID))[targetID]?.name || targetID;
-
-    const allUsers  = await usersData.getAll();
-    const sorted    = allUsers.filter(u => u.money !== undefined).sort((a, b) => b.money - a.money);
-    const globalRank = sorted.findIndex(u => (u.userID || u.id) == targetID) + 1;
-
     const bal = targetData.money || 0;
+
     const msg =
       `🎀\n` +
-      ` > ${fancy("Hey")} "${fancy(targetName)}"\n` +
-      `━━━━━━━━━━━━━━━━\n` +
-      `• ${fancy("Balance")} : ${formatMoney(bal)}\n` +
-      `• ${fancy("Rank")}    : ${fancy(globalRank > 0 ? String(globalRank) : "N/A")}\n` +
-      `━━━━━━━━━━━━━━━━\n` +
-      `${fancy("Type bal help for all commands Baby.")}`;
+      ` > ${fancy(targetName)}\n\n` +
+      `${fancy("Baby, Your balance: $")}${formatMoney(bal)}`;
 
     return api.sendMessage(
       { body: msg, mentions: [{ tag: targetName, id: targetID }] },
@@ -327,7 +319,7 @@ module.exports = {
 
     const tax          = amount * TAX_RATE;
     const totalDeduct  = amount + tax;
-    const receiverGets = amount;                // requester receives full amount; payer pays amount + tax
+    const receiverGets = amount;
 
     let payerData    = await usersData.get(targetID);
     let receiverData = await usersData.get(requesterID) || { money: 0 };
