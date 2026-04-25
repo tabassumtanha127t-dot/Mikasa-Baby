@@ -1,65 +1,56 @@
+// ✨ ফ্যান্সি ফন্ট হেল্পার (বোল্ড সেরিফ)
+const fancy = (text) => {
+  if (text === undefined || text === null) return "";
+  const fonts = {
+    'a': '𝐚','b': '𝐛','c': '𝐜','d': '𝐝','e': '𝐞','f': '𝐟','g': '𝐠','h': '𝐡','i': '𝐢','j': '𝐣','k': '𝐤','l': '𝐥','m': '𝐦','n': '𝐧','o': '𝐨','p': '𝐩','q': '𝐪','r': '𝐫','s': '𝐬','t': '𝐭','u': '𝐮','v': '𝐯','w': '𝐰','x': '𝐱','y': '𝐲','z': '𝐳',
+    'A': '𝐀','B': '𝐁','C': '𝐂','D': '𝐃','E': '𝐄','F': '𝐅','G': '𝐆','H': '𝐇','I': '𝐈','J': '𝐉','K': '𝐊','L': '𝐋','M': '𝐌','N': '𝐍','O': '𝐎','P': '𝐏','Q': '𝐐','R': '𝐑','S': '𝐒','T': '𝐓','U': '𝐔','V': '𝐕','W': '𝐖','X': '𝐗','Y': '𝐘','Z': '𝐙',
+    '0': '𝟎','1': '𝟏','2': '𝟐','3': '𝟑','4': '𝟒','5': '𝟓','6': '𝟔','7': '𝟕','8': '𝟖','9': '𝟗', '.': '.'
+  };
+  return String(text).split('').map(char => fonts[char] || char).join('');
+};
+
+// 💰 স্ট্যান্ডার্ড শর্টহ্যান্ড পার্সার (ভিজিন্টিলিয়ন পর্যন্ত)
 const parseShorthand = (str) => {
   if (!str) return NaN;
-  str = str.toLowerCase();
-
+  str = str.toLowerCase().replace(/\s+/g, "");
   const map = {
-    k: 1e3,
-    m: 1e6,
-    b: 1e9,
-    t: 1e12,
-    qd: 1e15,
-    qt: 1e18,
-    sx: 1e21,
-    sp: 1e24,
-    oc: 1e27,
-    no: 1e30,
-    dc: 1e33
+    vg: 1e63, nod: 1e60, ocd: 1e57, spd: 1e54, sxd: 1e51, qid: 1e48, qad: 1e45,
+    td: 1e42, dd: 1e39, ud: 1e36, dc: 1e33, no: 1e30, oc: 1e27, sp: 1e24,
+    sx: 1e21, qi: 1e18, qa: 1e15, t: 1e12, b: 1e9, m: 1e6, k: 1e3
   };
-
-  let suffix = Object.keys(map).sort((a,b) => b.length - a.length).find(s => str.endsWith(s));
-  let multiplier = suffix ? map[suffix] : 1;
-
-  if (suffix) str = str.slice(0, -suffix.length);
-  const number = parseFloat(str);
-  return isNaN(number) ? NaN : number * multiplier;
-};
-
-const smallBoldNumbers = {
-  "0": "𝟎", "1": "𝟏", "2": "𝟐", "3": "𝟑", "4": "𝟒",
-  "5": "𝟓", "6": "𝟔", "7": "𝟕", "8": "𝟖", "9": "𝟗", ".": "."
-};
-
-function toSmallBoldNumber(num) {
-  return num.toString().split("").map(c => smallBoldNumbers[c] || c).join("");
-}
-
-function formatMoney(num) {
-  const suffixes = [
-    { value: 1e33, symbol: "𝐃𝐂" },
-    { value: 1e30, symbol: "𝐍𝐎" },
-    { value: 1e27, symbol: "𝐎𝐂" },
-    { value: 1e24, symbol: "𝐒𝐏" },
-    { value: 1e21, symbol: "𝐒𝐗" },
-    { value: 1e18, symbol: "𝐐𝐍" },
-    { value: 1e15, symbol: "𝐐𝐃" },
-    { value: 1e12, symbol: "𝐓" },
-    { value: 1e9, symbol: "𝐁" },
-    { value: 1e6, symbol: "𝐌" },
-    { value: 1e3, symbol: "𝐊" }
-  ];
-  for (const s of suffixes) {
-    if (num >= s.value) {
-      return toSmallBoldNumber((num / s.value).toFixed(2)) + s.symbol;
+  const keys = Object.keys(map).sort((a, b) => b.length - a.length);
+  for (let key of keys) {
+    if (str.endsWith(key)) {
+      let num = parseFloat(str.slice(0, -key.length));
+      return isNaN(num) ? NaN : num * map[key];
     }
   }
-  return toSmallBoldNumber(num);
+  return parseFloat(str);
+};
+
+// 🏦 স্ট্যান্ডার্ড শর্টহ্যান্ড ফরম্যাটার (বড় সংখ্যা দেখানোর জন্য)
+function formatMoney(amount) {
+  if (amount === undefined || amount === null || isNaN(amount)) return "0";
+  const units = [
+    { v: 1e63, s: "𝐕𝐠" }, { v: 1e60, s: "𝐍𝐨𝐝" }, { v: 1e57, s: "𝐎𝐜𝐝" },
+    { v: 1e54, s: "𝐒𝐩𝐝" }, { v: 1e51, s: "𝐒𝐱𝐝" }, { v: 1e48, s: "𝐐𝐢𝐝" },
+    { v: 1e45, s: "𝐐𝐚𝐝" }, { v: 1e42, s: "𝐓𝐝" }, { v: 1e39, s: "𝐃𝐝" },
+    { v: 1e36, s: "𝐔𝐝" }, { v: 1e33, s: "𝐃𝐜" }, { v: 1e30, s: "𝐍𝐨" },
+    { v: 1e27, s: "𝐎𝐜" }, { v: 1e24, s: "𝐒𝐩" }, { v: 1e21, s: "𝐒𝐱" },
+    { v: 1e18, s: "𝐐𝐢" }, { v: 1e15, s: "𝐐𝐚" }, { v: 1e12, s: "𝐓" },
+    { v: 1e9, s: "𝐁" }, { v: 1e6, s: "𝐌" }, { v: 1e3, s: "𝐊" }
+  ];
+  for (let u of units) {
+    if (Math.abs(amount) >= u.v) return fancy((amount / u.v).toFixed(2)) + u.s;
+  }
+  return fancy(Math.floor(amount).toLocaleString());
 }
 
 module.exports = {
   config: {
     name: "dice",
     aliases: [],
-    version: "2.0",
+    version: "2.1",
     author: "SAIF",
     category: "game",
     shortDescription: "🎲 roll a dice automatically with bet amount",
@@ -75,11 +66,11 @@ module.exports = {
     const betAmount = parseShorthand(betInput);
 
     if (isNaN(betAmount) || betAmount <= 0) 
-      return message.reply("⚠️ 𝐄𝐍𝐓𝐄𝐑 𝐀 𝐕𝐀𝐋𝐈𝐃 𝐀𝐌𝐎𝐔𝐍𝐓.");
+      return message.reply(fancy("⚠️ ENTER A VALID AMOUNT."));
     if (userData.money < betAmount) 
-      return message.reply("💰 𝐍𝐎𝐓 𝐄𝐍𝐎𝐔𝐆𝐇 𝐁𝐀𝐋𝐀𝐍𝐂𝐄.");
+      return message.reply(fancy("💰 NOT ENOUGH BALANCE."));
 
-    // Bot rolls dice automatically
+    // বট অটোমেটিক ডাইস রোল করে
     const diceNum = Math.floor(Math.random() * 6) + 1;
     const rolledDice = Math.floor(Math.random() * 6) + 1;
     const isWin = rolledDice === diceNum;
@@ -88,15 +79,18 @@ module.exports = {
     userData.money += winnings;
     await usersData.set(user, userData);
 
-    const resultMsg = `
-🎲 𝐘𝐎𝐔𝐑 𝐃𝐈𝐂𝐄: ${diceNum}
-🤖 𝐑𝐎𝐋𝐋𝐄𝐃: ${rolledDice}
+    // আউটপুট ফর্ম্যাট (আগের মতই, কিন্তু fancy ও formatMoney সহ)
+    const resultMsg = [
+      `🎲 ${fancy("YOUR DICE:")} ${diceNum}`,
+      `🤖 ${fancy("ROLLED:")} ${rolledDice}`,
+      "",
+      isWin 
+        ? ` ${fancy("YOU WON")} ${formatMoney(betAmount)}!` 
+        : ` ${fancy("YOU LOST")} ${formatMoney(betAmount)}.`,
+      "",
+      ` ${fancy("BALANCE:")} ${formatMoney(userData.money)}`
+    ].join("\n");
 
-${isWin ? ` 𝐘𝐎𝐔 𝐖𝐎𝐍 ${formatMoney(betAmount)}!` : ` 𝐘𝐎𝐔 𝐋𝐎𝐒𝐓 ${formatMoney(betAmount)}.`}
-
- 𝐁𝐀𝐋𝐀𝐍𝐂𝐄: ${formatMoney(userData.money)}
-`;
-
-    return message.reply(resultMsg.trim());
+    return message.reply(resultMsg);
   }
 };
