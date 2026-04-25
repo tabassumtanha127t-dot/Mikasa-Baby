@@ -1,25 +1,22 @@
-const boldFont = (text) => {
+// ✨ Bold Sans-Serif Font Baby (same as slot/spin)
+const fancy = (text) => {
+  if (text === undefined || text === null) return "";
   const map = {
-    A:"𝑨",B:"𝑩",C:"𝑪",D:"𝑫",E:"𝑬",F:"𝑭",G:"𝑮",H:"𝑯",I:"𝑰",J:"𝑱",
-    K:"𝑲",L:"𝑳",M:"𝑴",N:"𝑵",O:"𝑶",P:"𝑷",Q:"𝒒",R:"𝑹",S:"𝑺",T:"𝑻",
-    U:"𝑼",V:"𝑽",W:"𝑾",X:"𝑿",Y:"𝒀",Z:"𝒁",
-    a:"𝒂",b:"𝒃",c:"𝒄",d:"𝒅",e:"𝒆",f:"𝒇",g:"𝒈",h:"𝒉",i:"𝒊",j:"𝒋",
-    k:"𝒌",l:"𝒍",m:"𝒎",n:"𝒏",o:"𝒐",p:"𝒑",q:"𝒒",r:"𝒓",s:"𝒔",t:"𝒕",
-    u:"𝒖",v:"𝒗",w:"𝒘",x:"𝒙",y:"𝒚",z:"𝒛",
-    0:"𝟎",1:"𝟏",2:"𝟐",3:"𝟑",4:"𝟒",5:"𝟓",6:"𝟔",7:"𝟕",8:"𝟖",9:"𝟗",
-    ".": "．", ":": "："
+    'a': '𝐚','b': '𝐛','c': '𝐜','d': '𝐝','e': '𝐞','f': '𝐟','g': '𝐠','h': '𝐡','i': '𝐢','j': '𝐣','k': '𝐤','l': '𝐥','m': '𝐦','n': '𝐧','o': '𝐨','p': '𝐩','q': '𝐪','r': '𝐫','s': '𝐬','t': '𝐭','u': '𝐮','v': '𝐯','w': '𝐰','x': '𝐱','y': '𝐲','z': '𝐳',
+    'A': '𝐀','B': '𝐁','C': '𝐂','D': '𝐃','E': '𝐄','F': '𝐅','G': '𝐆','H': '𝐇','I': '𝐈','J': '𝐉','K': '𝐊','L': '𝐋','M': '𝐌','N': '𝐍','O': '𝐎','P': '𝐏','Q': '𝐐','R': '𝐑','S': '𝐒','T': '𝐓','U': '𝐔','V': '𝐕','W': '𝐖','X': '𝐗','Y': '𝐘','Z': '𝐙',
+    '0': '𝟎','1': '𝟏','2': '𝟐','3': '𝟑','4': '𝟒','5': '𝟓','6': '𝟔','7': '𝟕','8': '𝟖','9': '𝟗', '.': '.', ':': ':'
   };
-  return text.split("").map(c => map[c] || c).join("");
+  return String(text).split('').map(char => map[char] || char).join('');
 };
 
 module.exports = {
   config: {
     name: "help2",
-    version: "2.9",
+    version: "3.0",
     author: "Saif / Gemini Fix",
     role: 0,
     category: "system",
-    description: "Interactive category help with direct edit return"
+    description: "💖 Interactive category help with love font Baby"
   },
 
   onStart: async function ({ api, event, args, role }) {
@@ -38,29 +35,29 @@ module.exports = {
     const sortedCats = Object.keys(categories).sort();
     const input = args.join(" ").toLowerCase();
 
-    // সরাসরি নাম দিলে রেজাল্ট দেখাবে বেবি
+    // Direct category name
     if (input) {
       const categoryName = sortedCats.find(c => c.toLowerCase() === input);
       if (categoryName) {
-        let msg = `╭───✦ ${boldFont(categoryName.toUpperCase())} ✦───╮\n`;
+        let msg = `╭───✦ ${fancy(categoryName.toUpperCase())} ✦───╮\n`;
         const cmds = categories[categoryName].sort();
         for (let i = 0; i < cmds.length; i += 2) {
-          const row = cmds.slice(i, i + 2).map(x => `⭔ ${boldFont(x)}`).join("   ");
+          const row = cmds.slice(i, i + 2).map(x => `⭔ ${fancy(x)}`).join("   ");
           msg += `│ ${row}\n`;
         }
         msg += "╰────────────────────╯\n";
-        msg += `💖 ${boldFont("Powered by Mikasa")}`;
+        msg += `💖 ${fancy("Powered by Mikasa")}`;
         return api.sendMessage(msg, threadID, messageID);
       }
     }
 
-    let helpMsg = `╭───✦ ${boldFont("HELP CATEGORIES")} ✦───╮\n`;
+    let helpMsg = `╭───✦ ${fancy("HELP CATEGORIES")} ✦───╮\n`;
     sortedCats.forEach((cat, index) => {
-      helpMsg += `│ ${index + 1}． ${boldFont(cat.toUpperCase())}\n`;
+      helpMsg += `│ ${index + 1}． ${fancy(cat.toUpperCase())}\n`;
     });
     helpMsg += "╰────────────────────╯\n";
-    helpMsg += `📝 ${boldFont("Reply with serial or category name")}\n`;
-    helpMsg += `⏳ ${boldFont("Auto unsend after 2 minutes")}`;
+    helpMsg += `📝 ${fancy("Reply with serial or category name")}\n`;
+    helpMsg += `⏳ ${fancy("Auto unsend after 2 minutes")}`;
 
     return api.sendMessage(helpMsg, threadID, (err, info) => {
       if (err) return;
@@ -93,16 +90,16 @@ module.exports = {
     if (!categoryName) return;
 
     const cmds = Reply.categories[categoryName].sort();
-    let msg = `╭───✦ ${boldFont(categoryName.toUpperCase())} ✦───╮\n`;
+    let msg = `╭───✦ ${fancy(categoryName.toUpperCase())} ✦───╮\n`;
     for (let i = 0; i < cmds.length; i += 2) {
-      const row = cmds.slice(i, i + 2).map(x => `⭔ ${boldFont(x)}`).join("   ");
+      const row = cmds.slice(i, i + 2).map(x => `⭔ ${fancy(x)}`).join("   ");
       msg += `│ ${row}\n`;
     }
     msg += "╰────────────────────╯\n";
-    msg += `✨ ${boldFont("Total Commands")}： ${cmds.length}\n`;
-    msg += `💖 ${boldFont("Powered by Mikasa")}`;
+    msg += `✨ ${fancy("Total Commands")}: ${cmds.length}\n`;
+    msg += `💖 ${fancy("Powered by Mikasa")}`;
 
-    // বেবি, তোমার বলা ফরম্যাট অনুযায়ী রিটার্ন করছি
+    // Unsend reply and edit the original category list message
     api.unsendMessage(messageID);
     return api.editMessage(msg, Reply.messageID);
   }
