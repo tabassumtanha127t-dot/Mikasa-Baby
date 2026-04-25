@@ -46,7 +46,7 @@ function formatMoney(num) {
 module.exports = {
   config: {
     name: "spin",
-    version: "11.0",
+    version: "11.0-love",
     author: "SAIF",
     category: "game",
     countDown: 10
@@ -67,7 +67,7 @@ module.exports = {
       return api.sendMessage(fancy("✅ SPIN LIMIT REFRESHED BABY! 🎀"), threadID, messageID);
     }
 
-    // 📖 First Time Player — Show Rules Baby
+    // 📖 First Time Player — Show Rules Baby (updated)
     let user = await usersData.get(senderID);
     if (!user.data) user.data = {};
 
@@ -82,16 +82,11 @@ module.exports = {
         fancy(`Type: spin [amount]\n`) +
         fancy(`Example: spin 5m\n\n`) +
         fancy(`🎰 Symbols & Payouts:\n`) +
-        `• 👑👑👑 → ×𝟏𝟎𝟎 ${fancy("(Biggest Win)")}\n` +
-        `• 💎💎💎 → ×𝟐𝟓\n` +
-        `• ${fancy("Any Triple")} → ×𝟓\n` +
-        `• ${fancy("Any Double")} → ×𝟐\n` +
+        `• ${fancy("Any Triple (❤️❤️❤️, 🖤🖤🖤, etc.)")} → ×𝟑 ${fancy("(Jackpot)")}\n` +
+        `• ${fancy("Any Double (❤️❤️💛, 💙💙🖤, etc.)")} → ×𝟐\n` +
         `• ${fancy("No Match")} → ${fancy("Lose Bet")}\n\n` +
         fancy(`⏰ Daily Limit:\n`) +
         fancy(`20 spins per 12 hours Baby.\n\n`) +
-        `⚠️ ${fancy("BET WARNING:")}\n` +
-        fancy(`If you bet more than $10M,\nyou will ALWAYS LOSE as penalty!\n`) +
-        fancy(`Keep your bet under $10M Baby.\n\n`) +
         `✅ ${fancy("Rules seen! Now type")} ${fancy("spin [amount]")} ${fancy("to play Baby.")}`;
 
       return api.sendMessage(rulesMsg, threadID, messageID);
@@ -122,74 +117,76 @@ module.exports = {
     if (isNaN(betAmount) || betAmount <= 0) return api.sendMessage(fancy("⚠️ ENTER A VALID BET AMOUNT BABY."), threadID, messageID);
     if (betAmount > user.money) return api.sendMessage(fancy("💰 NOT ENOUGH BALANCE BABY."), threadID, messageID);
 
-    // ⚠️ Bet Cap Penalty — Over 10M = Always Lose Baby
+    // ⚠️ Bet Cap (10M) → silent random big loss, no warning
     const BET_CAP = 10_000_000;
+
+    // 💖 Love-only emoji list
+    const slots = ["❤️","🧡","💛","💚","💙","💜","🖤"];
+    let s1, s2, s3, winnings;
+
     if (betAmount > BET_CAP) {
-      user.money = (user.money || 0) - betAmount;
-      user.data.spinLimit.count += 1;
-      await usersData.set(senderID, { money: user.money, data: user.data });
-
-      const penaltyMsg =
-        `🎀\n > ${user.name}\n\n` +
-        `⚠️ ${fancy("PENALTY!")}\n` +
-        `• ${fancy("Bet over $10M → Auto Lose Baby!")}\n` +
-        `• ${fancy("Lost:")} ${formatMoney(betAmount)}\n` +
-        `• ${fancy("Balance:")} ${formatMoney(user.money)}\n` +
-        `• ${fancy("Daily Use:")} ${fancy(String(user.data.spinLimit.count))}/𝟐𝟎 𝐁𝐚𝐛𝐲\n\n` +
-        fancy("⚠️ Keep bet under $10M to play fairly!");
-
-      return api.sendMessage(
-        { body: penaltyMsg, mentions: [{ tag: user.name, id: senderID }] },
-        threadID, messageID
-      );
-    }
-
-    // 🎯 50/50 Win Rate Baby
-    const slots = ["❤️", "💛", "💙", "💚", "💎", "👑"];
-    const winChance = Math.random();
-    let s1, s2, s3;
-
-    if (winChance < 0.50) {
-      const winType = Math.random();
-      if (winType < 0.01) s1 = s2 = s3 = "👑";
-      else if (winType < 0.05) s1 = s2 = s3 = "💎";
-      else {
-        s1 = slots[Math.floor(Math.random() * (slots.length - 2))];
-        s2 = s1;
-        s3 = Math.random() < 0.4 ? s1 : slots[Math.floor(Math.random() * slots.length)];
-      }
+      // Guaranteed loss, 50/60/70/80% random deduction
+      const lossPercent = [50, 60, 70, 80][Math.floor(Math.random() * 4)];
+      do {
+        s1 = slots[Math.floor(Math.random() * slots.length)];
+        s2 = slots[Math.floor(Math.random() * slots.length)];
+        s3 = slots[Math.floor(Math.random() * slots.length)];
+      } while (s1 === s2 || s1 === s3 || s2 === s3);
+      winnings = - (betAmount * lossPercent / 100);
     } else {
-      s1 = slots[Math.floor(Math.random() * slots.length)];
-      s2 = slots.filter(s => s !== s1)[Math.floor(Math.random() * (slots.length - 1))];
-      s3 = slots[Math.floor(Math.random() * slots.length)];
+      // Normal: Win 45% (Jackpot 5%, Double 40%) | Loss 55%
+      const roll = Math.random();
+      if (roll < 0.45) {
+        // Win
+        if (Math.random() < 5 / 45) { // Jackpot (triple)
+          const symbol = slots[Math.floor(Math.random() * slots.length)];
+          s1 = s2 = s3 = symbol;
+          winnings = betAmount * 3;
+        } else { // Double
+          const symbol = slots[Math.floor(Math.random() * slots.length)];
+          const pos = Math.floor(Math.random() * 3);
+          if (pos === 0) {
+            s1 = slots[Math.floor(Math.random() * slots.length)];
+            s2 = symbol;
+            s3 = symbol;
+          } else if (pos === 1) {
+            s1 = symbol;
+            s2 = slots[Math.floor(Math.random() * slots.length)];
+            s3 = symbol;
+          } else {
+            s1 = symbol;
+            s2 = symbol;
+            s3 = slots[Math.floor(Math.random() * slots.length)];
+          }
+          winnings = betAmount * 2;
+        }
+      } else {
+        // Loss (no match)
+        do {
+          s1 = slots[Math.floor(Math.random() * slots.length)];
+          s2 = slots[Math.floor(Math.random() * slots.length)];
+          s3 = slots[Math.floor(Math.random() * slots.length)];
+        } while (s1 === s2 || s1 === s3 || s2 === s3);
+        winnings = -betAmount;
+      }
     }
 
-    function calculateWinnings(a, b, c, bet) {
-      if (a === "👑" && b === "👑" && c === "👑") return bet * 100;
-      if (a === "💎" && b === "💎" && c === "💎") return bet * 25;
-      if (a === b && b === c) return bet * 5;
-      if (a === b || a === c || b === c) return bet * 2;
-      return -bet;
-    }
-
-    const winnings = calculateWinnings(s1, s2, s3, betAmount);
+    // Update spin count & money
     user.data.spinLimit.count += 1;
     const newBalance = user.money + winnings;
     await usersData.set(senderID, { money: newBalance, data: user.data });
 
-    let winStatus = winnings > 0 ? fancy("Won") : fancy("Lost");
-    if (s1 === "👑" && s2 === "👑" && s3 === "👑") winStatus = fancy("🔥 BIGGEST WON 🔥");
+    // 🎤 Result (only what you asked – no name, no daily count)
+    const amtFormatted = formatMoney(Math.abs(winnings));
+    let status = winnings > 0 
+      ? (s1 === s2 && s2 === s3 ? fancy("JACKPOT Won") : fancy("Won"))
+      : fancy("Lost");
 
     const resultMsg =
-      `🎀\n > ${fancy(user.name)}\n\n` +
-      `• ${fancy("Baby, You")} ${winStatus} ${formatMoney(Math.abs(winnings))}!\n` +
-      `• ${fancy("Game Results:")} [ ${s1} | ${s2} | ${s3} ]\n` +
-      `• ${fancy("Balance:")} ${formatMoney(newBalance)}\n` +
-      `• ${fancy("Daily Use:")} ${fancy(String(user.data.spinLimit.count))}/𝟐𝟎 𝐁𝐚𝐛𝐲`;
+      ">🎀\n" +
+      `• ${fancy("Baby, You")} ${status} $${amtFormatted}\n` +
+      `• ${fancy("Game Results:")} [ ${s1} | ${s2} | ${s3} ]`;
 
-    return api.sendMessage(
-      { body: resultMsg, mentions: [{ tag: user.name, id: senderID }] },
-      threadID, messageID
-    );
+    return api.sendMessage(resultMsg, threadID, messageID);
   }
 };
