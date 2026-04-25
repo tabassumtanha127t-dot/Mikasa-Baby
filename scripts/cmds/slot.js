@@ -50,7 +50,7 @@ function formatMoney(amount) {
 module.exports = {
   config: {
     name: "slot",
-    version: "13.0-love-final",
+    version: "13.0-final-chances",
     author: "SAIF",
     category: "game",
     countDown: 10
@@ -139,18 +139,20 @@ module.exports = {
       } while (s1 === s2 || s1 === s3 || s2 === s3);
       winnings = - (betAmount * lossPercent / 100);
     } else {
-      // Normal game (50% win, 2x/3x payouts only)
+      // Normal game:
+      // Win chance: 45% (Jackpot 5%, Double 40%) | Loss 55%
       const winChance = Math.random();
-      if (winChance < 0.50) {
-        // Win branch
-        const tripleChance = 0.20; // 20% of wins = jackpot (3x), 80% double (2x)
+      if (winChance < 0.45) {
+        // Win branch (45% total)
+        // Among wins: Jackpot (triple) = 5/45 ≈ 11.11%, Double = 40/45 ≈ 88.89%
+        const tripleChance = 5 / 45; // ~0.1111
         if (Math.random() < tripleChance) {
-          // Triple
+          // Triple (Jackpot)
           const symbol = slots[Math.floor(Math.random() * slots.length)];
           s1 = s2 = s3 = symbol;
           winnings = betAmount * 3;
         } else {
-          // Double
+          // Double (Normal win)
           const symbol = slots[Math.floor(Math.random() * slots.length)];
           const position = Math.floor(Math.random() * 3);
           if (position === 0) {
@@ -169,7 +171,7 @@ module.exports = {
           winnings = betAmount * 2;
         }
       } else {
-        // Lose branch
+        // Loss branch (55%)
         do {
           s1 = slots[Math.floor(Math.random() * slots.length)];
           s2 = slots[Math.floor(Math.random() * slots.length)];
