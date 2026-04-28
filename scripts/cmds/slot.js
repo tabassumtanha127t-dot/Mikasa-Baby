@@ -53,7 +53,7 @@ module.exports = {
     version: "13.0-final-chances",
     author: "SAIF",
     category: "game",
-    countDown: 10
+    countDown: 20
   },
 
   onStart: async function ({ api, event, args, usersData, role }) {
