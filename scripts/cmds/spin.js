@@ -49,7 +49,7 @@ module.exports = {
     version: "11.0-love",
     author: "SAIF",
     category: "game",
-    countDown: 10
+    countDown: 20
   },
 
   onStart: async function ({ api, event, args, usersData, role }) {
