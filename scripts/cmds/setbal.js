@@ -28,7 +28,7 @@ module.exports = {
     let amountRaw = args[1];
     const { threadID, messageID, senderID, mentions, messageReply, type: eventType } = event;
 
-    if (!type || !['exp', 'money'].includes(type) || !amountRaw) {
+    if (!type || !['exp', 'bal'].includes(type) || !amountRaw) {
       return api.sendMessage("Invalid usage Baby! Use: set [money|exp] [amount]\nExample: set money 500k", threadID, messageID);
     }
 
